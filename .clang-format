@@ -1,0 +1,60 @@
+BasedOnStyle: Google
+
+AlignAfterOpenBracket: BlockIndent
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: All
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: Never
+SpaceBeforeCpp11BracedList: true
+BreakInheritanceList: AfterComma
+AlwaysBreakTemplateDeclarations: Yes
+IndentWidth: 2
+AccessModifierOffset: -2
+SeparateDefinitionBlocks: Always
+ShortNamespaceLines: 0
+UseCRLF: false
+BreakBeforeConceptDeclarations: true
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+BreakBeforeBraces: Custom
+ColumnLimit: 150
+Cpp11BracedListStyle: true
+FixNamespaceComments: true
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PointerAlignment: Left
+SortIncludes: CaseSensitive
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 2
+UseTab: Never
+SpaceAroundPointerQualifiers: Default
+AlignTrailingComments: true
+AlignEscapedNewlines: Left
+AlignConsecutiveMacros: AcrossComments
+AlignConsecutiveDeclarations: AcrossComments
+AlignConsecutiveBitFields: AcrossComments
+AlignConsecutiveAssignments: AcrossComments
+AlignOperands: AlignAfterOperator
+AlignArrayOfStructures: Right
+AllowAllParametersOfDeclarationOnNextLine: true
