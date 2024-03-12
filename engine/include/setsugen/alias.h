@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+#include <deque>
 #include <forward_list>
 #include <fstream>
 #include <functional>
@@ -14,8 +15,8 @@
 #include <optional>
 #include <queue>
 #include <set>
-#include <span>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -71,6 +72,12 @@ using DArray = std::vector<T>;
 template <typename T>
 using Queue = std::queue<T>;
 
+template <typename T>
+using Stack = std::stack<T>;
+
+template <typename T>
+using Deque = std::deque<T>;
+
 template <typename T, size_t N>
 using Array = std::array<T, N>;
 
@@ -110,4 +117,3 @@ using IStringStream = std::istringstream;
 using OStringStream = std::ostringstream;
 
 }  // namespace setsugen
-
