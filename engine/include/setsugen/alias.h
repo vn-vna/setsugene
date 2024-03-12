@@ -1,11 +1,14 @@
 #pragma once
 
 #include <array>
+#include <atomic>
+#include <condition_variable>
 #include <cstdint>
 #include <deque>
 #include <forward_list>
 #include <fstream>
 #include <functional>
+#include <future>
 #include <ios>
 #include <iostream>
 #include <list>
@@ -102,9 +105,25 @@ using UnorderedSet = std::unordered_set<T>;
 template <typename... T>
 using Tuple = std::tuple<T...>;
 
+template <typename T>
+using Atomic = std::atomic<T>;
+
+template <typename T>
+using AtomicPtr = std::atomic<T*>;
+
+template <typename T>
+using Future = std::future<T>;
+
+template <typename T>
+using Promise = std::promise<T>;
+
 using StringView = std::string_view;
 
-using Mutex = std::mutex;
+using Mutex               = std::mutex;
+using MutexGuard          = std::lock_guard<Mutex>;
+using UniqueLock          = std::unique_lock<Mutex>;
+using ConditionalVariable = std::condition_variable;
+using AtomicFlag          = std::atomic_flag;
 
 using Stream        = std::iostream;
 using IStream       = std::istream;
