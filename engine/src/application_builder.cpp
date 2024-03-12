@@ -56,9 +56,7 @@ ApplicationBuilder& ApplicationBuilder::set_logger_format(const String& format)
   return *this;
 }
 
-ApplicationBuilder& ApplicationBuilder::set_window_config(
-    Int32 width, Int32 height, const String& title
-)
+ApplicationBuilder& ApplicationBuilder::set_window_config(Int32 width, Int32 height, const String& title)
 {
   m_description.window_config.width  = width;
   m_description.window_config.height = height;
@@ -77,15 +75,12 @@ SharedPtr<Application> ApplicationBuilder::build()
   Application::s_current_app = app_interface;
 
   app->m_logger_factory = std::make_shared<LoggerFactory>();
-  auto console_appender =
-      LogAppender::create_console_appender(this->m_description.logger_config.log_template);
+  auto console_appender = LogAppender::create_console_appender(this->m_description.logger_config.log_template);
   app->m_logger_factory->add_appender(console_appender);
 
   app->m_vulkan_app = VulkanApplication::create_instance();
-  app->m_window     = Window::create(
-      this->m_description.window_config.title, this->m_description.window_config.width,
-      this->m_description.window_config.height
-  );
+  app->m_window =
+      Window::create(this->m_description.window_config.title, this->m_description.window_config.width, this->m_description.window_config.height);
 
   return app_interface;
 }

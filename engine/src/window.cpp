@@ -38,7 +38,24 @@ Window::Window(const String& title, Int32 width, Int32 height)
 
     m_logger->info("Window created successfully");
 
-    auto render_target = RenderTarget::create_window_target(app->get_window());
+    try
+    {
+      auto render_target = RenderTarget::create_window_target(app->get_window());
+      auto renderer      = RendererBuilder()
+                          .with_render_target(render_target)
+                          .with_vertex_shader("test.vert")
+                          .with_fragment_shader("test.frag")
+                          .add_color_blend(true, ColorFlag {true, true, true, true})
+                          .build();
+    }
+    catch (const SetsugenException& e)
+    {
+      std::cerr << e.what() << std::endl;
+    }
+    catch (...)
+    {
+      std::cerr << "An unknown error occurred" << std::endl;
+    }
 
     while (!::glfwWindowShouldClose((GLFWwindow*) m_handler))
     {

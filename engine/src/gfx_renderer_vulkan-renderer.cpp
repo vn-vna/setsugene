@@ -205,6 +205,8 @@ VkColorComponentFlags convert_to_vulkan_color_component_flags(const ColorBlend& 
 
 VulkanWindowRenderer::VulkanWindowRenderer(const RendererConfig& config)
 {
+  m_logger = Application::current_app()->create_logger("VulkanWindowRenderer");
+
   RendererConfig renderer_config = config;
 
   if (renderer_config.render_target.expired())
@@ -237,6 +239,11 @@ VulkanWindowRenderer::~VulkanWindowRenderer()
   vkDestroyPipeline(device, m_pipeline, nullptr);
   vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
   vkDestroyRenderPass(device, m_render_pass, nullptr);
+}
+
+Void VulkanWindowRenderer::render()
+{
+  throw NotImplementedException();
 }
 
 Void VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
@@ -296,6 +303,11 @@ Void VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config
     viewports.push_back({viewport.x, viewport.y, viewport.width, viewport.height, viewport.min_depth, viewport.max_depth});
   }
 
+  if (viewports.empty())
+  {
+    m_logger->warn("No viewports specified");
+  }
+
   DArray<VkRect2D> scissors;
   for (auto scissor : config.scissors)
   {
@@ -303,6 +315,11 @@ Void VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config
         {     static_cast<Int32>(scissor.x),       static_cast<Int32>(scissor.y)},
         {static_cast<UInt32>(scissor.width), static_cast<UInt32>(scissor.height)}
     });
+  }
+
+  if (scissors.empty())
+  {
+    m_logger->warn("No scissors specified");
   }
 
   VkPipelineViewportStateCreateInfo viewport_state = {};

@@ -121,6 +121,8 @@ public:
   VulkanWindowRenderer(const RendererConfig& config);
   ~VulkanWindowRenderer() override;
 
+  Void render() override;
+
 public:
   static constexpr const Char* DEFAULT_VERTEX_SHADER   = "default";
   static constexpr const Char* DEFAULT_FRAGMENT_SHADER = "default";
@@ -139,6 +141,7 @@ private:
   VkRenderPass               m_render_pass;
   VkPipeline                 m_pipeline;
   DArray<VkFramebuffer>      m_framebuffers;
+  SharedPtr<Logger>          m_logger;
 };
 
 }  // namespace setsugen
