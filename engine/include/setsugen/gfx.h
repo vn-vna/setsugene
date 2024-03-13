@@ -123,6 +123,7 @@ struct RendererConfig
   FrontFace                          front_face;
   PolygonMode                        polygon_mode;
   Topology                           topology;
+  Color4F                            clear_color;
   WeakPtr<RenderTarget>              render_target;
 };
 
@@ -168,6 +169,8 @@ public:
   RendererBuilder& set_cull_mode(CullMode cull_mode);
   RendererBuilder& set_front_face(FrontFace front_face);
   RendererBuilder& set_polygon_mode(PolygonMode polygon_mode);
+  RendererBuilder& with_clear_color(const Color4F& clear_color);
+  RendererBuilder& with_clear_color(Float r, Float g, Float b, Float a);
 
 public:
   SharedPtr<Renderer> build();
@@ -183,6 +186,7 @@ public:
 
 public:
   virtual Void render() = 0;
+  virtual Void cleanup() = 0;
 };
 
 }  // namespace setsugen

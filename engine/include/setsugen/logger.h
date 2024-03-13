@@ -14,7 +14,6 @@
 
 namespace setsugen
 {
-
 enum class LogLevel;
 struct LogData;
 class LogAppender;
@@ -65,11 +64,11 @@ public:
 
 public:
   virtual Void append(const LogData& log_data) = 0;
-  virtual Void flush()                         = 0;
+  virtual Void flush() = 0;
 
 public:
   static SharedPtr<LogAppender> create_console_appender(
-      const String& name, const String& format = LogAppender::DEFAULT_FORMAT
+    const String& name, const String& format = DEFAULT_FORMAT
   );
 
   static constexpr const Char* DEFAULT_FORMAT = "[{level}] {{{tag}}}: {message}";
@@ -81,7 +80,7 @@ protected:
 class LogAppenderMapping
 {
 public:
-  using AppenderList        = List<SharedPtr<LogAppender>>;
+  using AppenderList        = List<SharedPtr<LogAppender> >;
   using AppenderLookupTable = UnorderedMap<String, AppenderList::iterator>;
   friend class Logger;
   friend class LoggerFactory;
@@ -135,43 +134,43 @@ public:
   Logger& operator=(Logger&& other)      = default;
 
 public:
-  template <typename... Args>
+  template<typename... Args>
   inline Void log(LogLevel level, const String& message, Args... args)
   {
     this->push_log(level, message, FormatArgsStore(std::forward<Args>(args)...));
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void trace(const String& message, Args... args)
   {
     this->log(LogLevel::Trace, message, args...);
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void debug(const String& message, Args... args)
   {
     this->log(LogLevel::Debug, message, args...);
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void info(const String& message, Args... args)
   {
     this->log(LogLevel::Info, message, args...);
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void warn(const String& message, Args... args)
   {
     this->log(LogLevel::Warn, message, args...);
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void error(const String& message, Args... args)
   {
     this->log(LogLevel::Error, message, args...);
   }
 
-  template <typename... Args>
+  template<typename... Args>
   inline Void fatal(const String& message, Args... args)
   {
     this->log(LogLevel::Fatal, message, args...);
@@ -211,5 +210,4 @@ public:
   Void append(const LogData& log_data) override;
   Void flush() override;
 };
-
-}  // namespace setsugen
+} // namespace setsugen

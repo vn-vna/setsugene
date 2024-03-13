@@ -3,10 +3,9 @@
 
 namespace setsugen
 {
-
 VulkanWindowRenderTarget::VulkanWindowRenderTarget(WeakPtr<Window> window)
-    : m_window {window},
-      m_vulkan_app {VulkanApplication::get_current()}
+  : m_window{window},
+    m_vulkan_app{VulkanApplication::get_current()}
 {
   m_window_handler = (GLFWwindow*) m_window.lock()->get_handler();
 
@@ -19,7 +18,7 @@ VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
 {
   auto vulkan_app = m_vulkan_app.lock();
 
-  for (auto image_view : m_swapchain_image_views)
+  for (auto image_view: m_swapchain_image_views)
   {
     vkDestroyImageView(vulkan_app->get_logical_device(), image_view, nullptr);
   }
@@ -28,32 +27,38 @@ VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
   vkDestroySurfaceKHR(vulkan_app->get_instance(), m_surface, nullptr);
 }
 
-Void VulkanWindowRenderTarget::resize(Int32 width, Int32 height)
+Void
+VulkanWindowRenderTarget::resize(Int32 width, Int32 height)
 {}
 
-Void VulkanWindowRenderTarget::present()
+Void
+VulkanWindowRenderTarget::present()
 {}
 
-Int32 VulkanWindowRenderTarget::width() const
+Int32
+VulkanWindowRenderTarget::width() const
 {
   Int32 width;
   glfwGetFramebufferSize((GLFWwindow*) m_window.lock()->get_handler(), &width, nullptr);
   return width;
 }
 
-Int32 VulkanWindowRenderTarget::height() const
+Int32
+VulkanWindowRenderTarget::height() const
 {
   Int32 height;
   glfwGetFramebufferSize((GLFWwindow*) m_window.lock()->get_handler(), nullptr, &height);
   return height;
 }
 
-RenderTargetType VulkanWindowRenderTarget::type() const
+RenderTargetType
+VulkanWindowRenderTarget::type() const
 {
   return RenderTargetType::Window;
 }
 
-Void VulkanWindowRenderTarget::create_surface()
+Void
+VulkanWindowRenderTarget::create_surface()
 {
   auto instance       = m_vulkan_app.lock()->get_instance();
   auto window_handler = (GLFWwindow*) m_window.lock()->get_handler();
@@ -67,7 +72,8 @@ Void VulkanWindowRenderTarget::create_surface()
   m_surface = surface;
 }
 
-Void VulkanWindowRenderTarget::create_swapchain()
+Void
+VulkanWindowRenderTarget::create_swapchain()
 {
   auto vulkan_app      = m_vulkan_app.lock();
   auto physical_device = vulkan_app->get_physical_device();
@@ -83,15 +89,12 @@ Void VulkanWindowRenderTarget::create_swapchain()
   }
 
   DArray<VkSurfaceFormatKHR> surface_formats(format_count);
-  vkGetPhysicalDeviceSurfaceFormatsKHR(
-      physical_device, m_surface, &format_count, surface_formats.data()
-  );
+  vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface, &format_count, surface_formats.data());
 
   Optional<VkSurfaceFormatKHR> surface_format;
-  for (const auto& format : surface_formats)
+  for (const auto& format: surface_formats)
   {
-    if (format.format == VK_FORMAT_B8G8R8A8_SRGB &&
-        format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+    if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
     {
       surface_format = format;
       break;
@@ -101,21 +104,17 @@ Void VulkanWindowRenderTarget::create_swapchain()
   m_surface_format = surface_format.value_or(surface_formats[0]);
 
   UInt32 present_mode_count;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(
-      physical_device, m_surface, &present_mode_count, nullptr
-  );
+  vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &present_mode_count, nullptr);
   if (present_mode_count == 0)
   {
     throw EngineException("No present modes found");
   }
 
   DArray<VkPresentModeKHR> present_modes(present_mode_count);
-  vkGetPhysicalDeviceSurfacePresentModesKHR(
-      physical_device, m_surface, &present_mode_count, present_modes.data()
-  );
+  vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &present_mode_count, present_modes.data());
 
   Optional<VkPresentModeKHR> present_mode;
-  for (const auto& mode : present_modes)
+  for (const auto& mode: present_modes)
   {
     if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
     {
@@ -133,21 +132,19 @@ Void VulkanWindowRenderTarget::create_swapchain()
   }
   else
   {
-    auto size    = m_window.lock()->get_size();
+    auto size     = m_window.lock()->get_size();
     extent.width  = static_cast<UInt32>(size.width());
     extent.height = static_cast<UInt32>(size.height());
   }
 
-  extent.width = std::clamp(
-      extent.width, surface_capabilities.minImageExtent.width,
-      surface_capabilities.maxImageExtent.width
-  );
-  extent.height = std::clamp(
-      extent.height, surface_capabilities.minImageExtent.height,
-      surface_capabilities.maxImageExtent.height
-  );
+  extent.width = std::clamp(extent.width, surface_capabilities.minImageExtent.width,
+                            surface_capabilities.maxImageExtent.width);
+  extent.height = std::clamp(extent.height, surface_capabilities.minImageExtent.height,
+                             surface_capabilities.maxImageExtent.height);
 
-  VkSwapchainCreateInfoKHR create_info {};
+  m_swapchain_extent = extent;
+
+  VkSwapchainCreateInfoKHR create_info{};
   create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   create_info.surface          = m_surface;
   create_info.minImageCount    = surface_capabilities.minImageCount + 1;
@@ -179,8 +176,7 @@ Void VulkanWindowRenderTarget::create_swapchain()
   create_info.oldSwapchain   = VK_NULL_HANDLE;
 
   VkSwapchainKHR swapchain;
-  if (vkCreateSwapchainKHR(vulkan_app->get_logical_device(), &create_info, nullptr, &swapchain) !=
-      VK_SUCCESS)
+  if (vkCreateSwapchainKHR(vulkan_app->get_logical_device(), &create_info, nullptr, &swapchain) != VK_SUCCESS)
   {
     throw EngineException("Failed to create swapchain");
   }
@@ -190,20 +186,19 @@ Void VulkanWindowRenderTarget::create_swapchain()
   UInt32 image_count;
   vkGetSwapchainImagesKHR(vulkan_app->get_logical_device(), m_swapchain, &image_count, nullptr);
   DArray<VkImage> images(image_count);
-  vkGetSwapchainImagesKHR(
-      vulkan_app->get_logical_device(), m_swapchain, &image_count, images.data()
-  );
+  vkGetSwapchainImagesKHR(vulkan_app->get_logical_device(), m_swapchain, &image_count, images.data());
 
   m_swapchain_images = std::move(images);
 }
 
-Void VulkanWindowRenderTarget::create_image_views()
+Void
+VulkanWindowRenderTarget::create_image_views()
 {
   DArray<VkImageView> image_views(m_swapchain_images.size());
 
   for (UInt32 i = 0; i < m_swapchain_images.size(); ++i)
   {
-    VkImageViewCreateInfo create_info {};
+    VkImageViewCreateInfo create_info{};
     create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     create_info.image                           = m_swapchain_images[i];
     create_info.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
@@ -218,23 +213,20 @@ Void VulkanWindowRenderTarget::create_image_views()
     create_info.subresourceRange.baseArrayLayer = 0;
     create_info.subresourceRange.layerCount     = 1;
 
-    VkImageView image_view;
-    auto        physical_device = m_vulkan_app.lock()->get_logical_device();
-    auto        result = vkCreateImageView(physical_device, &create_info, nullptr, &image_view);
+    auto physical_device = m_vulkan_app.lock()->get_logical_device();
+    auto result          = vkCreateImageView(physical_device, &create_info, nullptr, &image_views[i]);
     if (result != VK_SUCCESS)
     {
       throw EngineException("Failed to create image views");
     }
-
-    image_views.push_back(image_view);
   }
 
   m_swapchain_image_views = std::move(image_views);
 }
 
-SharedPtr<RenderTarget> RenderTarget::create_window_target(WeakPtr<Window> window)
+SharedPtr<RenderTarget>
+RenderTarget::create_window_target(WeakPtr<Window> window)
 {
   return std::make_shared<VulkanWindowRenderTarget>(window);
 }
-
-}  // namespace setsugen
+} // namespace setsugen

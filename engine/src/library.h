@@ -4,8 +4,8 @@
 
 extern setsugen::ThisLibrary* thislib = nullptr;
 
-extern "C" {
-
+extern "C"
+{
 bool on_load();
 bool on_unload();
 }

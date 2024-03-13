@@ -87,6 +87,36 @@ RendererBuilder& RendererBuilder::set_color_blends(DArray<ColorBlend> color_blen
   return *this;
 }
 
+RendererBuilder& RendererBuilder::set_cull_mode(CullMode cull_mode)
+{
+  m_config.cull_mode = cull_mode;
+  return *this;
+}
+
+RendererBuilder& RendererBuilder::set_front_face(FrontFace front_face)
+{
+  m_config.front_face = front_face;
+  return *this;
+}
+
+RendererBuilder& RendererBuilder::set_polygon_mode(PolygonMode polygon_mode)
+{
+  m_config.polygon_mode = polygon_mode;
+  return *this;
+}
+
+RendererBuilder& RendererBuilder::with_clear_color(const Color4F& clear_color)
+{
+  m_config.clear_color = clear_color;
+  return *this;
+}
+
+RendererBuilder& RendererBuilder::with_clear_color(Float r, Float g, Float b, Float a)
+{
+  m_config.clear_color = {r, g, b, a};
+  return *this;
+}
+
 SharedPtr<Renderer> RendererBuilder::build()
 {
   switch (m_config.render_target.lock()->type())

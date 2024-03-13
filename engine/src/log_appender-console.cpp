@@ -5,16 +5,16 @@
 
 namespace setsugen
 {
-
 ConsoleLogAppender::ConsoleLogAppender(const String& name, const String& format)
-    : LogAppender(name, format)
+  : LogAppender(name, format)
 {}
 
 ConsoleLogAppender::~ConsoleLogAppender() = default;
 
-Void ConsoleLogAppender::append(const LogData& log_data)
+Void
+ConsoleLogAppender::append(const LogData& log_data)
 {
-  if (this->get_settings().enabled && log_data.level >= this->get_settings().min_level)
+  if (this->get_settings().enabled && (log_data.level >= this->get_settings().min_level))
   {
     FormatArgsStore store;
     store.apply_arg("level", log_data.level);
@@ -25,16 +25,17 @@ Void ConsoleLogAppender::append(const LogData& log_data)
   }
 }
 
-Void ConsoleLogAppender::flush()
+Void
+ConsoleLogAppender::flush()
 {
   std::cout.flush();
 }
 
-SharedPtr<LogAppender> LogAppender::create_console_appender(
-    const String& name, const String& format
+SharedPtr<LogAppender>
+LogAppender::create_console_appender(
+  const String& name, const String& format
 )
 {
   return std::make_shared<ConsoleLogAppender>(name, format);
 }
-
-}  // namespace setsugen
+} // namespace setsugen

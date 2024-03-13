@@ -1,0 +1,9 @@
+# Description: Logger configuration file
+
+appenders:
+  console:
+    type: console
+    target: stdout
+    layout:
+      type: pattern
+      pattern: "{time} {{{level}}} {tag} - {msg}"

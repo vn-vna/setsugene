@@ -4,13 +4,14 @@
 #include <setsugen/exception.h>
 #include <setsugen/gfx.h>
 #include <setsugen/logger.h>
+#include <setsugen/platform.h>
+#include <setsugen/utilities.h>
 #include <setsugen/window.h>
 
 #include "window_helper.h"
 
 namespace setsugen
 {
-
 class VulkanApplication;
 class VulkanWindowRenderTarget;
 class ShaderCompiler;
@@ -18,20 +19,21 @@ class ShaderCompiler;
 class ShaderModule
 {
 public:
-  ShaderModule(const String& module_name);
+  ShaderModule(const String &module_name);
   ~ShaderModule();
 
   VkShaderModule get_module() const;
 
 private:
-  VkShaderModule             m_shader_module;
-  WeakPtr<VulkanApplication> m_vulkan_app;
+  VkShaderModule m_shader_module;
 };
 
 class VulkanApplication
 
 {
 public:
+  using ExtensionList = DArray<const Char *>;
+
   struct QueueFamilyIndices
   {
     Optional<UInt32> graphics_family;
@@ -39,7 +41,7 @@ public:
 
     Bool is_complete() const
     {
-      return graphics_family.has_value() &&  //
+      return graphics_family.has_value() && //
              present_family.has_value();
     }
   };
@@ -53,23 +55,26 @@ public:
   static SharedPtr<VulkanApplication> create_instance();
 
 public:
-  VkPhysicalDevice   get_physical_device();
+  VkPhysicalDevice   get_physical_device() const;
   VkDevice           get_logical_device();
   VkInstance         get_instance();
   QueueFamilyIndices get_queue_family_indices();
+  VkQueue            get_graphics_queue();
+  VkQueue            get_present_queue();
 
 private:
-  Void                initialize_instance();
-  DArray<const Char*> get_instance_layers();
-  Bool                check_layers_support(const DArray<const Char*>& layers);
-  DArray<const Char*> get_instance_extensions();
-  Bool                check_extensions_support(const DArray<const Char*>& extensions);
-  Void                setup_debug_messenger();
-  Void                query_physical_devices();
-  Bool                check_physical_device_extensions(VkPhysicalDevice device);
-  Int32               auto_select_physical_device();
-  QueueFamilyIndices  find_queue_families(VkPhysicalDevice device);
-  Void                create_logical_device();
+  Void               initialize_instance();
+  ExtensionList      get_instance_layers();
+  Void               setup_debug_messenger();
+  Void               query_physical_devices();
+  Int32              auto_select_physical_device();
+  QueueFamilyIndices find_queue_families(VkPhysicalDevice device) const;
+  Void               create_logical_device();
+
+  static ExtensionList get_instance_extensions();
+  static Bool          check_physical_device_extensions(VkPhysicalDevice device);
+  static Bool          check_layers_support(const DArray<const Char *> &layers);
+  static Bool          check_extensions_support(const DArray<const Char *> &extensions);
 
 private:
   VkInstance               m_instance;
@@ -108,9 +113,10 @@ private:
   VkSurfaceFormatKHR         m_surface_format;
   VkPresentModeKHR           m_present_mode;
   VkSwapchainKHR             m_swapchain;
+  VkExtent2D                 m_swapchain_extent;
   DArray<VkImage>            m_swapchain_images;
   DArray<VkImageView>        m_swapchain_image_views;
-  GLFWwindow*                m_window_handler;
+  GLFWwindow *               m_window_handler;
 
   friend class VulkanWindowRenderer;
 };
@@ -118,30 +124,36 @@ private:
 class VulkanWindowRenderer : virtual public Renderer
 {
 public:
-  VulkanWindowRenderer(const RendererConfig& config);
+  VulkanWindowRenderer(const RendererConfig &config);
   ~VulkanWindowRenderer() override;
 
   Void render() override;
+  Void cleanup() override;
 
 public:
-  static constexpr const Char* DEFAULT_VERTEX_SHADER   = "default";
-  static constexpr const Char* DEFAULT_FRAGMENT_SHADER = "default";
+  static constexpr auto DEFAULT_VERTEX_SHADER   = "default";
+  static constexpr auto DEFAULT_FRAGMENT_SHADER = "default";
 
 private:
-  Void create_graphics_pipeline(const RendererConfig& config);
-  Void create_framebuffers(const RendererConfig& config);
-  Void create_command_pool(const RendererConfig& config);
-  Void create_command_buffers(const RendererConfig& config);
+  Void create_graphics_pipeline(const RendererConfig &config);
+  Void create_framebuffers(const RendererConfig &config);
+  Void create_command_pool(const RendererConfig &config);
+  Void create_command_buffers(const RendererConfig &config);
+  Void create_synchronization_objects(const RendererConfig &config);
 
 private:
-  WeakPtr<VulkanApplication> m_vulkan_app;
-  DArray<VkCommandBuffer>    m_command_buffers;
-  VkCommandPool              m_command_pool;
-  VkPipelineLayout           m_pipeline_layout;
-  VkRenderPass               m_render_pass;
-  VkPipeline                 m_pipeline;
-  DArray<VkFramebuffer>      m_framebuffers;
-  SharedPtr<Logger>          m_logger;
+  WeakPtr<VulkanApplication>        m_vulkan_app;
+  WeakPtr<VulkanWindowRenderTarget> m_target;
+  VkCommandPool                     m_command_pool;
+  VkPipelineLayout                  m_pipeline_layout;
+  VkRenderPass                      m_render_pass;
+  VkPipeline                        m_pipeline;
+  DArray<VkCommandBuffer>           m_command_buffers;
+  DArray<VkFramebuffer>             m_framebuffers;
+  SharedPtr<Logger>                 m_logger;
+  DArray<VkFence>                   m_inflight_fences;
+  DArray<VkSemaphore>               m_image_available_semaphores;
+  DArray<VkSemaphore>               m_render_finished_semaphores;
+  UInt32                            m_current_frame;
 };
-
-}  // namespace setsugen
+} // namespace setsugen

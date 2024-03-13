@@ -1,19 +1,31 @@
+#include <filesystem>
+
 #include "gfx_renderer.h"
 
 namespace setsugen
 {
-
 ShaderModule::ShaderModule(const String& module_name)
 {
-  String shader_path = "assets/shaders/" + module_name + ".spv";
-  IFileStream file(module_name, std::ios::ate | std::ios::binary);
+  const auto vulkan_app  = VulkanApplication::get_current().lock();
+  const auto assets_path = get_assets_path();
 
-  if (!file.is_open())
+  const auto path = Path(Formatter::format("{}/shaders/{}.spv", assets_path, module_name));
+
+  if (!std::filesystem::exists(path))
   {
-    throw InvalidArgumentException("Failed to open shader file: " + module_name);
+    throw InvalidArgumentException(
+      Formatter::format("Cannot find shader module {} in folder {}", module_name, assets_path));
   }
 
-  Size file_size = static_cast<Size>(file.tellg());
+  IFileStream file;
+  file.open(path, std::ios::ate | std::ios::binary);
+  if (!file.is_open())
+  {
+    throw InvalidArgumentException(
+      Formatter::format("Cannot open shader module {}, in folder {}", module_name, assets_path));
+  }
+
+  const Size file_size = file.tellg();
   file.seekg(0);
   DArray<Byte> m_code(file_size);
   file.read(reinterpret_cast<Char*>(m_code.data()), file_size);
@@ -23,8 +35,8 @@ ShaderModule::ShaderModule(const String& module_name)
   create_info.codeSize                 = file_size;
   create_info.pCode                    = reinterpret_cast<UInt32*>(m_code.data());
 
-  auto logical_device = m_vulkan_app.lock()->get_logical_device();
-  auto result = vkCreateShaderModule(logical_device, &create_info, nullptr, &m_shader_module);
+  auto logical_device = vulkan_app->get_logical_device();
+  auto result         = vkCreateShaderModule(logical_device, &create_info, nullptr, &m_shader_module);
 
   if (result != VK_SUCCESS)
   {
@@ -34,13 +46,14 @@ ShaderModule::ShaderModule(const String& module_name)
 
 ShaderModule::~ShaderModule()
 {
-  auto logical_device = m_vulkan_app.lock()->get_logical_device();
+  const auto vulkan_app     = VulkanApplication::get_current().lock();
+  const auto logical_device = vulkan_app->get_logical_device();
   vkDestroyShaderModule(logical_device, m_shader_module, nullptr);
 }
 
-VkShaderModule ShaderModule::get_module() const
+VkShaderModule
+ShaderModule::get_module() const
 {
   return m_shader_module;
 }
-
-}  // namespace setsugen
+} // namespace setsugen

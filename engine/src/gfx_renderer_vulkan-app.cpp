@@ -2,35 +2,36 @@
 
 namespace setsugen
 {
-
 #ifndef NDEBUG
 static constexpr Bool enable_validation_layers = true;
 #else
 static constexpr Bool enable_validation_layers = false;
 #endif
 
-Optional<WeakPtr<VulkanApplication>> s_current_app;
+Optional<WeakPtr<VulkanApplication> > s_current_app;
 
 static const DArray<const Char*> s_validation_layers = {
-    "VK_LAYER_KHRONOS_validation",
+  "VK_LAYER_KHRONOS_validation",
 };
 
 static const DArray<const Char*> s_device_extensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+  VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vulkan_debug_callback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type,
-    const VkDebugUtilsMessengerCallbackDataEXT* callback, void* p_userdata
+  VkDebugUtilsMessageSeverityFlagBitsEXT      severity, VkDebugUtilsMessageTypeFlagsEXT type,
+  const VkDebugUtilsMessengerCallbackDataEXT* callback,
+  void*                                       p_userdata
 )
 {
   std::cout << "[Vulkan] >> " << callback->pMessage << std::endl;
   return VK_FALSE;
 }
 
-VkResult CreateDebugUtilsMessengerEXT(
-    VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator,
-    VkDebugUtilsMessengerEXT* pDebugMessenger
+VkResult
+CreateDebugUtilsMessengerEXT(
+  VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator,
+  VkDebugUtilsMessengerEXT* pDebugMessenger
 )
 {
   auto func_addr = vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
@@ -46,9 +47,9 @@ VkResult CreateDebugUtilsMessengerEXT(
   }
 }
 
-void DestroyDebugUtilsMessengerEXT(
-    VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator
-)
+void
+DestroyDebugUtilsMessengerEXT(VkInstance                   instance, VkDebugUtilsMessengerEXT debugMessenger,
+                              const VkAllocationCallbacks* pAllocator)
 {
   auto func_addr = vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
   auto func      = (PFN_vkDestroyDebugUtilsMessengerEXT) func_addr;
@@ -59,9 +60,9 @@ void DestroyDebugUtilsMessengerEXT(
 }
 
 VulkanApplication::VulkanApplication()
-    : m_instance {nullptr},
-      m_debug_messenger {nullptr},
-      m_physical_device_index {-1}
+  : m_instance{nullptr},
+    m_debug_messenger{nullptr},
+    m_physical_device_index{-1}
 {
   initialize_instance();
   setup_debug_messenger();
@@ -81,24 +82,40 @@ VulkanApplication::~VulkanApplication()
   vkDestroyInstance(m_instance, nullptr);
 }
 
-VkInstance VulkanApplication::get_instance()
+VkInstance
+VulkanApplication::get_instance()
 {
   return m_instance;
 }
 
-VulkanApplication::QueueFamilyIndices VulkanApplication::get_queue_family_indices()
+VulkanApplication::QueueFamilyIndices
+VulkanApplication::get_queue_family_indices()
 {
   return m_queue_family_indices;
 }
 
-VkDevice VulkanApplication::get_logical_device()
+VkQueue
+VulkanApplication::get_graphics_queue()
+{
+  return m_graphics_queue;
+}
+
+VkQueue
+VulkanApplication::get_present_queue()
+{
+  return m_present_queue;
+}
+
+VkDevice
+VulkanApplication::get_logical_device()
 {
   return m_logical_device;
 }
 
-Void VulkanApplication::initialize_instance()
+Void
+VulkanApplication::initialize_instance()
 {
-  VkApplicationInfo app_info {};
+  VkApplicationInfo app_info{};
   app_info.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   app_info.pApplicationName   = "SetsugenE Application";
   app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -106,7 +123,7 @@ Void VulkanApplication::initialize_instance()
   app_info.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
   app_info.apiVersion         = VK_API_VERSION_1_0;
 
-  VkInstanceCreateInfo create_info {};
+  VkInstanceCreateInfo create_info{};
   create_info.sType            = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   create_info.pApplicationInfo = &app_info;
 
@@ -125,7 +142,8 @@ Void VulkanApplication::initialize_instance()
   }
 }
 
-DArray<const Char*> VulkanApplication::get_instance_layers()
+DArray<const Char*>
+VulkanApplication::get_instance_layers()
 {
   DArray<const Char*> layers;
 
@@ -142,18 +160,19 @@ DArray<const Char*> VulkanApplication::get_instance_layers()
   return layers;
 }
 
-Bool VulkanApplication::check_layers_support(const DArray<const Char*>& layers)
+Bool
+VulkanApplication::check_layers_support(const DArray<const Char*>& layers)
 {
   UInt32 available_layer_count;
   vkEnumerateInstanceLayerProperties(&available_layer_count, nullptr);
   DArray<VkLayerProperties> available_layers(available_layer_count);
   vkEnumerateInstanceLayerProperties(&available_layer_count, available_layers.data());
 
-  for (const Char* layerName : layers)
+  for (const Char* layerName: layers)
   {
     Bool layer_found = false;
 
-    for (const auto& properties : available_layers)
+    for (const auto& properties: available_layers)
     {
       if (strcmp(layerName, properties.layerName) == 0)
       {
@@ -171,7 +190,8 @@ Bool VulkanApplication::check_layers_support(const DArray<const Char*>& layers)
   return true;
 }
 
-DArray<const Char*> VulkanApplication::get_instance_extensions()
+DArray<const Char*>
+VulkanApplication::get_instance_extensions()
 {
   DArray<const Char*> extensions;
 
@@ -194,18 +214,19 @@ DArray<const Char*> VulkanApplication::get_instance_extensions()
   return extensions;
 }
 
-Bool VulkanApplication::check_extensions_support(const DArray<const Char*>& extensions)
+Bool
+VulkanApplication::check_extensions_support(const DArray<const Char*>& extensions)
 {
   UInt32 extensionCount;
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
   DArray<VkExtensionProperties> availableExtensions(extensionCount);
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
 
-  for (const Char* extensionName : extensions)
+  for (const Char* extensionName: extensions)
   {
     Bool extensionFound = false;
 
-    for (const auto& extension : availableExtensions)
+    for (const auto& extension: availableExtensions)
     {
       if (strcmp(extensionName, extension.extensionName) == 0)
       {
@@ -223,22 +244,24 @@ Bool VulkanApplication::check_extensions_support(const DArray<const Char*>& exte
   return true;
 }
 
-Void VulkanApplication::setup_debug_messenger()
+Void
+VulkanApplication::setup_debug_messenger()
 {
   if (!enable_validation_layers)
   {
     return;
   }
 
-  VkDebugUtilsMessengerCreateInfoEXT create_info {};
+  VkDebugUtilsMessengerCreateInfoEXT create_info{};
   create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-  create_info.messageSeverity =
-      VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+  create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT   // Enable all warnings
+                                | VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT // Enable all verbose messages
+                                | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;  // Enable all error messages
 
-  create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+  create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT        // Enable all general messages
+                            | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT   // Enable all validation messages
+                            | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT; // Enable all performance messages
 
   create_info.pfnUserCallback = vulkan_debug_callback;
 
@@ -250,7 +273,8 @@ Void VulkanApplication::setup_debug_messenger()
   }
 }
 
-Void VulkanApplication::query_physical_devices()
+Void
+VulkanApplication::query_physical_devices()
 {
   UInt32 device_count = 0;
   vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
@@ -276,7 +300,8 @@ Void VulkanApplication::query_physical_devices()
   m_queue_family_indices = find_queue_families(m_physical_devices[m_physical_device_index]);
 }
 
-Bool VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device)
+Bool
+VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device)
 {
   UInt32 extension_count;
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
@@ -285,7 +310,7 @@ Bool VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device
 
   Set<const Char*> required_extensions(s_device_extensions.begin(), s_device_extensions.end());
 
-  for (const auto& extension : available_extensions)
+  for (const auto& extension: available_extensions)
   {
     required_extensions.erase(extension.extensionName);
   }
@@ -293,7 +318,8 @@ Bool VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device
   return required_extensions.empty();
 }
 
-Int32 VulkanApplication::auto_select_physical_device()
+Int32
+VulkanApplication::auto_select_physical_device()
 {
   for (UInt32 i = 0; i < m_physical_devices.size(); ++i)
   {
@@ -323,7 +349,8 @@ Int32 VulkanApplication::auto_select_physical_device()
   return 0;
 }
 
-VkPhysicalDevice VulkanApplication::get_physical_device()
+VkPhysicalDevice
+VulkanApplication::get_physical_device() const
 {
   if (m_physical_device_index < 0)
   {
@@ -333,7 +360,8 @@ VkPhysicalDevice VulkanApplication::get_physical_device()
   return m_physical_devices[m_physical_device_index];
 }
 
-VulkanApplication::QueueFamilyIndices VulkanApplication::find_queue_families(VkPhysicalDevice device)
+VulkanApplication::QueueFamilyIndices
+VulkanApplication::find_queue_families(VkPhysicalDevice device) const
 {
   QueueFamilyIndices indices;
 
@@ -343,7 +371,7 @@ VulkanApplication::QueueFamilyIndices VulkanApplication::find_queue_families(VkP
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
 
   // Create dummy GLFW window to get the surface
-  auto         dummy_window = ::setsugen::helper::GlfwInstance::get_instance().lock()->create_default_window();
+  auto         dummy_window = helper::GlfwInstance::get_instance().lock()->create_default_window();
   VkSurfaceKHR dummy_surface;
   glfwCreateWindowSurface(m_instance, dummy_window, nullptr, &dummy_surface);
 
@@ -374,17 +402,18 @@ VulkanApplication::QueueFamilyIndices VulkanApplication::find_queue_families(VkP
   return indices;
 }
 
-Void VulkanApplication::create_logical_device()
+Void
+VulkanApplication::create_logical_device()
 {
   DArray<VkDeviceQueueCreateInfo> queue_create_infos;
   Set<UInt32>                     unique_queue_families = {
-      m_queue_family_indices.graphics_family.value(), m_queue_family_indices.present_family.value()
+    m_queue_family_indices.graphics_family.value(), m_queue_family_indices.present_family.value()
   };
 
   Float queue_priority = 1.0f;
-  for (UInt32 queue_family : unique_queue_families)
+  for (UInt32 queue_family: unique_queue_families)
   {
-    VkDeviceQueueCreateInfo queue_create_info {};
+    VkDeviceQueueCreateInfo queue_create_info{};
     queue_create_info.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queue_create_info.queueFamilyIndex = queue_family;
     queue_create_info.queueCount       = 1;
@@ -392,9 +421,9 @@ Void VulkanApplication::create_logical_device()
     queue_create_infos.push_back(queue_create_info);
   }
 
-  VkPhysicalDeviceFeatures device_features {};
+  VkPhysicalDeviceFeatures device_features{};
 
-  VkDeviceCreateInfo create_info {};
+  VkDeviceCreateInfo create_info{};
   create_info.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   create_info.queueCreateInfoCount = static_cast<UInt32>(queue_create_infos.size());
   create_info.pQueueCreateInfos    = queue_create_infos.data();
@@ -436,16 +465,17 @@ Void VulkanApplication::create_logical_device()
   }
 }
 
-WeakPtr<VulkanApplication> VulkanApplication::get_current()
+WeakPtr<VulkanApplication>
+VulkanApplication::get_current()
 {
   return s_current_app.value();
 }
 
-SharedPtr<VulkanApplication> VulkanApplication::create_instance()
+SharedPtr<VulkanApplication>
+VulkanApplication::create_instance()
 {
   auto app      = std::make_shared<VulkanApplication>();
   s_current_app = app;
   return app;
 }
-
-}  // namespace setsugen
+} // namespace setsugen

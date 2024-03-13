@@ -8,7 +8,6 @@
 
 namespace setsugen
 {
-
 struct ApplicationDescription;
 class ApplicationBuilder;
 class Application;
@@ -50,13 +49,12 @@ public:
   using LoggerConfigCallback = Fn<Void(ApplicationBuilder&, LoggerFactory&)>;
 
 public:
-  ApplicationBuilder& set_name(const String& name);
-  ApplicationBuilder& set_version(const Version& version);
-  ApplicationBuilder& set_author(const String& author);
-  ApplicationBuilder& set_description(const String& desc);
-  ApplicationBuilder& set_window_config(Int32 width, Int32 height, const String& title);
-  ApplicationBuilder& set_logger_format(const String& format);
-
+  ApplicationBuilder&    set_name(const String& name);
+  ApplicationBuilder&    set_version(const Version& version);
+  ApplicationBuilder&    set_author(const String& author);
+  ApplicationBuilder&    set_description(const String& desc);
+  ApplicationBuilder&    set_window_config(Int32 width, Int32 height, const String& title);
+  ApplicationBuilder&    set_logger_format(const String& format);
   SharedPtr<Application> build();
 
 public:
@@ -71,17 +69,17 @@ private:
 class Application
 {
 public:
-  virtual Void              run()                                   = 0;
+  virtual Void              run() = 0;
+
   virtual SharedPtr<Logger> create_logger(const String& name) const = 0;
-  virtual WeakPtr<Window>   get_window() const                      = 0;
+  virtual WeakPtr<Window>   get_window() const = 0;
 
 public:
   static SharedPtr<Application> current_app();
 
 private:
-  static Optional<WeakPtr<Application>> s_current_app;
+  static Optional<WeakPtr<Application> > s_current_app;
 
   friend class ApplicationBuilder;
 };
-
-}  // namespace setsugen
+} // namespace setsugen

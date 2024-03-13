@@ -2,16 +2,18 @@
 
 using setsugen::ThisLibrary;
 
-bool on_load()
+bool
+on_load()
 {
   thislib = new ThisLibrary(GetModuleHandle(NULL));
   return true;
 }
 
-bool on_unload()
+bool
+on_unload()
 {
   bool success = true;
-  for (auto& callback : thislib->get_unload_events())
+  for (auto& callback: thislib->get_unload_events())
   {
     try
     {
@@ -32,12 +34,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
   switch (fdwReason)
   {
-  case DLL_PROCESS_ATTACH:
-    return on_load();
-  case DLL_PROCESS_DETACH:
-    return on_unload();
-  default:
-    return true;
+    case DLL_PROCESS_ATTACH: return on_load();
+    case DLL_PROCESS_DETACH: return on_unload();
+    default: return true;
   }
 }
 #endif
@@ -47,41 +46,46 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 namespace setsugen
 {
 ThisLibrary::ThisLibrary(Void* handle)
-    : m_handle(handle)
+  : m_handle(handle)
 {}
 
-String ThisLibrary::get_path() const
+String
+ThisLibrary::get_path() const
 {
   Char path[MAX_PATH];
   GetModuleFileNameA((HMODULE) m_handle, path, MAX_PATH);
   return String(path);
 }
 
-Void* ThisLibrary::get_handle() const
+Void*
+ThisLibrary::get_handle() const
 {
   return m_handle;
 }
 
-const std::forward_list<ThisLibrary::UnloadEventCallback>& ThisLibrary::get_unload_events() const
+const std::forward_list<ThisLibrary::UnloadEventCallback>&
+ThisLibrary::get_unload_events() const
 {
   return m_on_unload;
 }
 
-Void ThisLibrary::on_unload(const UnloadEventCallback& callback)
+Void
+ThisLibrary::on_unload(const UnloadEventCallback& callback)
 {
   m_on_unload.push_front(callback);
 }
 
-std::tuple<Int32, Int32, Int32> ThisLibrary::get_version()
+std::tuple<Int32, Int32, Int32>
+ThisLibrary::get_version()
 {
   return std::make_tuple(SETSUGENE_VERSION_MAJOR, SETSUGENE_VERSION_MINOR, SETSUGENE_VERSION_PATCH);
 }
 
-ThisLibrary& ThisLibrary::get()
+ThisLibrary&
+ThisLibrary::get()
 {
   return *thislib;
 }
-
-}  // namespace setsugen
+} // namespace setsugen
 
 #pragma endregion

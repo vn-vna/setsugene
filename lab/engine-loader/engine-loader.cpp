@@ -2,5 +2,6 @@
 
 int main()
 {
-  setsugen::ApplicationBuilder().build()->run();
+  using namespace setsugen;
+  ApplicationBuilder().build()->run();
 }

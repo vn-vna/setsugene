@@ -1,60 +1,59 @@
-BasedOnStyle: Google
-
-AlignAfterOpenBracket: BlockIndent
-AllowShortBlocksOnASingleLine: Never
+---
+Language: Cpp
+BasedOnStyle: LLVM
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: true
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
-AllowShortLambdasOnASingleLine: All
-BreakConstructorInitializers: BeforeColon
-PackConstructorInitializers: Never
-SpaceBeforeCpp11BracedList: true
-BreakInheritanceList: AfterComma
+AllowShortIfStatementsOnASingleLine: false
+AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlwaysBreakTemplateDeclarations: Yes
-IndentWidth: 2
-AccessModifierOffset: -2
-SeparateDefinitionBlocks: Always
-ShortNamespaceLines: 0
-UseCRLF: false
-BreakBeforeConceptDeclarations: true
-BraceWrapping:
+BraceWrapping: 
+  AfterCaseLabel: true
   AfterClass: true
-  AfterControlStatement: Always
+  AfterControlStatement: true
   AfterEnum: true
   AfterFunction: true
   AfterNamespace: true
   AfterStruct: true
   AfterUnion: true
+  AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
   IndentBraces: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
-ColumnLimit: 150
-Cpp11BracedListStyle: true
-FixNamespaceComments: true
-IndentCaseLabels: false
-IndentPPDirectives: AfterHash
-MaxEmptyLinesToKeep: 1
-NamespaceIndentation: None
-PointerAlignment: Left
-SortIncludes: CaseSensitive
-SortUsingDeclarations: true
+BreakConstructorInitializersBeforeComma: false
+ColumnLimit: 120
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+IncludeCategories: 
+  - Regex: '^<.*'
+    Priority: 1
+  - Regex: '^".*'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IndentCaseLabels: true
+InsertNewlineAtEOF: true
+MacroBlockBegin: ''
+MacroBlockEnd: ''
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: Inner
 SpaceAfterCStyleCast: true
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeParens: ControlStatements
+SpaceAfterTemplateKeyword: false
+SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
-SpacesInSquareBrackets: false
 TabWidth: 2
-UseTab: Never
-SpaceAroundPointerQualifiers: Default
-AlignTrailingComments: true
-AlignEscapedNewlines: Left
-AlignConsecutiveMacros: AcrossComments
-AlignConsecutiveDeclarations: AcrossComments
-AlignConsecutiveBitFields: AcrossComments
-AlignConsecutiveAssignments: AcrossComments
-AlignOperands: AlignAfterOperator
-AlignArrayOfStructures: Right
-AllowAllParametersOfDeclarationOnNextLine: true
+...

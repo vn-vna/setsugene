@@ -11,3 +11,4 @@
 #include <setsugen/math.h>
 #include <setsugen/thislib.h>
 #include <setsugen/window.h>
+#include <setsugen/utilities.h>

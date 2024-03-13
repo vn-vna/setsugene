@@ -134,5 +134,6 @@ using OFileStream   = std::ofstream;
 using StringStream  = std::stringstream;
 using IStringStream = std::istringstream;
 using OStringStream = std::ostringstream;
+using Path          = std::filesystem::path;
 
 }  // namespace setsugen
