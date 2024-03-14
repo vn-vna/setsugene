@@ -85,6 +85,8 @@ target_link_libraries(engine
         PRIVATE Vulkan::Vulkan
 )
 
+add_dependencies(engine engine-shaders)
+
 add_library(setsugen::engine ALIAS engine)
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/test")
