@@ -52,7 +52,7 @@ public:
 
 public:
   static WeakPtr<VulkanApplication>   get_current();
-  static SharedPtr<VulkanApplication> create_instance();
+  static SharedPtr<VulkanApplication> create();
 
 public:
   VkPhysicalDevice   get_physical_device() const;

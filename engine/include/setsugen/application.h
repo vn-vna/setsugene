@@ -26,9 +26,9 @@ struct ApplicationDescription
 
   struct
   {
+    String title;
     Int32  width;
     Int32  height;
-    String title;
   } window_config;
 
   struct

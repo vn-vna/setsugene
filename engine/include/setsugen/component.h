@@ -10,7 +10,7 @@ class Component;
 
 class Component
     : virtual public Formattable,
-      virtual EnableShared<Component>
+      virtual EnableSelfShared<Component>
 {
 public:
   Component(WeakPtr<Entity> entity);

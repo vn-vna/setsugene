@@ -472,7 +472,7 @@ VulkanApplication::get_current()
 }
 
 SharedPtr<VulkanApplication>
-VulkanApplication::create_instance()
+VulkanApplication::create()
 {
   auto app      = std::make_shared<VulkanApplication>();
   s_current_app = app;

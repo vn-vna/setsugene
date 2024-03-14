@@ -8,7 +8,7 @@ namespace setsugen
 class Entity;
 
 class Scene : virtual public Formattable,
-              EnableShared<Scene>
+              EnableSelfShared<Scene>
 {
 public:
   Scene();

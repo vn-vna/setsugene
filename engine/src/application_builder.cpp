@@ -10,7 +10,7 @@
 
 namespace setsugen
 {
-Optional<WeakPtr<Application> > Application::s_current_app{};
+Optional<WeakPtr<Application>> Application::s_current_app{};
 
 ApplicationBuilder::ApplicationBuilder()
   : m_description{}
@@ -85,10 +85,10 @@ ApplicationBuilder::build()
   console_appender->set_level(LogLevel::Trace);
   app->m_logger_factory->add_appender(console_appender);
 
-  app->m_vulkan_app = VulkanApplication::create_instance();
-  app->m_window     =
-      Window::create(this->m_description.window_config.title, this->m_description.window_config.width,
-                     this->m_description.window_config.height);
+  app->m_vulkan_app = VulkanApplication::create();
+
+  auto [title, width, height] = this->m_description.window_config;
+  app->m_window               = Window::create(title, width, height);
 
   return app_interface;
 }

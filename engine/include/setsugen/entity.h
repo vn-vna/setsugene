@@ -9,7 +9,7 @@ namespace setsugen
 class Entity;
 
 class Entity : virtual public Formattable,
-               virtual public EnableShared<Entity>
+               virtual public EnableSelfShared<Entity>
 {
 public:
   Entity();

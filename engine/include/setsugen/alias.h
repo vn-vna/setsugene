@@ -136,4 +136,9 @@ using IStringStream = std::istringstream;
 using OStringStream = std::ostringstream;
 using Path          = std::filesystem::path;
 
+using TypeInfo  = std::type_info;
+
+template <typename T>
+using EnableSelfShared = std::enable_shared_from_this<T>;
+
 }  // namespace setsugen

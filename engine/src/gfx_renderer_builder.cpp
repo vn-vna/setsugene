@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "gfx_renderer.h"
 
 namespace setsugen
@@ -17,7 +19,7 @@ RendererBuilder& RendererBuilder::with_fragment_shader(const String& file_path)
 
 RendererBuilder& RendererBuilder::with_render_target(WeakPtr<RenderTarget> render_target)
 {
-  m_config.render_target = render_target;
+  m_config.render_target = std::move(render_target);
   return *this;
 }
 
@@ -41,13 +43,13 @@ RendererBuilder& RendererBuilder::add_vertex_attribute(UInt32 binding, UInt32 lo
 
 RendererBuilder& RendererBuilder::set_vertex_bindings(DArray<VertexBindingDescription> vertex_bindings)
 {
-  m_config.vertex_bindings = vertex_bindings;
+  m_config.vertex_bindings = std::move(vertex_bindings);
   return *this;
 }
 
 RendererBuilder& RendererBuilder::set_vertex_attributes(DArray<VertexAttributeDescription> vertex_attributes)
 {
-  m_config.vertex_attributes = vertex_attributes;
+  m_config.vertex_attributes = std::move(vertex_attributes);
   return *this;
 }
 
@@ -65,13 +67,13 @@ RendererBuilder& RendererBuilder::add_scissor(Float x, Float y, Float width, Flo
 
 RendererBuilder& RendererBuilder::set_viewports(DArray<ViewPort> viewports)
 {
-  m_config.viewports = viewports;
+  m_config.viewports = std::move(viewports);
   return *this;
 }
 
 RendererBuilder& RendererBuilder::set_scissors(DArray<Scissor> scissors)
 {
-  m_config.scissors = scissors;
+  m_config.scissors = std::move(scissors);
   return *this;
 }
 
@@ -83,7 +85,7 @@ RendererBuilder& RendererBuilder::add_color_blend(Bool blend_enable, ColorFlag b
 
 RendererBuilder& RendererBuilder::set_color_blends(DArray<ColorBlend> color_blends)
 {
-  m_config.color_blends = color_blends;
+  m_config.color_blends = std::move(color_blends);
   return *this;
 }
 
