@@ -3,8 +3,21 @@
 namespace setsugen
 {
 BasicApplication::BasicApplication(ApplicationDescription&& app_desc)
-  : m_description(app_desc)
-{}
+  : Application{},
+    m_description(app_desc)
+{
+  m_logger_factory      = std::make_shared<LoggerFactory>();
+  auto console_appender = LogAppender::create_console_appender(this->m_description.logger_config.log_template);
+  console_appender->set_level(LogLevel::Trace);
+  m_logger_factory->add_appender(console_appender);
+
+  m_vulkan_app = VulkanApplication::create();
+
+  auto [title, width, height] = this->m_description.window_config;
+  m_window                    = Window::create(title, width, height);
+}
+
+BasicApplication::~BasicApplication() = default;
 
 Void
 BasicApplication::run()
@@ -30,24 +43,16 @@ BasicApplication::create_logger(const String& name) const
   return m_logger_factory->get(name);
 }
 
-WeakPtr<Window>
-BasicApplication::get_window() const
+Observer<Window>
+BasicApplication::get_window()
 {
-  return m_window;
+  return m_window.get();
 }
 
-WeakPtr<VulkanApplication>
+Observer<VulkanApplication>
 BasicApplication::get_vulkan_app()
 {
-  return m_vulkan_app;
+  return m_vulkan_app.get();
 }
 } // namespace setsugen::impl__
 
-namespace setsugen
-{
-SharedPtr<Application>
-Application::current_app()
-{
-  return s_current_app.value().lock();
-}
-} // namespace setsugen

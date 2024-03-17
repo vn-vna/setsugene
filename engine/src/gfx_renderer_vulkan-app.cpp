@@ -8,7 +8,7 @@ static constexpr Bool enable_validation_layers = true;
 static constexpr Bool enable_validation_layers = false;
 #endif
 
-Optional<WeakPtr<VulkanApplication> > s_current_app;
+Atomic<Observer<VulkanApplication>> VulkanApplication::s_current_app;
 
 static const DArray<const Char*> s_validation_layers = {
   "VK_LAYER_KHRONOS_validation",
@@ -35,7 +35,7 @@ CreateDebugUtilsMessengerEXT(
 )
 {
   auto func_addr = vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-  auto func      = (PFN_vkCreateDebugUtilsMessengerEXT) func_addr;
+  auto func      = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(func_addr);
 
   if (func != nullptr)
   {
@@ -64,6 +64,13 @@ VulkanApplication::VulkanApplication()
     m_debug_messenger{nullptr},
     m_physical_device_index{-1}
 {
+  if (s_current_app)
+  {
+    throw EngineException("A Vulkan application is created");
+  }
+
+  s_current_app = this;
+
   initialize_instance();
   setup_debug_messenger();
   query_physical_devices();
@@ -80,34 +87,36 @@ VulkanApplication::~VulkanApplication()
   }
 
   vkDestroyInstance(m_instance, nullptr);
+
+  s_current_app = nullptr;
 }
 
 VkInstance
-VulkanApplication::get_instance()
+VulkanApplication::get_instance() const
 {
   return m_instance;
 }
 
 VulkanApplication::QueueFamilyIndices
-VulkanApplication::get_queue_family_indices()
+VulkanApplication::get_queue_family_indices() const
 {
   return m_queue_family_indices;
 }
 
 VkQueue
-VulkanApplication::get_graphics_queue()
+VulkanApplication::get_graphics_queue() const
 {
   return m_graphics_queue;
 }
 
 VkQueue
-VulkanApplication::get_present_queue()
+VulkanApplication::get_present_queue() const
 {
   return m_present_queue;
 }
 
 VkDevice
-VulkanApplication::get_logical_device()
+VulkanApplication::get_logical_device() const
 {
   return m_logical_device;
 }
@@ -465,17 +474,15 @@ VulkanApplication::create_logical_device()
   }
 }
 
-WeakPtr<VulkanApplication>
+Observer<VulkanApplication>
 VulkanApplication::get_current()
 {
-  return s_current_app.value();
+  return s_current_app;
 }
 
 SharedPtr<VulkanApplication>
 VulkanApplication::create()
 {
-  auto app      = std::make_shared<VulkanApplication>();
-  s_current_app = app;
-  return app;
+  return std::make_shared<VulkanApplication>();
 }
 } // namespace setsugen

@@ -48,18 +48,19 @@ class ApplicationBuilder
 public:
   using LoggerConfigCallback = Fn<Void(ApplicationBuilder&, LoggerFactory&)>;
 
-public:
-  ApplicationBuilder&    set_name(const String& name);
-  ApplicationBuilder&    set_version(const Version& version);
-  ApplicationBuilder&    set_author(const String& author);
-  ApplicationBuilder&    set_description(const String& desc);
-  ApplicationBuilder&    set_window_config(Int32 width, Int32 height, const String& title);
-  ApplicationBuilder&    set_logger_format(const String& format);
-  SharedPtr<Application> build();
-
-public:
   ApplicationBuilder();
   ~ApplicationBuilder() = default;
+
+  Observer<ApplicationBuilder> set_name(const String& name);
+  Observer<ApplicationBuilder> set_version(const Version& version);
+  Observer<ApplicationBuilder> set_author(const String& author);
+  Observer<ApplicationBuilder> set_description(const String& desc);
+  Observer<ApplicationBuilder> set_window_config(const String& title, Int32 width, Int32 height);
+  Observer<ApplicationBuilder> set_logger_format(const String& format);
+
+  SharedPtr<Application> build();
+
+  static UniquePtr<ApplicationBuilder> create();
 
 private:
   ApplicationDescription m_description;
@@ -69,17 +70,19 @@ private:
 class Application
 {
 public:
+  Application();
+  virtual ~Application();
+
   virtual Void              run() = 0;
-
   virtual SharedPtr<Logger> create_logger(const String& name) const = 0;
-  virtual WeakPtr<Window>   get_window() const = 0;
+  virtual Observer<Window>  get_window() = 0;
 
-public:
-  static SharedPtr<Application> current_app();
+  static Observer<Application> current_app();
+
+protected:
+  static Atomic<Observer<Application>> s_current_app;
 
 private:
-  static Optional<WeakPtr<Application> > s_current_app;
-
   friend class ApplicationBuilder;
 };
 } // namespace setsugen

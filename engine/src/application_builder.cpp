@@ -10,13 +10,11 @@
 
 namespace setsugen
 {
-Optional<WeakPtr<Application>> Application::s_current_app{};
-
 ApplicationBuilder::ApplicationBuilder()
   : m_description{}
 {
   m_description.name                       = "Setsugen Application";
-  m_description.version                    = Version{0, 1, 0};
+  m_description.version                    = {0, 1, 0};
   m_description.author                     = "Unknown";
   m_description.description                = "Setsugen Application";
   m_description.logger_config.log_template = "{time} [{level}] {tag}: {message}";
@@ -25,71 +23,57 @@ ApplicationBuilder::ApplicationBuilder()
   m_description.window_config.title        = "Setsugen Application";
 }
 
-ApplicationBuilder&
+Observer<ApplicationBuilder>
 ApplicationBuilder::set_name(const String& name)
 {
   m_description.name = name;
-  return *this;
+  return this;
 }
 
-ApplicationBuilder&
+Observer<ApplicationBuilder>
 ApplicationBuilder::set_version(const Version& version)
 {
   m_description.version = version;
-  return *this;
+  return this;
 }
 
-ApplicationBuilder&
+Observer<ApplicationBuilder>
 ApplicationBuilder::set_author(const String& author)
 {
   m_description.author = author;
-  return *this;
+  return this;
 }
 
-ApplicationBuilder&
+Observer<ApplicationBuilder>
 ApplicationBuilder::set_description(const String& desc)
 {
   m_description.description = desc;
-  return *this;
+  return this;
 }
 
-ApplicationBuilder&
+Observer<ApplicationBuilder>
 ApplicationBuilder::set_logger_format(const String& format)
 {
-  m_description.logger_config.log_template = format;
-  return *this;
+  m_description.logger_config = {format};
+  return this;
 }
 
-ApplicationBuilder&
-ApplicationBuilder::set_window_config(Int32 width, Int32 height, const String& title)
+UniquePtr<ApplicationBuilder>
+ApplicationBuilder::create()
 {
-  m_description.window_config.width  = width;
-  m_description.window_config.height = height;
-  m_description.window_config.title  = title;
-  return *this;
+  return std::make_unique<ApplicationBuilder>();
+}
+
+Observer<ApplicationBuilder>
+ApplicationBuilder::set_window_config(const String& title, Int32 width, Int32 height)
+{
+  m_description.window_config = {title, width, height};
+  return this;
 }
 
 SharedPtr<Application>
 ApplicationBuilder::build()
 {
-  if (Application::s_current_app.has_value())
-  {
-    throw InvalidStateException("An application instance is already running");
-  }
-  auto app                   = std::make_shared<BasicApplication>(std::move(this->m_description));
-  auto app_interface         = std::dynamic_pointer_cast<Application>(app);
-  Application::s_current_app = app_interface;
-
-  app->m_logger_factory = std::make_shared<LoggerFactory>();
-  auto console_appender = LogAppender::create_console_appender(this->m_description.logger_config.log_template);
-  console_appender->set_level(LogLevel::Trace);
-  app->m_logger_factory->add_appender(console_appender);
-
-  app->m_vulkan_app = VulkanApplication::create();
-
-  auto [title, width, height] = this->m_description.window_config;
-  app->m_window               = Window::create(title, width, height);
-
-  return app_interface;
+  return std::make_shared<BasicApplication>(std::move(this->m_description));
 }
 } // namespace setsugen

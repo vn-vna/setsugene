@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <deque>
+#include <format>
 #include <forward_list>
 #include <fstream>
 #include <functional>
@@ -30,7 +31,6 @@
 
 namespace setsugen
 {
-
 using Void   = void;
 using Byte   = uint8_t;
 using Int8   = int8_t;
@@ -136,9 +136,14 @@ using IStringStream = std::istringstream;
 using OStringStream = std::ostringstream;
 using Path          = std::filesystem::path;
 
-using TypeInfo  = std::type_info;
+using TypeInfo = std::type_info;
 
 template <typename T>
 using EnableSelfShared = std::enable_shared_from_this<T>;
 
-}  // namespace setsugen
+template <typename T = Void>
+using Observer = T*;
+
+using Handler = Observer<Void>;
+
+} // namespace setsugen

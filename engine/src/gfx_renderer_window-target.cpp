@@ -1,13 +1,16 @@
+#include <memory>
+
 #include "application_basic-app.h"
 #include "gfx_renderer.h"
 
 namespace setsugen
 {
-VulkanWindowRenderTarget::VulkanWindowRenderTarget(WeakPtr<Window> window)
+VulkanWindowRenderTarget::VulkanWindowRenderTarget(Observer<Window> window)
   : m_window{window},
     m_vulkan_app{VulkanApplication::get_current()}
 {
-  m_window_handler = (GLFWwindow*) m_window.lock()->get_handler();
+  m_window_handler = static_cast<GLFWwindow*>(m_window->get_handler());
+  m_logical_device = m_vulkan_app->get_logical_device();
 
   create_surface();
   create_swapchain();
@@ -16,15 +19,13 @@ VulkanWindowRenderTarget::VulkanWindowRenderTarget(WeakPtr<Window> window)
 
 VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
 {
-  auto vulkan_app = m_vulkan_app.lock();
-
-  for (auto image_view: m_swapchain_image_views)
+  for (const auto image_view: m_swapchain_image_views)
   {
-    vkDestroyImageView(vulkan_app->get_logical_device(), image_view, nullptr);
+    vkDestroyImageView(m_logical_device, image_view, nullptr);
   }
 
-  vkDestroySwapchainKHR(vulkan_app->get_logical_device(), m_swapchain, nullptr);
-  vkDestroySurfaceKHR(vulkan_app->get_instance(), m_surface, nullptr);
+  vkDestroySwapchainKHR(m_logical_device, m_swapchain, nullptr);
+  vkDestroySurfaceKHR(m_vulkan_app->get_instance(), m_surface, nullptr);
 }
 
 Void
@@ -39,7 +40,7 @@ Int32
 VulkanWindowRenderTarget::width() const
 {
   Int32 width;
-  glfwGetFramebufferSize((GLFWwindow*) m_window.lock()->get_handler(), &width, nullptr);
+  glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), &width, nullptr);
   return width;
 }
 
@@ -47,7 +48,7 @@ Int32
 VulkanWindowRenderTarget::height() const
 {
   Int32 height;
-  glfwGetFramebufferSize((GLFWwindow*) m_window.lock()->get_handler(), nullptr, &height);
+  glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), nullptr, &height);
   return height;
 }
 
@@ -60,8 +61,8 @@ VulkanWindowRenderTarget::type() const
 Void
 VulkanWindowRenderTarget::create_surface()
 {
-  auto instance       = m_vulkan_app.lock()->get_instance();
-  auto window_handler = (GLFWwindow*) m_window.lock()->get_handler();
+  const auto instance       = m_vulkan_app->get_instance();
+  const auto window_handler = static_cast<GLFWwindow*>(m_window->get_handler());
 
   VkSurfaceKHR surface;
   if (glfwCreateWindowSurface(instance, window_handler, nullptr, &surface) != VK_SUCCESS)
@@ -75,8 +76,7 @@ VulkanWindowRenderTarget::create_surface()
 Void
 VulkanWindowRenderTarget::create_swapchain()
 {
-  auto vulkan_app      = m_vulkan_app.lock();
-  auto physical_device = vulkan_app->get_physical_device();
+  auto physical_device = m_vulkan_app->get_physical_device();
 
   VkSurfaceCapabilitiesKHR surface_capabilities;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, m_surface, &surface_capabilities);
@@ -132,7 +132,7 @@ VulkanWindowRenderTarget::create_swapchain()
   }
   else
   {
-    auto size     = m_window.lock()->get_size();
+    auto size     = m_window->get_size();
     extent.width  = static_cast<UInt32>(size.width());
     extent.height = static_cast<UInt32>(size.height());
   }
@@ -154,7 +154,7 @@ VulkanWindowRenderTarget::create_swapchain()
   create_info.imageArrayLayers = 1;
   create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  auto   indices                = vulkan_app->get_queue_family_indices();
+  auto   indices                = m_vulkan_app->get_queue_family_indices();
   UInt32 queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
   if (indices.graphics_family != indices.present_family)
   {
@@ -176,7 +176,7 @@ VulkanWindowRenderTarget::create_swapchain()
   create_info.oldSwapchain   = VK_NULL_HANDLE;
 
   VkSwapchainKHR swapchain;
-  if (vkCreateSwapchainKHR(vulkan_app->get_logical_device(), &create_info, nullptr, &swapchain) != VK_SUCCESS)
+  if (vkCreateSwapchainKHR(m_vulkan_app->get_logical_device(), &create_info, nullptr, &swapchain) != VK_SUCCESS)
   {
     throw EngineException("Failed to create swapchain");
   }
@@ -184,9 +184,9 @@ VulkanWindowRenderTarget::create_swapchain()
   m_swapchain = swapchain;
 
   UInt32 image_count;
-  vkGetSwapchainImagesKHR(vulkan_app->get_logical_device(), m_swapchain, &image_count, nullptr);
+  vkGetSwapchainImagesKHR(m_vulkan_app->get_logical_device(), m_swapchain, &image_count, nullptr);
   DArray<VkImage> images(image_count);
-  vkGetSwapchainImagesKHR(vulkan_app->get_logical_device(), m_swapchain, &image_count, images.data());
+  vkGetSwapchainImagesKHR(m_vulkan_app->get_logical_device(), m_swapchain, &image_count, images.data());
 
   m_swapchain_images = std::move(images);
 }
@@ -213,8 +213,7 @@ VulkanWindowRenderTarget::create_image_views()
     create_info.subresourceRange.baseArrayLayer = 0;
     create_info.subresourceRange.layerCount     = 1;
 
-    auto physical_device = m_vulkan_app.lock()->get_logical_device();
-    auto result          = vkCreateImageView(physical_device, &create_info, nullptr, &image_views[i]);
+    const auto result = vkCreateImageView(m_logical_device, &create_info, nullptr, &image_views[i]);
     if (result != VK_SUCCESS)
     {
       throw EngineException("Failed to create image views");
@@ -225,7 +224,7 @@ VulkanWindowRenderTarget::create_image_views()
 }
 
 SharedPtr<RenderTarget>
-RenderTarget::create_window_target(WeakPtr<Window> window)
+RenderTarget::create_window_target(Window* window)
 {
   return std::make_shared<VulkanWindowRenderTarget>(window);
 }

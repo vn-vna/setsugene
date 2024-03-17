@@ -8,20 +8,17 @@
 
 namespace setsugen
 {
-
 class BasicApplication : virtual public Application
 {
 public:
   explicit BasicApplication(ApplicationDescription&& app_desc);
-  ~BasicApplication() = default;
+  ~BasicApplication() override;
 
-public:
   Void              run() override;
   SharedPtr<Logger> create_logger(const String& name) const override;
-  WeakPtr<Window>   get_window() const override;
+  Observer<Window>  get_window() override;
 
-public:
-  WeakPtr<VulkanApplication> get_vulkan_app();
+  Observer<VulkanApplication> get_vulkan_app();
 
 private:
   ApplicationDescription m_description;
@@ -31,8 +28,6 @@ private:
   SharedPtr<LoggerFactory>     m_logger_factory;
   SharedPtr<VulkanApplication> m_vulkan_app;
 
-private:
-  friend class ::setsugen::ApplicationBuilder;
+  friend class ApplicationBuilder;
 };
-
-}  // namespace setsugen::impl__
+} // namespace setsugen::impl__

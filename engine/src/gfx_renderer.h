@@ -19,20 +19,22 @@ class ShaderCompiler;
 class ShaderModule
 {
 public:
-  ShaderModule(const String &module_name);
+  ShaderModule(const String& module_name);
   ~ShaderModule();
 
   VkShaderModule get_module() const;
 
 private:
-  VkShaderModule m_shader_module;
+  VkShaderModule              m_shader_module;
+  VkDevice                    m_logical_device;
+  Observer<VulkanApplication> m_vulkan_app;
 };
 
 class VulkanApplication
 
 {
 public:
-  using ExtensionList = DArray<const Char *>;
+  using ExtensionList = DArray<const Char*>;
 
   struct QueueFamilyIndices
   {
@@ -46,21 +48,18 @@ public:
     }
   };
 
-public:
   VulkanApplication();
   ~VulkanApplication();
 
-public:
-  static WeakPtr<VulkanApplication>   get_current();
+  static Observer<VulkanApplication>  get_current();
   static SharedPtr<VulkanApplication> create();
 
-public:
   VkPhysicalDevice   get_physical_device() const;
-  VkDevice           get_logical_device();
-  VkInstance         get_instance();
-  QueueFamilyIndices get_queue_family_indices();
-  VkQueue            get_graphics_queue();
-  VkQueue            get_present_queue();
+  VkDevice           get_logical_device() const;
+  VkInstance         get_instance() const;
+  QueueFamilyIndices get_queue_family_indices() const;
+  VkQueue            get_graphics_queue() const;
+  VkQueue            get_present_queue() const;
 
 private:
   Void               initialize_instance();
@@ -73,10 +72,9 @@ private:
 
   static ExtensionList get_instance_extensions();
   static Bool          check_physical_device_extensions(VkPhysicalDevice device);
-  static Bool          check_layers_support(const DArray<const Char *> &layers);
-  static Bool          check_extensions_support(const DArray<const Char *> &extensions);
+  static Bool          check_layers_support(const DArray<const Char*>& layers);
+  static Bool          check_extensions_support(const DArray<const Char*>& extensions);
 
-private:
   VkInstance               m_instance;
   VkDebugUtilsMessengerEXT m_debug_messenger;
   DArray<VkPhysicalDevice> m_physical_devices;
@@ -85,12 +83,14 @@ private:
   VkDevice                 m_logical_device;
   VkQueue                  m_graphics_queue;
   VkQueue                  m_present_queue;
+
+  static Atomic<Observer<VulkanApplication>> s_current_app;
 };
 
 class VulkanWindowRenderTarget : virtual public RenderTarget
 {
 public:
-  VulkanWindowRenderTarget(WeakPtr<Window> window);
+  VulkanWindowRenderTarget(Observer<Window> window);
   ~VulkanWindowRenderTarget() override;
 
   Void resize(Int32 width, Int32 height) override;
@@ -107,16 +107,17 @@ private:
   Void create_image_views();
 
 private:
-  WeakPtr<Window>            m_window;
-  WeakPtr<VulkanApplication> m_vulkan_app;
-  VkSurfaceKHR               m_surface;
-  VkSurfaceFormatKHR         m_surface_format;
-  VkPresentModeKHR           m_present_mode;
-  VkSwapchainKHR             m_swapchain;
-  VkExtent2D                 m_swapchain_extent;
-  DArray<VkImage>            m_swapchain_images;
-  DArray<VkImageView>        m_swapchain_image_views;
-  GLFWwindow *               m_window_handler;
+  Observer<Window>            m_window;
+  Observer<VulkanApplication> m_vulkan_app;
+  VkDevice                    m_logical_device;
+  VkSurfaceKHR                m_surface;
+  VkSurfaceFormatKHR          m_surface_format;
+  VkPresentModeKHR            m_present_mode;
+  VkSwapchainKHR              m_swapchain;
+  VkExtent2D                  m_swapchain_extent;
+  DArray<VkImage>             m_swapchain_images;
+  DArray<VkImageView>         m_swapchain_image_views;
+  GLFWwindow*                 m_window_handler;
 
   friend class VulkanWindowRenderer;
 };
@@ -124,7 +125,7 @@ private:
 class VulkanWindowRenderer : virtual public Renderer
 {
 public:
-  VulkanWindowRenderer(const RendererConfig &config);
+  VulkanWindowRenderer(const RendererConfig& config);
   ~VulkanWindowRenderer() override;
 
   Void render() override;
@@ -135,25 +136,26 @@ public:
   static constexpr auto DEFAULT_FRAGMENT_SHADER = "default";
 
 private:
-  Void create_graphics_pipeline(const RendererConfig &config);
-  Void create_framebuffers(const RendererConfig &config);
-  Void create_command_pool(const RendererConfig &config);
-  Void create_command_buffers(const RendererConfig &config);
-  Void create_synchronization_objects(const RendererConfig &config);
+  Void create_graphics_pipeline(const RendererConfig& config);
+  Void create_framebuffers(const RendererConfig& config);
+  Void create_command_pool(const RendererConfig& config);
+  Void create_command_buffers(const RendererConfig& config);
+  Void create_synchronization_objects(const RendererConfig& config);
 
 private:
-  WeakPtr<VulkanApplication>        m_vulkan_app;
-  WeakPtr<VulkanWindowRenderTarget> m_target;
-  VkCommandPool                     m_command_pool;
-  VkPipelineLayout                  m_pipeline_layout;
-  VkRenderPass                      m_render_pass;
-  VkPipeline                        m_pipeline;
-  DArray<VkCommandBuffer>           m_command_buffers;
-  DArray<VkFramebuffer>             m_framebuffers;
-  SharedPtr<Logger>                 m_logger;
-  DArray<VkFence>                   m_inflight_fences;
-  DArray<VkSemaphore>               m_image_available_semaphores;
-  DArray<VkSemaphore>               m_render_finished_semaphores;
-  UInt32                            m_current_frame;
+  Observer<VulkanApplication>        m_vulkan_app;
+  Observer<VulkanWindowRenderTarget> m_target;
+  VkDevice                           m_logical_device;
+  VkCommandPool                      m_command_pool;
+  VkPipelineLayout                   m_pipeline_layout;
+  VkRenderPass                       m_render_pass;
+  VkPipeline                         m_pipeline;
+  DArray<VkCommandBuffer>            m_command_buffers;
+  DArray<VkFramebuffer>              m_framebuffers;
+  SharedPtr<Logger>                  m_logger;
+  DArray<VkFence>                    m_inflight_fences;
+  DArray<VkSemaphore>                m_image_available_semaphores;
+  DArray<VkSemaphore>                m_render_finished_semaphores;
+  UInt32                             m_current_frame;
 };
 } // namespace setsugen

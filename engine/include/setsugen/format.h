@@ -18,6 +18,7 @@ class Formattable;
 class Formattable
 {
 public:
+  virtual        ~Formattable() = default;
   virtual String to_string() const = 0;
 };
 

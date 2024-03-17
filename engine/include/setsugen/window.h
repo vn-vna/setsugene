@@ -18,7 +18,6 @@
 
 namespace setsugen
 {
-
 enum class WindowEventMode;
 class InputManager;
 class Window;
@@ -56,13 +55,14 @@ public:
   Window(const String& title, Int32 width, Int32 height);
   ~Window();
 
-public:
-  Dim2I get_size() const;
-  Dim2I get_framebuffer_size() const;
-  Bool  is_visible() const;
+  static SharedPtr<Window> create(const String& title, Int32 width, Int32 height);
+
+  SharedPtr<RenderTarget> create_render_target();
+  Dim2I                   get_size() const;
+  Dim2I                   get_framebuffer_size() const;
+  Bool                    is_visible() const;
 
   Void set_event_mode(WindowEventMode event_mode);
-  Void set_visible(Bool visible);
   Void set_title(const String& title);
   Void set_size(Int32 width, Int32 height);
 
@@ -70,24 +70,17 @@ public:
   Void hide_window();
   Void join();
 
-  Void* get_handler();
-
-public:
-  static SharedPtr<Window> create(const String& title, Int32 width, Int32 height);
+  Handler get_handler() const;
 
 private:
-  Void*              m_handler;
-  Thread             m_thread;
-  WindowEventMode    m_event_mode;
-  WindowCommandQueue m_command_queue;
-
-private:
+  Void*                   m_handler;
+  Thread                  m_thread;
+  WindowEventMode         m_event_mode;
+  WindowCommandQueue      m_command_queue;
   SharedPtr<InputManager> m_input_manager;
   SharedPtr<Renderer>     m_renderer;
   SharedPtr<Logger>       m_logger;
 
-private:
   friend class WindowCommandQueue;
 };
-
-}  // namespace setsugen
+} // namespace setsugen

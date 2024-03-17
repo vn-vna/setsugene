@@ -152,20 +152,17 @@ convert_to_vulkan_color_component_flags(const ColorBlend& color_blend)
 
 VulkanWindowRenderer::VulkanWindowRenderer(const RendererConfig& config)
   : m_vulkan_app{VulkanApplication::get_current()},
-    m_target{std::dynamic_pointer_cast<VulkanWindowRenderTarget>(config.render_target.lock())},
+    m_target{dynamic_cast<Observer<VulkanWindowRenderTarget>>(config.render_target)},
     m_current_frame{0}
 {
   m_logger = Application::current_app()->create_logger(typeid(VulkanWindowRenderer).name());
 
-  if (config.render_target.expired())
-  {
-    throw InvalidArgumentException("Render target is expired");
-  }
-
-  if (config.render_target.lock()->type() != RenderTargetType::Window)
+  if (config.render_target->type() != RenderTargetType::Window)
   {
     throw InvalidArgumentException("Render target is not a window");
   }
+
+  m_logical_device = m_vulkan_app->get_logical_device();
 
   create_graphics_pipeline(config);
   create_framebuffers(config);
@@ -176,46 +173,42 @@ VulkanWindowRenderer::VulkanWindowRenderer(const RendererConfig& config)
 
 VulkanWindowRenderer::~VulkanWindowRenderer()
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-
   for (UInt32 i = 0; i < m_framebuffers.size(); ++i)
   {
-    vkDestroySemaphore(device, m_image_available_semaphores[i], nullptr);
-    vkDestroySemaphore(device, m_render_finished_semaphores[i], nullptr);
-    vkDestroyFence(device, m_inflight_fences[i], nullptr);
+    vkDestroySemaphore(m_logical_device, m_image_available_semaphores[i], nullptr);
+    vkDestroySemaphore(m_logical_device, m_render_finished_semaphores[i], nullptr);
+    vkDestroyFence(m_logical_device, m_inflight_fences[i], nullptr);
   }
 
-  vkDestroyCommandPool(device, m_command_pool, nullptr);
+  vkDestroyCommandPool(m_logical_device, m_command_pool, nullptr);
 
   for (auto framebuffer: m_framebuffers)
   {
-    vkDestroyFramebuffer(device, framebuffer, nullptr);
+    vkDestroyFramebuffer(m_logical_device, framebuffer, nullptr);
   }
 
-  vkDestroyPipeline(device, m_pipeline, nullptr);
-  vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
-  vkDestroyRenderPass(device, m_render_pass, nullptr);
+  vkDestroyPipeline(m_logical_device, m_pipeline, nullptr);
+  vkDestroyPipelineLayout(m_logical_device, m_pipeline_layout, nullptr);
+  vkDestroyRenderPass(m_logical_device, m_render_pass, nullptr);
 }
 
 Void
 VulkanWindowRenderer::render()
 {
-  auto   logical_device = VulkanApplication::get_current().lock()->get_logical_device();
-  auto   graphics_queue = VulkanApplication::get_current().lock()->get_graphics_queue();
-  auto   swapchain      = m_target.lock()->m_swapchain;
-  UInt32 image_index;
+  const auto graphics_queue = m_vulkan_app->get_graphics_queue();
+  const auto swapchain      = m_target->m_swapchain;
+  UInt32     image_index;
 
   // Wait for the previous frame to be finished
   {
-    vkWaitForFences(logical_device, 1, &m_inflight_fences[m_current_frame], VK_TRUE, UINT64_MAX);
-    vkResetFences(logical_device, 1, &m_inflight_fences[m_current_frame]);
+    vkWaitForFences(m_logical_device, 1, &m_inflight_fences[m_current_frame], VK_TRUE, UINT64_MAX);
+    vkResetFences(m_logical_device, 1, &m_inflight_fences[m_current_frame]);
   }
 
   // Acquire the next image
   {
     auto acquire_result = vkAcquireNextImageKHR(
-      logical_device,
+      m_logical_device,
       swapchain,
       UINT64_MAX,
       m_image_available_semaphores[m_current_frame],
@@ -269,8 +262,8 @@ VulkanWindowRenderer::render()
     present_info.pSwapchains    = swapchains;
     present_info.pImageIndices  = &image_index;
 
-    auto present_result = vkQueuePresentKHR(VulkanApplication::get_current().lock()->get_present_queue(),
-                                            &present_info);
+    const auto present_result = vkQueuePresentKHR(VulkanApplication::get_current()->get_present_queue(),
+                                                  &present_info);
     if (present_result != VK_SUCCESS)
     {
       throw EngineException("Failed to present swapchain image");
@@ -283,20 +276,13 @@ VulkanWindowRenderer::render()
 Void
 VulkanWindowRenderer::cleanup()
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-
-  vkDeviceWaitIdle(device);
+  vkDeviceWaitIdle(m_logical_device);
 }
 
 
 Void
 VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-  auto target     = std::dynamic_pointer_cast<VulkanWindowRenderTarget>(config.render_target.lock());
-
   auto vertex_shader   = ShaderModule(config.vertex_shader.value_or(DEFAULT_VERTEX_SHADER));
   auto fragment_shader = ShaderModule(config.fragment_shader.value_or(DEFAULT_FRAGMENT_SHADER));
 
@@ -414,14 +400,15 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   VkPipelineLayoutCreateInfo pipeline_layout_info = {};
   pipeline_layout_info.sType                      = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-  auto pipeline_layout_result = vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &m_pipeline_layout);
+  auto pipeline_layout_result = vkCreatePipelineLayout(m_logical_device, &pipeline_layout_info, nullptr,
+                                                       &m_pipeline_layout);
   if (pipeline_layout_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create pipeline layout");
   }
 
   VkAttachmentDescription color_attachment = {};
-  color_attachment.format                  = target->m_surface_format.format;
+  color_attachment.format                  = m_target->m_surface_format.format;
   color_attachment.samples                 = VK_SAMPLE_COUNT_1_BIT;
   color_attachment.loadOp                  = VK_ATTACHMENT_LOAD_OP_CLEAR;
   color_attachment.storeOp                 = VK_ATTACHMENT_STORE_OP_STORE;
@@ -458,7 +445,7 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   render_pass_info.dependencyCount = 1;
   render_pass_info.pDependencies   = &dependency;
 
-  auto render_pass_result = vkCreateRenderPass(device, &render_pass_info, nullptr, &m_render_pass);
+  auto render_pass_result = vkCreateRenderPass(m_logical_device, &render_pass_info, nullptr, &m_render_pass);
   if (render_pass_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create render pass");
@@ -479,7 +466,8 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   pipeline_info.subpass                      = 0;
   pipeline_info.basePipelineHandle           = VK_NULL_HANDLE;
 
-  auto pipeline_result = vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &m_pipeline);
+  auto pipeline_result = vkCreateGraphicsPipelines(m_logical_device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr,
+                                                   &m_pipeline);
   if (pipeline_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create graphics pipeline");
@@ -489,24 +477,22 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
 Void
 VulkanWindowRenderer::create_framebuffers(const RendererConfig& config)
 {
-  auto vulkan_app       = VulkanApplication::get_current().lock();
-  auto device           = vulkan_app->get_logical_device();
-  auto target           = std::dynamic_pointer_cast<VulkanWindowRenderTarget>(config.render_target.lock());
-  auto swapchain_images = target->m_swapchain_images;
+  const auto device           = m_vulkan_app->get_logical_device();
+  const auto swapchain_images = m_target->m_swapchain_images;
 
   m_framebuffers.resize(swapchain_images.size());
 
   for (UInt32 i = 0; i < swapchain_images.size(); ++i)
   {
-    VkImageView attachments[] = {target->m_swapchain_image_views[i]};
+    const VkImageView attachments[] = {m_target->m_swapchain_image_views[i]};
 
     VkFramebufferCreateInfo framebuffer_info = {};
     framebuffer_info.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebuffer_info.renderPass              = m_render_pass;
     framebuffer_info.attachmentCount         = 1;
     framebuffer_info.pAttachments            = attachments;
-    framebuffer_info.width                   = target->m_swapchain_extent.width;
-    framebuffer_info.height                  = target->m_swapchain_extent.height;
+    framebuffer_info.width                   = m_target->m_swapchain_extent.width;
+    framebuffer_info.height                  = m_target->m_swapchain_extent.height;
     framebuffer_info.layers                  = 1;
 
     auto framebuffer_result = vkCreateFramebuffer(device, &framebuffer_info, nullptr, &m_framebuffers[i]);
@@ -520,17 +506,14 @@ VulkanWindowRenderer::create_framebuffers(const RendererConfig& config)
 Void
 VulkanWindowRenderer::create_command_pool(const RendererConfig& config)
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-
-  auto queue_family_indices = vulkan_app->get_queue_family_indices();
+  const auto& [graphics_family, present_family] = m_vulkan_app->get_queue_family_indices();
 
   VkCommandPoolCreateInfo pool_info = {};
   pool_info.sType                   = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-  pool_info.queueFamilyIndex        = queue_family_indices.graphics_family.value();
+  pool_info.queueFamilyIndex        = graphics_family.value();
   pool_info.flags                   = 0;
 
-  auto command_pool_result = vkCreateCommandPool(device, &pool_info, nullptr, &m_command_pool);
+  auto command_pool_result = vkCreateCommandPool(m_logical_device, &pool_info, nullptr, &m_command_pool);
   if (command_pool_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create command pool");
@@ -540,10 +523,6 @@ VulkanWindowRenderer::create_command_pool(const RendererConfig& config)
 Void
 VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-  auto target     = std::dynamic_pointer_cast<VulkanWindowRenderTarget>(config.render_target.lock());
-
   m_command_buffers.resize(m_framebuffers.size());
 
   VkCommandBufferAllocateInfo alloc_info = {};
@@ -552,7 +531,7 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
   alloc_info.level                       = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
   alloc_info.commandBufferCount          = (UInt32) m_command_buffers.size();
 
-  auto command_buffer_result = vkAllocateCommandBuffers(device, &alloc_info, m_command_buffers.data());
+  auto command_buffer_result = vkAllocateCommandBuffers(m_logical_device, &alloc_info, m_command_buffers.data());
   if (command_buffer_result != VK_SUCCESS)
   {
     throw EngineException("Failed to allocate command buffers");
@@ -576,7 +555,7 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
     render_pass_info.renderPass            = m_render_pass;
     render_pass_info.framebuffer           = m_framebuffers[i];
     render_pass_info.renderArea.offset     = {0, 0};
-    render_pass_info.renderArea.extent     = {(UInt32) target->width(), (UInt32) target->height()};
+    render_pass_info.renderArea.extent     = {(UInt32) m_target->width(), (UInt32) m_target->height()};
 
     VkClearValue clear_color = {
       config.clear_color.r(), config.clear_color.g(), //
@@ -603,9 +582,6 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
 Void
 VulkanWindowRenderer::create_synchronization_objects(const RendererConfig& config)
 {
-  auto vulkan_app = VulkanApplication::get_current().lock();
-  auto device     = vulkan_app->get_logical_device();
-
   m_image_available_semaphores.resize(m_framebuffers.size());
   m_render_finished_semaphores.resize(m_framebuffers.size());
   m_inflight_fences.resize(m_framebuffers.size());
@@ -619,19 +595,20 @@ VulkanWindowRenderer::create_synchronization_objects(const RendererConfig& confi
 
   for (UInt32 i = 0; i < m_framebuffers.size(); ++i)
   {
-    auto semaphore_result = vkCreateSemaphore(device, &semaphore_info, nullptr, &m_image_available_semaphores[i]);
+    auto semaphore_result = vkCreateSemaphore(m_logical_device, &semaphore_info, nullptr,
+                                              &m_image_available_semaphores[i]);
     if (semaphore_result != VK_SUCCESS)
     {
       throw EngineException("Failed to create semaphores");
     }
 
-    semaphore_result = vkCreateSemaphore(device, &semaphore_info, nullptr, &m_render_finished_semaphores[i]);
+    semaphore_result = vkCreateSemaphore(m_logical_device, &semaphore_info, nullptr, &m_render_finished_semaphores[i]);
     if (semaphore_result != VK_SUCCESS)
     {
       throw EngineException("Failed to create semaphores");
     }
 
-    auto fence_result = vkCreateFence(device, &fence_info, nullptr, &m_inflight_fences[i]);
+    auto fence_result = vkCreateFence(m_logical_device, &fence_info, nullptr, &m_inflight_fences[i]);
     if (fence_result != VK_SUCCESS)
     {
       throw EngineException("Failed to create fences");

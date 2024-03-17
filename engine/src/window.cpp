@@ -40,27 +40,33 @@ Window::Window(const String& title, Int32 width, Int32 height)
 
       m_logger->info("Window created successfully");
 
-      auto render_target = RenderTarget::create_window_target(app->get_window());
-      auto renderer      = RendererBuilder()
-                     .with_render_target(render_target)
-                     .with_vertex_shader("test.vert")
-                     .with_fragment_shader("test.frag")
-                     .with_topology(Topology::TriangleList)
-                     .add_viewport(0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f)
-                     .add_scissor(0.0f, 0.0f, 800.0f, 600.0f)
-                     .add_color_blend(false, ColorFlag{true, true, true, true})
-                     .build();
+      const auto render_target = this->create_render_target();
+      const auto renderer      = RendererBuilder::create()
+                          ->with_render_target(render_target.get())
+                          ->with_vertex_shader("test.vert")
+                          ->with_fragment_shader("test.frag")
+                          ->with_topology(Topology::TriangleList)
+                          ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
+                          ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
+                          ->add_color_blend({false, {true, true, true, true}})
+                          ->build();
 
-      while (!::glfwWindowShouldClose(handler))
+      while (!glfwWindowShouldClose(handler))
       {
         m_command_queue.execute();
 
         switch (m_event_mode)
         {
-          case WindowEventMode::Polling: ::glfwPollEvents();
+          case WindowEventMode::Polling:
+          {
+            glfwPollEvents();
             break;
-          case WindowEventMode::Wait: ::glfwWaitEventsTimeout(window_wait_event_timeout);
+          }
+          case WindowEventMode::Wait:
+          {
+            glfwWaitEventsTimeout(window_wait_event_timeout);
             break;
+          }
           default: break;
         }
 
@@ -68,12 +74,18 @@ Window::Window(const String& title, Int32 width, Int32 height)
       }
 
       renderer->cleanup();
-      ::glfwDestroyWindow(handler);
+      glfwDestroyWindow(handler);
     }
   };
 }
 
 Window::~Window() = default;
+
+SharedPtr<RenderTarget>
+Window::create_render_target()
+{
+  return RenderTarget::create_window_target(this);
+}
 
 Dim2I
 Window::get_size() const
@@ -108,7 +120,7 @@ Window::show_window()
 {
   m_command_queue.push([=]
   {
-    ::glfwShowWindow((GLFWwindow*) m_handler);
+    glfwShowWindow(static_cast<GLFWwindow*>(m_handler));
   });
 }
 
@@ -117,7 +129,7 @@ Window::hide_window()
 {
   m_command_queue.push([=]
   {
-    ::glfwHideWindow((GLFWwindow*) m_handler);
+    glfwHideWindow(static_cast<GLFWwindow*>(m_handler));
   });
 }
 
@@ -126,7 +138,7 @@ Window::set_title(const String& title)
 {
   m_command_queue.push([=]
   {
-    ::glfwSetWindowTitle((GLFWwindow*) m_handler, title.c_str());
+    glfwSetWindowTitle(static_cast<GLFWwindow*>(m_handler), title.c_str());
   });
 }
 
@@ -135,7 +147,7 @@ Window::set_size(Int32 width, Int32 height)
 {
   m_command_queue.push([=]
   {
-    ::glfwSetWindowSize((GLFWwindow*) m_handler, width, height);
+    glfwSetWindowSize(static_cast<GLFWwindow*>(m_handler), width, height);
   });
 }
 
@@ -145,8 +157,8 @@ Window::join()
   m_thread.join();
 }
 
-Void*
-Window::get_handler()
+Handler
+Window::get_handler() const
 {
   return m_handler;
 }
