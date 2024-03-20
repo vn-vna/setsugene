@@ -3,7 +3,6 @@
 
 // Private headers
 #include "clock-units.h"
-#include "format_impl.h"
 
 namespace setsugen
 {
@@ -102,12 +101,4 @@ TimePoint::operator-(const TimePoint& other)
   return Duration{this->m_data - other.m_data};
 }
 
-String
-TimePoint::to_string() const
-{
-  const auto t = std::chrono::time_point_cast<StdDuration>(TimePointUnit{DurationUnit{this->m_data}});
-  return Formatter::format(m_format, t);
-}
-
-EXPLICIT_INSTANTIATE_SETSUGEN_FORMAT_FOR_CLS(TimePoint);
 } // namespace setsugen

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <any>
 #include <array>
 #include <atomic>
 #include <condition_variable>
@@ -28,6 +29,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <variant>
 
 namespace setsugen
 {
@@ -145,5 +147,19 @@ template <typename T = Void>
 using Observer = T*;
 
 using Handler = Observer<Void>;
+
+template <typename... Ts>
+using Variant = std::variant<Ts...>;
+
+using Any = std::any;
+
+template <typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+template <typename T>
+concept StringConcept = std::is_same_v<String, T> ||
+                        std::is_same_v<const Char*, T> ||
+                        std::is_same_v<Char*, T> ||
+                        std::is_same_v<StringView, T>;
 
 } // namespace setsugen

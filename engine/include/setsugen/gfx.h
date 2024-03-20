@@ -9,7 +9,7 @@ class Window;
 class Renderer;
 class RenderTarget;
 
-using ColorFlag = Vec<Bool, 4, 2>;
+using ColorFlag = Vec<Bool, 4, VectorUsage::Color>;
 
 enum class RenderTargetType
 {

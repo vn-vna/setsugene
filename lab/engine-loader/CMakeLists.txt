@@ -1,7 +1,5 @@
 project(setsugen-lab)
 
-set(CMAKE_CXX_STANDARD 17)
-
 add_executable(lab-engine-loader
         "engine-loader.cpp"
         "engine-loader.h")

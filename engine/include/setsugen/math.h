@@ -4,7 +4,6 @@
 
 // Setsugen headers
 #include <setsugen/exception.h>
-#include <setsugen/format.h>
 
 // C++ standard library
 #include <algorithm>
@@ -14,17 +13,28 @@
 
 namespace setsugen
 {
+enum class VectorUsage
+{
+  Math,
+  Size,
+  Color
+};
 
-constexpr const Int32 NormalVector    = 0;
-constexpr const Int32 DimensionVector = 1;
-constexpr const Int32 ColorVector     = 2;
+template <Arithmetic T, Int32 Dimension, VectorUsage Usage = VectorUsage::Math>
+  requires (Dimension > 0)
+class Vec;
 
-template <typename T, Int32 Dimension, Int32 Usage = NormalVector>
+template <Arithmetic T, Int32 DimM, Int32 DimN>
+  requires (DimM > 0) && (DimN > 0)
+class Mat;
+
+template <Arithmetic T>
+class Quaternion;
+
+template <Arithmetic T, Int32 Dimension, VectorUsage Usage>
+  requires (Dimension > 0)
 class Vec
 {
-  static_assert(std::is_arithmetic_v<T>, "Vec can only be used with arithmetic types");
-  static_assert(Dimension > 0, "Vec dimension must be greater than 0");
-
 public:
   /// @brief Default constructor - Creates a Vec with all elements initialized to 0
   Vec()
@@ -35,9 +45,10 @@ public:
     }
   }
 
-  template <typename... Args, typename = std::enable_if_t<(sizeof...(Args) == Dimension)>>
+  template <typename... Args>
+    requires (sizeof...(Args) == Dimension) && ( std::is_convertible_v<Args, T> && ...)
   Vec(Args... args)
-      : m_data {args...}
+    : m_data{static_cast<T>(args)...}
   {}
 
   Vec(const Vec& other) = default;
@@ -76,91 +87,104 @@ public:
 #pragma region NormalVectorComponents
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 0), T&> x()
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
+  T& x()
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 0), const T&> x() const
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
+  const T& x() const
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 0), T&> y()
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
+  T& y()
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 0), const T&> y() const
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
+  const T& y() const
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 0), T&> z()
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
+  T& z()
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 0), const T&> z() const
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
+  const T& z() const
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 4>
-  std::enable_if_t<(N == 4 && Dimension >= 4 && Usage == 0), T&> w()
+    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
+  T& w()
   {
-    return m_data[3];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 4>
-  std::enable_if_t<(N == 4 && Dimension >= 4 && Usage == 0), const T&> w() const
+    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
+  const T& w() const
   {
-    return m_data[3];
+    return m_data[N - 1];
   }
-
 #pragma endregion
 
 #pragma region DimensionVectorComponents
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 1), T&> width()
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
+  T& width()
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 1), const T&> width() const
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
+  const T& width() const
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 1), T&> height()
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
+  T& height()
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 1), const T&> height() const
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
+  const T& height() const
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 1), T&> depth()
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
+  T& depth()
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 1), const T&> depth() const
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
+  const T& depth() const
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
 #pragma endregion
@@ -168,51 +192,59 @@ public:
 #pragma region ColorVectorComponents
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 2), T&> r()
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
+  T& r()
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 1>
-  std::enable_if_t<(N == 1 && Dimension >= 1 && Usage == 2), const T&> r() const
+    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
+  const T& r() const
   {
-    return m_data[0];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 2), T&> g()
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
+  T& g()
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 2>
-  std::enable_if_t<(N == 2 && Dimension >= 2 && Usage == 2), const T&> g() const
+    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
+  const T& g() const
   {
-    return m_data[1];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 2), T&> b()
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
+  T& b()
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension >= 3 && Usage == 2), const T&> b() const
+    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
+  const T& b() const
   {
-    return m_data[2];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 4>
-  std::enable_if_t<(N == 4 && Dimension >= 4 && Usage == 2), T&> a()
+    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
+  T& a()
   {
-    return m_data[3];
+    return m_data[N - 1];
   }
 
   template <Int32 N = 4>
-  std::enable_if_t<(N == 4 && Dimension >= 4 && Usage == 2), const T&> a() const
+    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
+  const T& a() const
   {
-    return m_data[3];
+    return m_data[N - 1];
   }
 
 #pragma endregion
@@ -238,12 +270,13 @@ public:
   }
 
   template <Int32 N = 3>
-  std::enable_if_t<(N == 3 && Dimension == 3), Vec> cross(const Vec& other) const
+    requires (N == Dimension) && (Dimension == 3)
+  Vec cross(const Vec& other) const
   {
     // clang-format off
     return Vec({
-      m_data[1] * other.m_data[2] - m_data[2] * other.m_data[1], 
-      m_data[2] * other.m_data[0] - m_data[0] * other.m_data[2], 
+      m_data[1] * other.m_data[2] - m_data[2] * other.m_data[1],
+      m_data[2] * other.m_data[0] - m_data[0] * other.m_data[2],
       m_data[0] * other.m_data[1] - m_data[1] * other.m_data[0]
     });
     // clang-format on
@@ -255,9 +288,9 @@ public:
   }
 
   template <typename U = T>
-  std::enable_if_t<(std::is_same_v<U, T> && std::is_floating_point_v<U>), Vec> normalized() const
+    requires std::is_same_v<U, T> && std::is_floating_point_v<U>
+  Vec normalized() const
   {
-    static_assert(std::is_same_v<U, T>, "Template parameter U must be the same as T due to SFINAE");
     return *this / length();
   }
 
@@ -388,16 +421,12 @@ private:
   T m_data[Dimension];
 };
 
-template <typename T, Int32 DimM, Int32 DimN>
+template <Arithmetic T, Int32 DimM, Int32 DimN>
+  requires (DimM > 0) && (DimN > 0)
 class Mat
 {
-  static_assert(std::is_arithmetic_v<T>, "Mat can only be used with arithmetic types");
-  static_assert(DimM > 0, "Mat dimension must be greater than 0");
-  static_assert(DimN > 0, "Mat dimension must be greater than 0");
-
 public:
   Mat()
-
   {
     for (Int32 i = 0; i < DimM; ++i)
     {
@@ -422,6 +451,7 @@ public:
   Mat& operator=(Mat&& other)      = default;
 
   template <Int32 SubDimM, Int32 SubDimN>
+    requires (SubDimM > 0) && (SubDimM < DimM) && (SubDimN > 0) && (SubDimN < DimN)
   Mat<T, SubDimM, SubDimN> submatrix(Int32 row, Int32 col) const
   {
     Mat<T, SubDimM, SubDimN> result;
@@ -651,7 +681,8 @@ public:
     }
     else if constexpr (DimM == 3)
     {
-      return m_data[0] * (m_data[4] * m_data[8] - m_data[5] * m_data[7]) - m_data[1] * (m_data[3] * m_data[8] - m_data[5] * m_data[6]) +
+      return m_data[0] * (m_data[4] * m_data[8] - m_data[5] * m_data[7]) -
+             m_data[1] * (m_data[3] * m_data[8] - m_data[5] * m_data[6]) +
              m_data[2] * (m_data[3] * m_data[7] - m_data[4] * m_data[6]);
     }
     else
@@ -665,11 +696,11 @@ public:
     }
   }
 
-public:
   /// @brief Create an identity matrix
   /// @return The identity matrix
   template <Int32 IDimM = DimM, Int32 IDimN = DimN>
-  static std::enable_if_t<(IDimM == DimM && IDimN == DimN), Mat<T, IDimM, IDimN>> identity()
+    requires (IDimM == DimM) && (IDimN == DimN)
+  static Mat<T, IDimM, IDimN> identity()
   {
     static_assert(DimM == DimN, "Identity matrix must be square");
 
@@ -688,12 +719,11 @@ public:
   /// @param far Far plane
   /// @return The perspective projection matrix
   template <Int32 IDimM = DimM, Int32 IDimN = DimN>
-  static std::enable_if_t<(std::is_floating_point_v<T> && IDimM == DimM && IDimN == DimN), Mat<T, IDimM, IDimN>> perspective(
-      T fov, T aspect, T near, T far
+    requires std::is_floating_point_v<T> && (IDimM == DimM) && (IDimN == DimN) && (IDimM == 4)
+  static Mat<T, IDimM, IDimN> perspective(
+    T fov, T aspect, T near, T far
   )
   {
-    static_assert(DimM == DimN && DimM == 4, "Perspective projection matrix must be 4x4");
-
     Mat<T, IDimM, IDimN> result;
 
     T f              = T(1) / std::tan(fov / T(2));
@@ -715,12 +745,9 @@ public:
   /// @param far The maximum z-coordinate of the view volume
   /// @return The orthographic projection matrix
   template <Int32 IDimM = DimM, Int32 IDimN = DimN>
-  static std::enable_if_t<(std::is_floating_point_v<T> && IDimM == DimM && IDimN == DimN), Mat<T, IDimM, IDimN>> orthographic(
-      T left, T right, T bottom, T top, T near, T far
-  )
+    requires std::is_floating_point_v<T> && (IDimM == DimM) && (IDimN == DimN) && (IDimM == 4)
+  static Mat<T, IDimM, IDimN> orthographic(T left, T right, T bottom, T top, T near, T far)
   {
-    static_assert(DimM == DimN && DimM == 4, "Orthographic projection matrix must be 4x4");
-
     Mat<T, IDimM, IDimN> result;
     result.get(0, 0) = T(2) / (right - left);
     result.get(1, 1) = T(2) / (top - bottom);
@@ -736,7 +763,8 @@ public:
   /// @param translation The translation vector
   /// @return The translation matrix
   template <Int32 IDimM = DimM, Int32 IDimN = DimN>
-  static std::enable_if_t<(IDimM == DimM && IDimN == DimN), Mat<T, IDimM, IDimN>> translation(const Vec<T, IDimM - 1>& translation)
+    requires std::is_arithmetic_v<T> && (IDimM == DimM) && (IDimN == DimN)
+  Mat<T, IDimM, IDimN> translation(const Vec<T, IDimM - 1>& translation)
   {
     static_assert(DimM == DimN && DimM >= 3, "Translation matrix must be square and at least 3x3");
 
@@ -752,48 +780,66 @@ private:
   T m_data[DimM * DimN];
 };
 
-using Vec2I = Vec<Int32, 2, NormalVector>;
-using Vec3I = Vec<Int32, 3, NormalVector>;
-using Vec4I = Vec<Int32, 4, NormalVector>;
-using Vec2U = Vec<UInt32, 2, NormalVector>;
-using Vec3U = Vec<UInt32, 3, NormalVector>;
-using Vec4U = Vec<UInt32, 4, NormalVector>;
-using Vec2F = Vec<Float, 2, NormalVector>;
-using Vec3F = Vec<Float, 3, NormalVector>;
-using Vec4F = Vec<Float, 4, NormalVector>;
-using Vec2D = Vec<Double, 2, NormalVector>;
-using Vec4D = Vec<Double, 4, NormalVector>;
-using Vec3D = Vec<Double, 3, NormalVector>;
+template <Arithmetic T>
+class Quaternion
+{
+public:
+  Quaternion()
+    : m_data{0, 0, 0, 1}
+  {}
 
-using Dim2I = Vec<Int32, 2, DimensionVector>;
-using Dim3I = Vec<Int32, 3, DimensionVector>;
-using Dim4I = Vec<Int32, 4, DimensionVector>;
-using Dim3U = Vec<UInt32, 3, DimensionVector>;
-using Dim4U = Vec<UInt32, 4, DimensionVector>;
-using Dim2U = Vec<UInt32, 2, DimensionVector>;
-using Dim2F = Vec<Float, 2, DimensionVector>;
-using Dim3F = Vec<Float, 3, DimensionVector>;
-using Dim4F = Vec<Float, 4, DimensionVector>;
-using Dim4D = Vec<Double, 4, DimensionVector>;
-using Dim2D = Vec<Double, 2, DimensionVector>;
-using Dim3D = Vec<Double, 3, DimensionVector>;
+  template <typename... Args>
+    requires (sizeof...(Args) == 4) && (std::is_convertible_v<Args, T> && ...)
+  Quaternion(Args... args)
+    : m_data{std::forward<Args>(args)...}
+  {}
 
-using Color1I = Vec<Int32, 1, 2>;
-using Color2I = Vec<Int32, 2, 2>;
-using Color3I = Vec<Int32, 3, 2>;
-using Color4I = Vec<Int32, 4, 2>;
-using Color1U = Vec<UInt32, 1, 2>;
-using Color2U = Vec<UInt32, 2, 2>;
-using Color3U = Vec<UInt32, 3, 2>;
-using Color4U = Vec<UInt32, 4, 2>;
-using Color1F = Vec<Float, 1, 2>;
-using Color2F = Vec<Float, 2, 2>;
-using Color3F = Vec<Float, 3, 2>;
-using Color4F = Vec<Float, 4, 2>;
-using Color1D = Vec<Double, 1, 2>;
-using Color4D = Vec<Double, 4, 2>;
-using Color2D = Vec<Double, 2, 2>;
-using Color3D = Vec<Double, 3, 2>;
+private:
+  T m_data[4];
+};
+
+using Vec2I = Vec<Int32, 2, VectorUsage::Math>;
+using Vec3I = Vec<Int32, 3, VectorUsage::Math>;
+using Vec4I = Vec<Int32, 4, VectorUsage::Math>;
+using Vec2U = Vec<UInt32, 2, VectorUsage::Math>;
+using Vec3U = Vec<UInt32, 3, VectorUsage::Math>;
+using Vec4U = Vec<UInt32, 4, VectorUsage::Math>;
+using Vec2F = Vec<Float, 2, VectorUsage::Math>;
+using Vec3F = Vec<Float, 3, VectorUsage::Math>;
+using Vec4F = Vec<Float, 4, VectorUsage::Math>;
+using Vec2D = Vec<Double, 2, VectorUsage::Math>;
+using Vec4D = Vec<Double, 4, VectorUsage::Math>;
+using Vec3D = Vec<Double, 3, VectorUsage::Math>;
+
+using Dim2I = Vec<Int32, 2, VectorUsage::Size>;
+using Dim3I = Vec<Int32, 3, VectorUsage::Size>;
+using Dim4I = Vec<Int32, 4, VectorUsage::Size>;
+using Dim3U = Vec<UInt32, 3, VectorUsage::Size>;
+using Dim4U = Vec<UInt32, 4, VectorUsage::Size>;
+using Dim2U = Vec<UInt32, 2, VectorUsage::Size>;
+using Dim2F = Vec<Float, 2, VectorUsage::Size>;
+using Dim3F = Vec<Float, 3, VectorUsage::Size>;
+using Dim4F = Vec<Float, 4, VectorUsage::Size>;
+using Dim4D = Vec<Double, 4, VectorUsage::Size>;
+using Dim2D = Vec<Double, 2, VectorUsage::Size>;
+using Dim3D = Vec<Double, 3, VectorUsage::Size>;
+
+using Color1I = Vec<Int32, 1, VectorUsage::Color>;
+using Color2I = Vec<Int32, 2, VectorUsage::Color>;
+using Color3I = Vec<Int32, 3, VectorUsage::Color>;
+using Color4I = Vec<Int32, 4, VectorUsage::Color>;
+using Color1U = Vec<UInt32, 1, VectorUsage::Color>;
+using Color2U = Vec<UInt32, 2, VectorUsage::Color>;
+using Color3U = Vec<UInt32, 3, VectorUsage::Color>;
+using Color4U = Vec<UInt32, 4, VectorUsage::Color>;
+using Color1F = Vec<Float, 1, VectorUsage::Color>;
+using Color2F = Vec<Float, 2, VectorUsage::Color>;
+using Color3F = Vec<Float, 3, VectorUsage::Color>;
+using Color4F = Vec<Float, 4, VectorUsage::Color>;
+using Color1D = Vec<Double, 1, VectorUsage::Color>;
+using Color4D = Vec<Double, 4, VectorUsage::Color>;
+using Color2D = Vec<Double, 2, VectorUsage::Color>;
+using Color3D = Vec<Double, 3, VectorUsage::Color>;
 
 using Mat2F   = Mat<Float, 2, 2>;
 using Mat2x2F = Mat<Float, 2, 2>;
@@ -826,5 +872,4 @@ using Mat4x3D = Mat<Double, 4, 3>;
 using Mat4x4D = Mat<Double, 4, 4>;
 
 using Color = Color4F;
-
-}  // namespace setsugen
+}

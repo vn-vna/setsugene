@@ -48,7 +48,7 @@ Window::Window(const String& title, Int32 width, Int32 height)
                           ->with_topology(Topology::TriangleList)
                           ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
                           ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
-                          ->add_color_blend({false, {true, true, true, true}})
+                          ->add_color_blend({false, ColorFlag{true, true, true, true}})
                           ->build();
 
       while (!glfwWindowShouldClose(handler))

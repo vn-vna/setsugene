@@ -10,11 +10,11 @@
 
 namespace setsugen
 {
-class Duration final : virtual public Formattable
+class Duration final
 {
 public:
   explicit Duration(UInt64 duration = 0);
-  ~Duration() noexcept override;
+  ~Duration() noexcept;
 
   UInt64 get_day() const;
   UInt64 get_hour() const;
@@ -22,7 +22,7 @@ public:
   UInt64 get_second() const;
   UInt64 get_millisecond() const;
 
-  String to_string() const override;
+  Void stringify(const FormatContext& context) const;
 
   Duration& operator=(const Duration& other);
   Duration  operator+(const Duration& other) const;
@@ -34,13 +34,13 @@ private:
   friend class TimePoint;
 };
 
-class TimePoint final : virtual public Formattable
+class TimePoint final
 {
 public:
   TimePoint(UInt64 timepoint = 0);
-  TimePoint(const String& time_str, const String& format = TimePoint::DEFAULT_FORMAT);
+  TimePoint(const String& time_str, const String& format = DEFAULT_FORMAT);
 
-  ~TimePoint() noexcept override;
+  ~TimePoint() noexcept;
 
   Int32 get_year() const;
   Int32 get_month() const;
@@ -53,7 +53,7 @@ public:
 
   Void set_format(const String& format);
 
-  String to_string() const override;
+  Void stringify(const FormatContext& context) const;
 
   TimePoint& operator=(const TimePoint& other);
   TimePoint  operator+(const Duration& dur);

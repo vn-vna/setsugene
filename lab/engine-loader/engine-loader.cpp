@@ -4,8 +4,15 @@ int
 main()
 {
   using namespace setsugen;
-  ApplicationBuilder::create()
-    ->set_name("Setsugen Application")
-    ->set_window_config("Hello LMFAO", 800, 600)
-    ->build()->run();
+  try
+  {
+    auto factory = LoggerFactory();
+    factory.add_appender(LogAppender::create_console_appender("console"));
+    auto logger = factory.get("main");
+    logger->info("Hello, world!");
+  }
+  catch (std::exception& e)
+  {
+    std::cout << e.what();
+  }
 }

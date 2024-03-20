@@ -2,7 +2,6 @@
 
 // Private headers
 #include "clock-units.h"
-#include "format_impl.h"
 
 namespace setsugen
 {
@@ -48,14 +47,9 @@ Duration::get_millisecond() const
   return m_data / cv_milliseconds;
 }
 
-String
-Duration::to_string() const
-{
-  using Milliseconds = std::chrono::milliseconds;
-  return Formatter::format(
-    "{}", std::chrono::duration_cast<Milliseconds>(DurationUnit{this->m_data})
-  );
-}
+Void
+Duration::stringify(const FormatContext& context) const
+{}
 
 Duration&
 Duration::operator=(const Duration& other)
@@ -88,5 +82,8 @@ TimePoint::set_format(const String& format)
   m_format = Formatter::format("{{{}}}", format);
 }
 
-EXPLICIT_INSTANTIATE_SETSUGEN_FORMAT_FOR_CLS(Duration);
+Void
+TimePoint::stringify(const FormatContext& context) const
+{}
+
 } // namespace setsugen

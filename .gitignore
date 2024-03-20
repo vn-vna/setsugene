@@ -55,3 +55,6 @@ __pycache__/
 # Jupyter Notebook
 .ipynb_checkpoints
 .cache
+
+build/
+cmake-build*/

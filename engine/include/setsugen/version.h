@@ -10,8 +10,7 @@
 
 namespace setsugen
 {
-
-class Version : public Formattable
+class Version
 {
 public:
   Version();
@@ -26,10 +25,9 @@ public:
   UInt32 get_minor() const;
   UInt32 get_patch() const;
 
-  String to_string() const override;
+  Void stringify(const FormatContext& context) const;
 
 private:
   UInt32 m_version;
 };
-
-}  // namespace setsugen
+} // namespace setsugen

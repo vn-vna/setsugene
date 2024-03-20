@@ -43,12 +43,8 @@ UInt32 Version::get_patch() const
   return (m_version & VERSION_PATCH_MASK);
 }
 
-String Version::to_string() const
-{
-  return Formatter::format(
-      "Version[major={}, minor={}, patch={}]", this->get_major(), this->get_minor(),
-      this->get_patch()
-  );
-}
+Void
+Version::stringify(const FormatContext& context) const
+{}
 
 }  // namespace setsugen

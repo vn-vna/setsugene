@@ -8,18 +8,17 @@
 
 namespace setsugen
 {
-
 SetsugenException::SetsugenException(const String& message)
     : std::exception(message.c_str())
 {}
 
-String SetsugenException::to_string() const
-{
-  return fmt::format("Exception[what='{}']", this->what());
-}
+Void
 
-NotImplementedException::NotImplementedException()
-    : SetsugenException("Not implemented")
+SetsugenException::stringify(const FormatContext& context) const
+{}
+
+NotImplementedException::NotImplementedException(const String& message)
+    : SetsugenException(Formatter::format("Not implemented: {0}", message))
 {}
 
 InvalidStateException::InvalidStateException(const String& message)
@@ -41,5 +40,4 @@ InvalidOperationException::InvalidOperationException(const String& message)
 EngineException::EngineException(const String& message)
     : SetsugenException(Formatter::format("Engine error: {0}", message))
 {}
-
-}  // namespace setsugen
+} // namespace setsugen

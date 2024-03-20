@@ -2,30 +2,23 @@
 
 #include <setsugen/pch.h>
 
-// Setsugen headers
-#include <setsugen/format.h>
-
-// C++ standard library
-#include <stdexcept>
-
 namespace setsugen
 {
+struct FormatContext;
 
-class SetsugenException : public std::exception,
-                          public Formattable
+class SetsugenException : public std::exception
 {
 public:
   explicit SetsugenException(const String& message);
   ~SetsugenException() override = default;
 
-public:
-  String to_string() const override;
+  virtual Void stringify(const FormatContext& context) const;
 };
 
 class NotImplementedException : public SetsugenException
 {
 public:
-  explicit NotImplementedException();
+  explicit NotImplementedException(const String& message);
   ~NotImplementedException() override = default;
 };
 
@@ -63,5 +56,4 @@ public:
   explicit EngineException(const String& message);
   ~EngineException() override = default;
 };
-
-}  // namespace setsugen
+} // namespace setsugen
