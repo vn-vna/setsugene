@@ -380,7 +380,7 @@ VulkanApplication::find_queue_families(VkPhysicalDevice device) const
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
 
   // Create dummy GLFW window to get the surface
-  auto         dummy_window = helper::GlfwInstance::get_instance().lock()->create_default_window();
+  auto         dummy_window = GlfwInstance::get_instance()->create_default_window();
   VkSurfaceKHR dummy_surface;
   glfwCreateWindowSurface(m_instance, dummy_window, nullptr, &dummy_surface);
 

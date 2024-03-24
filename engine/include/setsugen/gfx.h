@@ -5,6 +5,7 @@
 
 namespace setsugen
 {
+struct RenderContext;
 class Window;
 class Renderer;
 class RenderTarget;
@@ -125,6 +126,12 @@ struct RendererConfig
   Color4F                            clear_color;
   Observer<RenderTarget>             render_target;
 };
+
+struct RenderContext
+{
+  Observer<Renderer> renderer;
+};
+
 
 class RenderTarget
 {

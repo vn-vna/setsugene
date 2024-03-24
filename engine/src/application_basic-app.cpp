@@ -3,18 +3,18 @@
 namespace setsugen
 {
 BasicApplication::BasicApplication(ApplicationDescription&& app_desc)
-  : Application{},
-    m_description(app_desc)
+  : m_description(app_desc)
 {
   m_logger_factory      = std::make_shared<LoggerFactory>();
   auto console_appender = LogAppender::create_console_appender(this->m_description.logger_config.log_template);
   console_appender->set_level(LogLevel::Trace);
   m_logger_factory->add_appender(console_appender);
 
-  m_vulkan_app = VulkanApplication::create();
+  m_glfw_instance = GlfwInstance::create();
+  m_vulkan_app    = VulkanApplication::create();
 
-  auto [title, width, height] = this->m_description.window_config;
-  m_window                    = Window::create(title, width, height);
+  const auto& [title, width, height] = this->m_description.window_config;
+  m_window                           = Window::create(title, width, height);
 }
 
 BasicApplication::~BasicApplication() = default;
@@ -47,6 +47,12 @@ Observer<Window>
 BasicApplication::get_window()
 {
   return m_window.get();
+}
+
+Observer<Scene>
+BasicApplication::get_current_scene()
+{
+  return m_scene.get();
 }
 
 Observer<VulkanApplication>

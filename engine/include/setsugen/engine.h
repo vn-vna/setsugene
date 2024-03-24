@@ -12,3 +12,4 @@
 #include <setsugen/thislib.h>
 #include <setsugen/window.h>
 #include <setsugen/utilities.h>
+#include <setsugen/scene.h>

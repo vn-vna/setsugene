@@ -15,7 +15,7 @@ ShaderModule::ShaderModule(const String& module_name)
 
   if (!std::filesystem::exists(path))
   {
-    throw InvalidArgumentException(
+  throw InvalidArgumentException(
       Formatter::format("Cannot find shader module {} in folder {}", module_name, assets_path));
   }
 

@@ -4,15 +4,11 @@ int
 main()
 {
   using namespace setsugen;
-  try
-  {
-    auto factory = LoggerFactory();
-    factory.add_appender(LogAppender::create_console_appender("console"));
-    auto logger = factory.get("main");
-    logger->info("Hello, world!");
-  }
-  catch (std::exception& e)
-  {
-    std::cout << e.what();
-  }
+  Scene s{"main scene"};
+
+  auto e = s.create_entity("Entity 1");
+  auto m = e->add_component<Mesh>("user/mesh/untitled.fbx");
+  m->load();
+
+  std::cout << Formatter::format("{}", m);
 }

@@ -12,8 +12,11 @@ find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 set(ENGINE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(ENGINE_BUILD_COMPACT OFF)
+set(ENGINE_ASSETS_DIR "${CMAKE_BINARY_DIR}/assets")
 set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/assets/shaders")
 set(SHADER_BINARY_DIR "${CMAKE_BINARY_DIR}/assets/shaders")
+set(USER_ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets/user")
+set(USER_ASSETS_TARGET "${CMAKE_BINARY_DIR}/assets/user")
 
 file(GLOB SHADERS
         ${SHADER_SOURCE_DIR}/*.vert
@@ -38,11 +41,8 @@ add_custom_command(
 foreach (source IN LISTS SHADERS)
     get_filename_component(FILENAME ${source} NAME)
     add_custom_command(
-            COMMAND
-            ${glslc_executable}
-            #      -MD -MF ${SHADER_BINARY_DIR}/${FILENAME}.d
-            -o ${SHADER_BINARY_DIR}/${FILENAME}.spv
-            ${source}
+            COMMAND ${glslc_executable}
+            ARGS -o ${SHADER_BINARY_DIR}/${FILENAME}.spv ${source}
             OUTPUT ${SHADER_BINARY_DIR}/${FILENAME}.spv
             DEPENDS ${source} ${SHADER_BINARY_DIR}
             COMMENT "Compiling ${FILENAME}"
@@ -51,6 +51,13 @@ foreach (source IN LISTS SHADERS)
 endforeach ()
 
 add_custom_target(engine-shaders ALL DEPENDS ${SPV_SHADERS})
+
+add_custom_command(
+        COMMAND ${CMAKE_COMMAND}
+        ARGS -E copy_directory ${USER_ASSETS_DIR} ${USER_ASSETS_TARGET}
+        OUTPUT ${USER_ASSETS_TARGET}
+)
+add_custom_target(user-assets ALL DEPENDS ${USER_ASSETS_TARGET})
 
 # Collect all the header files in the include directory
 file(GLOB_RECURSE ENGINE_INCLUDE_FILES
@@ -80,12 +87,12 @@ target_precompile_headers(engine PRIVATE "${ENGINE_INCLUDE_DIR}/setsugen/pch.h")
 target_link_libraries(engine
         PRIVATE glfw
         PRIVATE yaml-cpp::yaml-cpp
-        PRIVATE fmt::fmt
         PRIVATE date::date
         PRIVATE Vulkan::Vulkan
+        PRIVATE assimp::assimp
 )
 
-add_dependencies(engine engine-shaders)
+add_dependencies(engine engine-shaders user-assets)
 
 add_library(setsugen::engine ALIAS engine)
 

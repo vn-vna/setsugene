@@ -1,8 +1,5 @@
 #include <setsugen/logger.h>
 
-// Dependency headers
-#include <fmt/format.h>
-
 namespace setsugen
 {
 Logger::Logger(LoggerSettings& settings)

@@ -15,8 +15,6 @@ constexpr auto window_wait_event_timeout = 0.1;
 
 namespace setsugen
 {
-using GlfwInstance = helper::GlfwInstance;
-
 Window::Window(const String& title, Int32 width, Int32 height)
   : m_handler{nullptr},
     m_event_mode{WindowEventMode::Polling}
@@ -27,7 +25,7 @@ Window::Window(const String& title, Int32 width, Int32 height)
   m_thread = Thread{
     [=]
     {
-      GLFWwindow* handler = GlfwInstance::get_instance().lock()->create_default_window();
+      GLFWwindow* handler = GlfwInstance::get_instance()->create_default_window();
       m_handler           = handler;
 
       if (!m_handler)

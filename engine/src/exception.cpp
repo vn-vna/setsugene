@@ -3,9 +3,6 @@
 // Setsugen headers
 #include <setsugen/format.h>
 
-// Dependency headers
-#include <fmt/format.h>
-
 namespace setsugen
 {
 SetsugenException::SetsugenException(const String& message)

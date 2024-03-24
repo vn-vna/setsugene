@@ -4,17 +4,18 @@
 
 namespace setsugen
 {
-Formatter::Formatter(const String &fmt_template) : m_fmt_template(fmt_template)
+Formatter::Formatter(const String& fmt_template)
+  : m_fmt_template(fmt_template)
 {
   parse_template();
 }
 
 String
-Formatter::format(const FormatArgsStore &args) const
+Formatter::format(const FormatArgsStore& args) const
 {
   StringStream result;
 
-  for (const auto &token: m_tokens)
+  for (const auto& token: m_tokens)
   {
     switch (token.type)
     {
@@ -35,7 +36,7 @@ Formatter::format(const FormatArgsStore &args) const
 }
 
 Void
-Formatter::stringify(const FormatContext &context) const
+Formatter::stringify(const FormatContext& context) const
 {}
 
 Void
@@ -103,7 +104,7 @@ Formatter::parse_template()
 }
 
 Void
-parse_index(const String &index, Size &auto_index, FormatPlaceholder &placeholder)
+parse_index(const String& index, Size& auto_index, FormatPlaceholder& placeholder)
 {
   if (index.empty())
   {
@@ -116,7 +117,7 @@ parse_index(const String &index, Size &auto_index, FormatPlaceholder &placeholde
     {
       placeholder.index = static_cast<Size>(std::stoi(index));
     }
-    catch (const std::invalid_argument &)
+    catch (const std::invalid_argument&)
     {
       placeholder.index = index;
     }
@@ -124,7 +125,7 @@ parse_index(const String &index, Size &auto_index, FormatPlaceholder &placeholde
 }
 
 FormatPlaceholder
-Formatter::parse_placeholder(StringIter &start, StringIter end, Size &auto_index)
+Formatter::parse_placeholder(StringIter& start, StringIter end, Size& auto_index)
 {
   FormatPlaceholder placeholder{};
 
@@ -156,10 +157,10 @@ Formatter::parse_placeholder(StringIter &start, StringIter end, Size &auto_index
 }
 
 Void
-Formatter::emplace_placeholder(StringStream &ss, const FormatArgsStore &args,
-                               const FormatPlaceholder &placeholder) const
+Formatter::emplace_placeholder(StringStream&            ss, const FormatArgsStore& args,
+                               const FormatPlaceholder& placeholder) const
 {
-  const auto &desc = args.get(placeholder.index);
+  const auto& desc = args.get(placeholder.index);
   desc.fmt_call(ss, desc.data, placeholder);
 }
 

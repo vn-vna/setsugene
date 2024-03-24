@@ -15,19 +15,9 @@ class FormatArgsStore;
 class FormatArg;
 
 template <typename T>
-concept Formattable = requires(const FormatContext& context, const T& value)
+concept Formattable = requires(const FormatContext& context, Observer<const T> value)
 {
   { Stringify<T>::stringify(context, value) } -> std::same_as<Void>;
-};
-
-template <typename T>
-class Stringify
-{
-public:
-  static Void stringify(const FormatContext&, const T&)
-  {
-    throw NotImplementedException("Stringify has not been implemented for type");
-  }
 };
 
 
@@ -57,30 +47,18 @@ struct FormatPlaceholder
 
 struct ArgDescription
 {
-  using FmtCall = Fn<Void(StringStream&, Void*, const FormatPlaceholder&)>;
+  using FmtCall = Fn<Void(StringStream&, const Void*, const FormatPlaceholder&)>;
   using Deleter = Fn<Void(Void*)>;
 
   template <typename T>
-  ArgDescription(const FmtCall& callback, const T& value)
-    : fmt_call{callback}
-  {
-    using ErasedValueType = std::remove_cvref_t<T>;
+  ArgDescription(const FmtCall& callback, const Observer<T> value)
+    : data{value},
+      fmt_call{callback}
+  {}
 
-    data    = new ErasedValueType(value);
-    deleter = [](Void* data)
-    {
-      delete static_cast<ErasedValueType*>(data);
-    };
-  }
-
-  ~ArgDescription()
-  {
-    deleter(data);
-  }
-
-  Deleter deleter;
-  Void*   data;
-  FmtCall fmt_call;
+  Deleter     deleter;
+  const Void* data;
+  FmtCall     fmt_call;
 };
 
 struct FormatToken
@@ -95,19 +73,43 @@ struct FormatContext
   FormatPlaceholder placeholder;
 };
 
+template <typename T>
+class Stringify
+{
+public:
+  static Void stringify(const FormatContext& context, Observer<const T> value)
+  {
+    context.result << *value;
+  }
+};
+
+
 class FormatArgsStore final
 {
 public:
   FormatArgsStore();
   ~FormatArgsStore();
 
-  template <typename K, typename V>
-  Void set(K index, V value)
+  template <typename K, Formattable V>
+  Void set(K index, const V& value)
   {
-    using ErasedValueType = std::remove_cvref_t<V>;
+    using ErasedType = std::remove_pointer_t<std::remove_cvref_t<V>>;
+
+    Observer<const ErasedType> ptr = nullptr;
+
+    if constexpr (std::is_pointer_v<V>)
+    {
+      // T *const
+      ptr = value;
+    }
+    else
+    {
+      // T const
+      ptr = &value;
+    }
 
     UniquePtr<ArgDescription> arg_fn = std::make_unique<ArgDescription>(
-      [](StringStream& ss, Void* data, const FormatPlaceholder& placeholder)
+      [](StringStream& ss, const Void* data, const FormatPlaceholder& placeholder)
       {
         auto fill_width_ptr = placeholder.specs.find('w');
         if (fill_width_ptr != placeholder.specs.end())
@@ -123,50 +125,36 @@ public:
           ss << std::setfill(fill_char);
         }
 
-        auto p = static_cast<ErasedValueType*>(data);
-        if constexpr (Formattable<ErasedValueType>)
-        {
-          Stringify<ErasedValueType>::stringify(
-            {
-              .result = ss,
-              .placeholder = placeholder
-            },
-            *p);
-        }
+        auto p = static_cast<Observer<const ErasedType>>(data);
+        Stringify<ErasedType>::stringify(
+          {
+            .result = ss,
+            .placeholder = placeholder
+          },
+          p);
 
         ss << std::setfill(' ');
         ss << std::setw(0);
       },
-      value
+      ptr
     );
-
 
     const FormatIndex findex = erase_key_type(index);
     m_args[findex]           = std::move(arg_fn);
   }
+
+  template <typename K, Formattable V>
+  Void set(K index, const V* value)
+  {
+    set(index, *value);
+  }
+
 
   const ArgDescription& get(const FormatIndex& index) const;
 
   Void stringify(const FormatContext& context) const;
 
 private:
-  template <typename T>
-  static constexpr auto erase_type(T t)
-  {
-    if constexpr (std::is_enum_v<T>)
-    {
-      return Int32{t};
-    }
-    else if constexpr (StringConcept<std::remove_cv_t<T>>)
-    {
-      return String{t};
-    }
-    else
-    {
-      return t;
-    }
-  }
-
   template <typename T>
   static constexpr auto erase_key_type(T key)
   {
@@ -229,26 +217,20 @@ private:
   String            m_fmt_template;
 };
 
-// Implement the stringify function for all types that are formattable
-template <StringConcept T>
-class Stringify<T>
+template <>
+class Stringify<String>
 {
 public:
-  using ValueType = T;
-
-  static Void stringify(const FormatContext& context, const ValueType& value)
+  static Void stringify(const FormatContext& context, Observer<const String> value)
   {
-    context.result << value;
+    context.result << *value;
   }
 };
 
-template <Arithmetic T>
-class Stringify<T>
+template <>
+class Stringify<Char>
 {
-public:
-  using ValueType = T;
-
-  static Void stringify(const FormatContext& context, const ValueType& value)
+  static Void stringify(const FormatContext& context, Observer<const Char> value)
   {
     context.result << value;
   }

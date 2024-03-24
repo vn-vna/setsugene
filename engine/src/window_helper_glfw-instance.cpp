@@ -2,49 +2,59 @@
 
 #include "./window_helper.h"
 
-namespace setsugen::helper
+namespace setsugen
 {
+constexpr auto default_window_width  = 640;
+constexpr auto default_window_height = 480;
+constexpr auto default_window_title  = "SetsugenE Window";
 
-constexpr const Int32 default_window_width  = 640;
-constexpr const Int32 default_window_height = 480;
-constexpr const Char* default_window_title  = "SetsugenE Window";
+Optional<Observer<GlfwInstance>> s_instance;
 
-WeakPtr<GlfwInstance> GlfwInstance::get_instance()
+Observer<GlfwInstance>
+GlfwInstance::get_instance()
 {
-  static auto instance = std::make_shared<GlfwInstance>();
-  return instance;
+  return s_instance.value();
 }
 
 GlfwInstance::GlfwInstance()
-    : m_mutex {}
 {
-  if (!::glfwInit())
+  if (!glfwInit())
   {
     throw InvalidStateException("Cannot initialize GLFW");
   }
+
+  s_instance = this;
 }
 
 GlfwInstance::~GlfwInstance()
 {
-  ::glfwTerminate();
+  glfwTerminate();
+  s_instance = {};
 }
 
-Void GlfwInstance::instance_locked_execute(GlfwInstance::GlfwCommand command)
+Void
+GlfwInstance::instance_locked_execute(GlfwCommand command)
 {
-  ::std::lock_guard<std::mutex> lock {m_mutex};
-  ::std::invoke(command);
+  std::lock_guard lock{m_mutex};
+  invoke(command);
 }
 
-GLFWwindow* GlfwInstance::create_default_window()
+GLFWwindow*
+GlfwInstance::create_default_window()
 {
-  ::std::lock_guard<std::mutex> lock {m_mutex};
-  ::glfwDefaultWindowHints();
-  ::glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  ::glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-  ::glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+  std::lock_guard lock{m_mutex};
+  glfwDefaultWindowHints();
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   return glfwCreateWindow(
-      default_window_width, default_window_height, default_window_title, nullptr, nullptr
+    default_window_width, default_window_height, default_window_title, nullptr, nullptr
   );
 }
 
-}  // namespace setsugen::helper
+SharedPtr<GlfwInstance>
+GlfwInstance::create()
+{
+  return std::make_shared<GlfwInstance>();
+}
+} // namespace setsugen::helper

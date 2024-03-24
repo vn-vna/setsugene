@@ -3,9 +3,6 @@
 // C++ standard library
 #include <sstream>
 
-// Dependency headers
-#include <fmt/format.h>
-
 #define VERSION_MAJOR_MASK 4290772992U
 #define VERSION_MINOR_MASK 4190208U
 #define VERSION_PATCH_MASK 4095U

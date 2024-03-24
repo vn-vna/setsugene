@@ -6,6 +6,8 @@
 #include <setsugen/logger.h>
 #include <setsugen/version.h>
 
+#include "scene.h"
+
 namespace setsugen
 {
 struct ApplicationDescription;
@@ -76,6 +78,7 @@ public:
   virtual Void              run() = 0;
   virtual SharedPtr<Logger> create_logger(const String& name) const = 0;
   virtual Observer<Window>  get_window() = 0;
+  virtual Observer<Scene>   get_current_scene() = 0;
 
   static Observer<Application> current_app();
 
