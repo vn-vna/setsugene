@@ -6,9 +6,16 @@
 
 namespace setsugen
 {
+class SceneManager;
 class Scene;
 class Entity;
 class Component;
+class Transform;
+class MeshData;
+class Mesh;
+class Camera;
+class PerspectiveCamera;
+class OrthographicCamera;
 
 template <typename T>
 concept ComponentType = std::is_base_of_v<Component, T>;
@@ -21,19 +28,46 @@ public:
 
   const String& get_name() const;
 
-  Void             render(const RenderContext& context);
-  Observer<Entity> create_entity(const String& name);
+  Void load();
+  Void unload();
+
+  Observer<Entity> add_entity(Observer<Entity> entity);
+  Observer<Entity> get_entity(const String& name);
+  Void             remove_entity(const String& name);
+  Void             set_main_camera(Observer<Camera> camera);
+  Observer<Camera> get_main_camera() const;
+  Void             add_meshdata(const String& path);
+  Void             remove_meshdata(const String& path);
+
+  auto& get_entity_manager()
+  {
+    return m_entities;
+  }
 
 private:
+  Observer<Camera>                        m_main_camera;
+  UnorderedSet<String>                    m_meshdata_paths;
   String                                  m_name;
   UnorderedMap<String, SharedPtr<Entity>> m_entities;
+
+  friend class Entity;
+};
+
+class SceneManager final
+{
+public:
+  SceneManager();
+
+private:
 };
 
 class Entity
 {
 public:
+  using ComponentManager = UnorderedMap<Size, SharedPtr<Component>>;
+
   Entity(const String& name);
-  ~Entity() = default;
+  ~Entity();
 
   const String& get_name() const;
 
@@ -79,18 +113,16 @@ public:
     m_components.erase(iter);
   }
 
-  auto& get_components()
-  {
-    return m_components;
-  }
-
-  const auto& get_components() const
-  {
-    return m_components;
-  }
+  Observer<ComponentManager> get_components();
+  Void                       add_child(Observer<Entity> entity);
+  Observer<Entity>           get_child(const String& name);
+  Void                       remove_child(const String& name);
 
 protected:
   String                                   m_name;
+  Observer<Scene>                          m_scene;
+  Observer<Entity>                         m_parent;
+  UnorderedMap<String, SharedPtr<Entity>>  m_children;
   UnorderedMap<Size, SharedPtr<Component>> m_components;
 
   friend class Scene;
@@ -142,12 +174,47 @@ public:
   Mesh(Observer<Entity> entity, const String& file_path);
   ~Mesh() override = default;
 
-  Void load();
-  Void unload();
+private:
+  Observer<MeshData> m_data;
+};
 
-protected:
-  DArray<VertexData> m_vertices;
-  String             m_path;
+class Camera : virtual public Component
+{
+public:
+  Camera(Observer<Entity> entity,
+         const Vec3F&     position  = Vec3F{},
+         const Vec3F&     direction = Vec3F{});
+
+private:
+  Vec3F m_position;
+  Vec3F m_direction;
+};
+
+class PerspectiveCamera : virtual public Camera
+{
+public:
+  PerspectiveCamera(Observer<Entity> entity,
+                    const Vec3F&     position   = Vec3F{},
+                    const Vec3F&     direction  = Vec3F{},
+                    Float            near_plane = 0.5f,
+                    Float            far_plane  = 1000.0f,
+                    Float            fov        = 75.0f);
+
+private:
+  Float m_near;
+  Float m_far;
+  Float m_fov;
+};
+
+class OrthographicCamera : virtual public Camera
+{
+public:
+  OrthographicCamera(Observer<Entity> entity,
+                     const Vec3F&     position   = Vec3F{},
+                     const Vec3F&     direction  = Vec3F{},
+                     const Vec2F&     horizontal = Vec2F{-10.0f, 10.0f},
+                     const Vec2F&     vertical   = Vec2F{-10.0f, 10.0f},
+                     const Vec2F&     depth      = Vec2F{1.0f, 1000.0f});
 };
 
 class Behavior : virtual public Component

@@ -31,7 +31,6 @@ private:
 };
 
 class VulkanApplication
-
 {
 public:
   using ExtensionList = DArray<const Char*>;
