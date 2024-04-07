@@ -5,6 +5,6 @@ namespace setsugen
 class RenderBatcher
 {
 public:
-  RenderBatcher(Observer<Scene> scene);
+  RenderBatcher(Scene* scene);
 };
-}
+} // namespace setsugen

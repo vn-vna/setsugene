@@ -2,10 +2,6 @@ project(setsugen-engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
-if (WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif ()
-
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 
@@ -82,7 +78,10 @@ foreach (file ${ENGINE_SOURCE_FILES} ${ENGINE_INCLUDE_FILES})
 endforeach ()
 
 add_library(engine SHARED ${ENGINE_SOURCE_FILES})
-target_include_directories(engine PUBLIC "${ENGINE_INCLUDE_DIR}")
+target_compile_definitions(engine 
+        PRIVATE SETSUGEN_EXPORT_SIGNATURES)
+target_include_directories(engine 
+        PUBLIC "${ENGINE_INCLUDE_DIR}")
 target_precompile_headers(engine PRIVATE "${ENGINE_INCLUDE_DIR}/setsugen/pch.h")
 target_link_libraries(engine
         PRIVATE glfw

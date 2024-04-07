@@ -1,35 +1,40 @@
 #pragma once
 
-#include <iomanip>
 #include <setsugen/pch.h>
-#include <setsugen/exception.h>
+
+#include <cstring>
+#include <functional>
+#include <iomanip>
 
 namespace setsugen
 {
 struct FormatContext;
 
-template <typename T>
+template<typename T>
 class Stringify;
 class Formatter;
 class FormatArgsStore;
-class FormatArg;
 
-template <typename T>
-concept Formattable = requires(const FormatContext& context, Observer<const T> value)
-{
-  { Stringify<T>::stringify(context, value) } -> std::same_as<Void>;
+template<typename T>
+concept StringConstructable = requires(T&& t) {
+  {
+    std::string{std::forward<T>(t)}
+  };
 };
 
-
-using FormatIndex = Variant<Size, String>;
-
-template <typename T>
-struct NamedArg
+template<typename T>
+concept Formattable = []() constexpr
 {
-  String name;
-  T      value;
-};
+  using ErasedType = std::remove_cvref_t<T>;
 
+  return requires(const FormatContext& context, const ErasedType& value) {
+    {
+      Stringify<ErasedType>::stringify(context, value)
+    };
+  };
+}();
+
+using FormatIndex = std::variant<size_t, std::string>;
 
 enum class TokenType
 {
@@ -37,142 +42,117 @@ enum class TokenType
   Placeholder
 };
 
-
 struct FormatPlaceholder
 {
-  FormatIndex                    index;
-  StringView                     format;
-  UnorderedMap<Char, StringView> specs;
-};
+  using SpecsMapping = std::unordered_map<char, std::string_view>;
 
-struct ArgDescription
-{
-  using FmtCall = Fn<Void(StringStream&, const Void*, const FormatPlaceholder&)>;
-  using Deleter = Fn<Void(Void*)>;
-
-  template <typename T>
-  ArgDescription(const FmtCall& callback, const Observer<T> value)
-    : data{value},
-      fmt_call{callback}
-  {}
-
-  Deleter     deleter;
-  const Void* data;
-  FmtCall     fmt_call;
+  FormatIndex      index;
+  std::string_view format;
+  SpecsMapping     specs;
 };
 
 struct FormatToken
 {
-  TokenType                              type;
-  Variant<FormatPlaceholder, StringView> details;
+  using TokenDetail = std::variant<FormatPlaceholder, std::string_view>;
+
+  TokenType   type;
+  TokenDetail details;
 };
 
 struct FormatContext
 {
-  StringStream&     result;
-  FormatPlaceholder placeholder;
+  std::stringstream& result;
+  FormatPlaceholder  placeholder;
 };
 
-template <typename T>
-class Stringify
+class  ArgDescription
 {
 public:
-  static Void stringify(const FormatContext& context, Observer<const T> value)
+  using FmtCall = std::function<void(std::stringstream&, const void*, const FormatPlaceholder&)>;
+  using Deleter = std::function<void(void*)>;
+
+  template<typename T>
+  ArgDescription(const FmtCall& callback, T&& value) : m_fmt_call{callback}
   {
-    context.result << *value;
+    using ErasedType = std::remove_cvref_t<T>;
+    if constexpr (std::is_lvalue_reference_v<T>)
+    {
+      m_data    = reinterpret_cast<void*>(const_cast<ErasedType*>(&value));
+      m_deleter = [](void*) {};
+    }
+    else
+    {
+      m_data    = new ErasedType{std::forward<T>(value)};
+      m_deleter = [](void* data) { delete reinterpret_cast<ErasedType*>(data); };
+    }
   }
+
+  ~ArgDescription()
+  {
+    m_deleter(m_data);
+  }
+
+  constexpr void operator()(std::stringstream& ss, const FormatPlaceholder& placeholder) const
+  {
+    std::invoke(m_fmt_call, ss, m_data, placeholder);
+  }
+
+private:
+  Deleter m_deleter;
+  void*   m_data;
+  FmtCall m_fmt_call;
 };
 
-
-class FormatArgsStore final
+class  FormatArgsStore final
 {
 public:
   FormatArgsStore();
   ~FormatArgsStore();
 
-  template <typename K, Formattable V>
-  Void set(K index, const V& value)
+  template<typename K, Formattable V>
+  void set(K index, V&& value)
   {
-    using ErasedType = std::remove_pointer_t<std::remove_cvref_t<V>>;
-
-    Observer<const ErasedType> ptr = nullptr;
-
-    if constexpr (std::is_pointer_v<V>)
-    {
-      // T *const
-      ptr = value;
-    }
-    else
-    {
-      // T const
-      ptr = &value;
-    }
-
-    UniquePtr<ArgDescription> arg_fn = std::make_unique<ArgDescription>(
-      [](StringStream& ss, const Void* data, const FormatPlaceholder& placeholder)
-      {
-        auto fill_width_ptr = placeholder.specs.find('w');
-        if (fill_width_ptr != placeholder.specs.end())
+    using ErasedType = std::remove_cvref_t<V>;
+    auto arg_fn      = std::make_unique<ArgDescription>(
+        [](std::stringstream& ss, const void* data, const FormatPlaceholder& placeholder)
         {
-          const auto fill_width = get_int_spec(fill_width_ptr->second);
-          ss << std::setw(fill_width);
-        }
+          std::stringstream temp;
 
-        auto fill_char_ptr = placeholder.specs.find('c');
-        if (fill_char_ptr != placeholder.specs.end() && !fill_char_ptr->second.empty())
-        {
-          auto fill_char = fill_char_ptr->second[0];
-          ss << std::setfill(fill_char);
-        }
-
-        auto p = static_cast<Observer<const ErasedType>>(data);
-        Stringify<ErasedType>::stringify(
+          if (placeholder.specs.contains('w'))
           {
-            .result = ss,
-            .placeholder = placeholder
-          },
-          p);
+            temp << std::setw(get_int_spec(placeholder.specs.at('w')));
+          }
 
-        ss << std::setfill(' ');
-        ss << std::setw(0);
-      },
-      ptr
-    );
+          if (placeholder.specs.contains('p'))
+          {
+            temp << std::setprecision(get_int_spec(placeholder.specs.at('p')));
+          }
 
-    const FormatIndex findex = erase_key_type(index);
-    m_args[findex]           = std::move(arg_fn);
+          Stringify<ErasedType>::stringify({temp, placeholder}, *reinterpret_cast<const ErasedType*>(data));
+          ss << temp.str();
+        },
+        std::forward<V>(value));
+    FormatIndex findex = create_index(index);
+    m_args[findex]     = std::move(arg_fn);
   }
-
-  template <typename K, Formattable V>
-  Void set(K index, const V* value)
-  {
-    set(index, *value);
-  }
-
 
   const ArgDescription& get(const FormatIndex& index) const;
 
-  Void stringify(const FormatContext& context) const;
-
 private:
-  template <typename T>
-  static constexpr auto erase_key_type(T key)
+  template<typename T>
+  inline static FormatIndex create_index(T&& index)
   {
-    if constexpr (StringConcept<T>)
+    if constexpr (StringConstructable<std::remove_cvref_t<T>>)
     {
-      return String{key};
-    }
-    else if constexpr (std::is_arithmetic_v<T>)
-    {
-      return static_cast<Size>(key);
+      return std::string(index);
     }
     else
     {
-      throw InvalidArgumentException("Invalid key type");
+      return std::forward<T>(index);
     }
   }
 
-  inline static auto get_int_spec(const StringView& view)
+  inline static int get_int_spec(const std::string_view& view)
   {
     char buffer[128];
     auto size = view.end() - view.begin();
@@ -181,58 +161,64 @@ private:
     return std::stoi(buffer);
   }
 
-  UnorderedMap<FormatIndex, UniquePtr<ArgDescription>> m_args;
+  std::unordered_map<FormatIndex, std::unique_ptr<ArgDescription>> m_args;
 };
 
 
-class Formatter final
+class  Formatter final
 {
 public:
-  using StringIter = String::const_iterator;
+  using SpecsMapping = FormatPlaceholder::SpecsMapping;
+  using StringIter   = std::string::const_iterator;
 
-  Formatter(const String& fmt_template);
+  Formatter(const std::string& fmt_template);
   ~Formatter() = default;
 
-  String format(const FormatArgsStore& args) const;
+  const std::string& get_template() const;
+  std::string        format(const FormatArgsStore& args) const;
 
-  Void stringify(const FormatContext& context) const;
+  void stringify(const FormatContext& context) const;
 
-  template <typename... Args>
-  static String format(const String& fmt_template, Args&&... args)
+  template<typename... Args>
+  static std::string format(const std::string& fmt_template, Args&&... args)
   {
     Formatter       formatter(fmt_template);
     FormatArgsStore args_store;
-    Size            s = 0;
+    size_t          s = 0;
     (args_store.set(s++, std::forward<Args>(args)), ...);
     return formatter.format(args_store);
   }
 
 private:
-  Void parse_template();
-  FormatPlaceholder parse_placeholder(StringIter& start, StringIter end, Size& auto_index);
-  Void emplace_placeholder(StringStream& ss, const FormatArgsStore& args, const FormatPlaceholder& placeholder) const;
-  UnorderedMap<Char, StringView> parse_specs(StringView format);
+  void              parse_template();
+  FormatPlaceholder parse_placeholder(StringIter start, StringIter end, size_t& auto_index);
+  void              emplace_placeholder(std::stringstream& ss, const FormatArgsStore& args,
+                                        const FormatPlaceholder& placeholder) const;
 
-  List<FormatToken> m_tokens;
-  String            m_fmt_template;
+  SpecsMapping parse_specs(std::string_view format);
+
+  std::list<FormatToken> m_tokens;
+  std::string            m_fmt_template;
 };
 
-template <>
-class Stringify<String>
+template<typename T>
+class Stringify
 {
 public:
-  static Void stringify(const FormatContext& context, Observer<const String> value)
-  {
-    context.result << *value;
-  }
-};
-
-template <>
-class Stringify<Char>
-{
-  static Void stringify(const FormatContext& context, Observer<const Char> value)
+  static void stringify(const FormatContext& context, const T& value)
   {
     context.result << value;
   }
 };
+
+template<>
+class Stringify<Formatter>
+{
+public:
+  static void stringify(const FormatContext& context, const Formatter& value)
+  {
+    context.result << "[[ Formatter: template = " << value.get_template() << " ]]";
+  }
+};
+
 } // namespace setsugen

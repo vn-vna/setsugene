@@ -9,7 +9,7 @@
 #include <setsugen/format.h>
 #include <setsugen/logger.h>
 #include <setsugen/math.h>
-#include <setsugen/thislib.h>
-#include <setsugen/window.h>
-#include <setsugen/utilities.h>
 #include <setsugen/scene.h>
+#include <setsugen/thislib.h>
+#include <setsugen/utilities.h>
+#include <setsugen/window.h>

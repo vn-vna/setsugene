@@ -19,11 +19,11 @@ public:
   ~ConfigurationSource_Yaml() override = default;
 
 public:
-  Void   load(std::istream& stream) override;
-  String get_config(const String& section, const String& key) override;
+  void        load(std::istream& stream) override;
+  std::string get_config(const std::string& section, const std::string& key) override;
 
 private:
   std::unique_ptr<YAML::Node> mp_root;
 };
 
-}  // namespace setsugen::impl__
+} // namespace setsugen::impl__

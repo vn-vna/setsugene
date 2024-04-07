@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <setsugen/pch.h>
 
 // Setsugen headers
@@ -21,21 +22,21 @@ class Window;
  */
 struct ApplicationDescription
 {
-  String  name;
-  Version version;
-  String  author;
-  String  description;
+  std::string name;
+  Version     version;
+  std::string author;
+  std::string description;
 
   struct
   {
-    String title;
-    Int32  width;
-    Int32  height;
+    std::string title;
+    int         width;
+    int         height;
   } window_config;
 
   struct
   {
-    String log_template;
+    std::string log_template;
   } logger_config;
 };
 
@@ -45,45 +46,46 @@ struct ApplicationDescription
  * and description. Once all of these fields have been set, the application can be built by calling
  * the build() method.
  */
-class ApplicationBuilder
+class  ApplicationBuilder
 {
 public:
-  using LoggerConfigCallback = Fn<Void(ApplicationBuilder&, LoggerFactory&)>;
+  using LoggerConfigCallback = std::function<void(ApplicationBuilder&, LoggerFactory&)>;
 
   ApplicationBuilder();
   ~ApplicationBuilder() = default;
 
-  Observer<ApplicationBuilder> set_name(const String& name);
-  Observer<ApplicationBuilder> set_version(const Version& version);
-  Observer<ApplicationBuilder> set_author(const String& author);
-  Observer<ApplicationBuilder> set_description(const String& desc);
-  Observer<ApplicationBuilder> set_window_config(const String& title, Int32 width, Int32 height);
-  Observer<ApplicationBuilder> set_logger_format(const String& format);
+  ApplicationBuilder* set_name(const std::string& name);
+  ApplicationBuilder* set_version(const Version& version);
+  ApplicationBuilder* set_author(const std::string& author);
+  ApplicationBuilder* set_description(const std::string& desc);
+  ApplicationBuilder* set_window_config(const std::string& title, int width, int height);
+  ApplicationBuilder* set_logger_format(const std::string& format);
 
-  SharedPtr<Application> build();
+  std::unique_ptr<Application> build();
 
-  static UniquePtr<ApplicationBuilder> create();
+  static std::unique_ptr<ApplicationBuilder> create();
 
 private:
   ApplicationDescription m_description;
   LoggerFactory          m_logger_factory;
 };
 
-class Application
+class  Application
 {
 public:
   Application();
   virtual ~Application();
 
-  virtual Void              run() = 0;
-  virtual SharedPtr<Logger> create_logger(const String& name) const = 0;
-  virtual Observer<Window>  get_window() = 0;
-  virtual Observer<Scene>   get_current_scene() = 0;
+  virtual void run() = 0;
 
-  static Observer<Application> current_app();
+  virtual std::shared_ptr<Logger> create_logger(const std::string& name) const = 0;
+  virtual Window*                 get_window()                                 = 0;
+  virtual SceneManager*           get_scene_manager()                          = 0;
+
+  static Application* current_app();
 
 protected:
-  static Atomic<Observer<Application>> s_current_app;
+  static std::atomic<Application*> s_current_app;
 
 private:
   friend class ApplicationBuilder;

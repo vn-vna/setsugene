@@ -3,8 +3,7 @@
 namespace setsugen
 {
 
-NoSectionFoundException::NoSectionFoundException(const String& section)
-    : SetsugenException("Section not found")
+NoSectionFoundException::NoSectionFoundException(const std::string& section) : SetsugenException("Section not found")
 {}
 
-}  // namespace setsugen
+} // namespace setsugen

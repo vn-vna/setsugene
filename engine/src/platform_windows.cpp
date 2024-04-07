@@ -1,7 +1,7 @@
 #include <setsugen/platform.h>
 
 #ifdef SETSUGENE_WINDOWS
-#  include <Windows.h>
+#include <Windows.h>
 #endif
 
 #ifdef SETSUGENE_WINDOWS
@@ -9,18 +9,20 @@
 namespace setsugen
 {
 
-String get_root_path()
+std::string
+get_root_path()
 {
   char buffer[MAX_PATH];
   GetModuleFileNameA(nullptr, buffer, MAX_PATH);
-  String path = buffer;
+  std::string path = buffer;
   return path.substr(0, path.find_last_of("\\/"));
 }
 
-String get_assets_path()
+std::string
+get_assets_path()
 {
   return get_root_path() + "/assets";
 }
 
-}  // namespace setsugen
+} // namespace setsugen
 #endif

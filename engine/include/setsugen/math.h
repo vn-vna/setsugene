@@ -7,8 +7,8 @@
 
 // C++ standard library
 #include <algorithm>
+#include <array>
 #include <cmath>
-#include <initializer_list>
 #include <type_traits>
 
 namespace setsugen
@@ -20,35 +20,37 @@ enum class VectorUsage
   Color
 };
 
-template <Arithmetic T, Int32 Dimension, VectorUsage Usage = VectorUsage::Math>
-  requires (Dimension > 0)
+template<typename T>
+concept Arithmetic = std::is_arithmetic_v<T>;
+
+template<Arithmetic T, int Dimension, VectorUsage Usage = VectorUsage::Math>
+  requires(Dimension > 0)
 class Vec;
 
-template <Arithmetic T, Int32 DimM, Int32 DimN>
-  requires (DimM > 0) && (DimN > 0)
+template<Arithmetic T, int DimM, int DimN>
+  requires(DimM > 0) && (DimN > 0)
 class Mat;
 
-template <Arithmetic T>
+template<Arithmetic T>
 class Quaternion;
 
-template <Arithmetic T, Int32 Dimension, VectorUsage Usage>
-  requires (Dimension > 0)
+template<Arithmetic T, int Dimension, VectorUsage Usage>
+  requires(Dimension > 0)
 class Vec
 {
 public:
   /// @brief Default constructor - Creates a Vec with all elements initialized to 0
   Vec()
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       m_data[i] = T();
     }
   }
 
-  template <typename... Args>
-    requires (sizeof...(Args) == Dimension) && ( std::is_convertible_v<Args, T> && ...)
-  Vec(Args... args)
-    : m_data{static_cast<T>(args)...}
+  template<typename... Args>
+    requires(sizeof...(Args) == Dimension) && (std::is_convertible_v<Args, T> && ...)
+  Vec(Args... args) : m_data{static_cast<T>(args)...}
   {}
 
   Vec(const Vec& other) = default;
@@ -63,7 +65,7 @@ public:
   /// @brief Access an element of the Vec
   /// @param index Element index (0-based)
   /// @return Value of the element at the given index
-  T& get(Int32 index)
+  T& get(int index)
   {
     if (index < 0 || index >= Dimension)
     {
@@ -75,7 +77,7 @@ public:
   /// @brief Access an element of the Vec
   /// @param index Element index (0-based)
   /// @return Value of the element at the given index
-  const T& get(Int32 index) const
+  const T& get(int index) const
   {
     if (index < 0 || index >= Dimension)
     {
@@ -86,57 +88,57 @@ public:
 
 #pragma region NormalVectorComponents
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
   T& x()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Math)
   const T& x() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
   T& y()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Math)
   const T& y() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
   T& z()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Math)
   const T& z() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 4>
-    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
+  template<int N = 4>
+    requires(N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
   T& w()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 4>
-    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
+  template<int N = 4>
+    requires(N == 4 && Dimension >= 4 && Usage == VectorUsage::Math)
   const T& w() const
   {
     return m_data[N - 1];
@@ -145,43 +147,43 @@ public:
 
 #pragma region DimensionVectorComponents
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
   T& width()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Size)
   const T& width() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
   T& height()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Size)
   const T& height() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
   T& depth()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Size)
   const T& depth() const
   {
     return m_data[N - 1];
@@ -191,57 +193,57 @@ public:
 
 #pragma region ColorVectorComponents
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
   T& r()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 1>
-    requires (N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
+  template<int N = 1>
+    requires(N == 1 && Dimension >= 1 && Usage == VectorUsage::Color)
   const T& r() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
   T& g()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 2>
-    requires (N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
+  template<int N = 2>
+    requires(N == 2 && Dimension >= 2 && Usage == VectorUsage::Color)
   const T& g() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
   T& b()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 3>
-    requires (N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
+  template<int N = 3>
+    requires(N == 3 && Dimension >= 3 && Usage == VectorUsage::Color)
   const T& b() const
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 4>
-    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
+  template<int N = 4>
+    requires(N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
   T& a()
   {
     return m_data[N - 1];
   }
 
-  template <Int32 N = 4>
-    requires (N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
+  template<int N = 4>
+    requires(N == 4 && Dimension >= 4 && Usage == VectorUsage::Color)
   const T& a() const
   {
     return m_data[N - 1];
@@ -254,7 +256,7 @@ public:
     return m_data;
   }
 
-  const T* data() const
+  const T data() const
   {
     return m_data;
   }
@@ -262,15 +264,15 @@ public:
   T dot(const Vec& other) const
   {
     T result = T();
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       result += m_data[i] * other.m_data[i];
     }
     return result;
   }
 
-  template <Int32 N = 3>
-    requires (N == Dimension) && (Dimension == 3)
+  template<int N = 3>
+    requires(N == Dimension) && (Dimension == 3)
   Vec cross(const Vec& other) const
   {
     // clang-format off
@@ -287,16 +289,37 @@ public:
     return std::sqrt(dot(*this));
   }
 
-  template <typename U = T>
+  template<typename U = T>
     requires std::is_same_v<U, T> && std::is_floating_point_v<U>
-  Vec normalized() const
+  Vec normalize() const
   {
-    return *this / length();
+    Vec result = *this;
+    T   len    = length();
+    if (len != T())
+    {
+      throw InvalidOperationException("Cannot normalize a zero vector");
+    }
+
+    for (int i = 0; i < Dimension; ++i)
+    {
+      result.m_data[i] /= len;
+    }
+
+    return result;
+  }
+
+  Vec rotate(const Quaternion<T>& rotation) const
+  {
+    Quaternion<T> q = rotation.normalized();
+    Quaternion<T> p(0, m_data[0], m_data[1], m_data[2]);
+    Quaternion<T> q_conjugate = q.conjugate();
+    Quaternion<T> result      = q * p * q_conjugate;
+    return Vec(result.y(), result.z(), result.w());
   }
 
   Vec& operator+=(const Vec& other)
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       m_data[i] += other.m_data[i];
     }
@@ -305,7 +328,7 @@ public:
 
   Vec& operator-=(const Vec& other)
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       m_data[i] -= other.m_data[i];
     }
@@ -314,7 +337,7 @@ public:
 
   Vec& operator*=(T scalar)
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       m_data[i] *= scalar;
     }
@@ -323,66 +346,17 @@ public:
 
   Vec& operator/=(T scalar)
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       m_data[i] /= scalar;
     }
     return *this;
   }
 
-  Vec operator-() const
-  {
-    Vec result;
-    for (Int32 i = 0; i < Dimension; ++i)
-    {
-      result.m_data[i] = -m_data[i];
-    }
-    return result;
-  }
-
-  Vec operator+(const Vec& other) const
-  {
-    Vec result;
-    for (Int32 i = 0; i < Dimension; ++i)
-    {
-      result.m_data[i] = m_data[i] + other.m_data[i];
-    }
-    return result;
-  }
-
-  Vec operator-(const Vec& other) const
-  {
-    Vec result;
-    for (Int32 i = 0; i < Dimension; ++i)
-    {
-      result.m_data[i] = m_data[i] - other.m_data[i];
-    }
-    return result;
-  }
-
-  Vec operator*(T scalar) const
-  {
-    Vec result;
-    for (Int32 i = 0; i < Dimension; ++i)
-    {
-      result.m_data[i] = m_data[i] * scalar;
-    }
-    return result;
-  }
-
-  Vec operator/(T scalar) const
-  {
-    Vec result;
-    for (Int32 i = 0; i < Dimension; ++i)
-    {
-      result.m_data[i] = m_data[i] / scalar;
-    }
-    return result;
-  }
 
   bool operator==(const Vec& other) const
   {
-    for (Int32 i = 0; i < Dimension; ++i)
+    for (int i = 0; i < Dimension; ++i)
     {
       if (m_data[i] != other.m_data[i])
       {
@@ -418,26 +392,107 @@ public:
   }
 
 private:
-  T m_data[Dimension];
+  std::array<T, Dimension> m_data;
 };
 
-template <Arithmetic T, Int32 DimM, Int32 DimN>
-  requires (DimM > 0) && (DimN > 0)
+template<Arithmetic T, int DimM, int DimN>
+  requires(DimM > 0) && (DimN > 0)
 class Mat
 {
 public:
+  class RowIterator
+  {
+  public:
+    RowIterator(T* ptr, T* begin, T* end) : m_ptr(ptr), m_begin(begin), m_end(end)
+    {}
+
+    T& operator*()
+    {
+      return *m_ptr;
+    }
+
+    const T& operator*() const
+    {
+      return *m_ptr;
+    }
+
+    RowIterator& operator++()
+    {
+      m_ptr += DimN;
+      return *this;
+    }
+
+    RowIterator& operator--()
+    {
+      m_ptr -= DimN;
+      return *this;
+    }
+
+    bool operator==(const RowIterator& other) const
+    {
+      return m_ptr == other.m_ptr;
+    }
+
+    bool operator!=(const RowIterator& other) const
+    {
+      return m_ptr != other.m_ptr;
+    }
+
+  private:
+    T* m_ptr;
+    T* m_begin;
+    T* m_end;
+  };
+
+  class ColIterator
+  {
+  public:
+    ColIterator(T* ptr) : m_ptr(ptr)
+    {}
+
+    T& operator*()
+    {
+      return *m_ptr;
+    }
+
+    ColIterator& operator++()
+    {
+      ++m_ptr;
+      return *this;
+    }
+
+    ColIterator& operator--()
+    {
+      --m_ptr;
+      return *this;
+    }
+
+    bool operator==(const ColIterator& other) const
+    {
+      return m_ptr == other.m_ptr;
+    }
+
+    bool operator!=(const ColIterator& other) const
+    {
+      return m_ptr != other.m_ptr;
+    }
+
+  private:
+    T* m_ptr;
+  };
+
   Mat()
   {
-    for (Int32 i = 0; i < DimM; ++i)
+    for (int i = 0; i < DimM; ++i)
     {
-      for (Int32 j = 0; j < DimN; ++j)
+      for (int j = 0; j < DimN; ++j)
       {
         m_data[i * DimN + j] = T();
       }
     }
   }
 
-  Mat(const Array<T, DimM * DimN>& data)
+  Mat(const std::array<T, DimM * DimN>& data)
   {
     std::copy(data.begin(), data.end(), m_data);
   }
@@ -450,14 +505,14 @@ public:
   Mat& operator=(const Mat& other) = default;
   Mat& operator=(Mat&& other)      = default;
 
-  template <Int32 SubDimM, Int32 SubDimN>
-    requires (SubDimM > 0) && (SubDimM < DimM) && (SubDimN > 0) && (SubDimN < DimN)
-  Mat<T, SubDimM, SubDimN> submatrix(Int32 row, Int32 col) const
+  template<int SubDimM, int SubDimN>
+    requires(SubDimM > 0) && (SubDimM < DimM) && (SubDimN > 0) && (SubDimN < DimN)
+  Mat<T, SubDimM, SubDimN> submatrix(int row, int col) const
   {
     Mat<T, SubDimM, SubDimN> result;
-    for (Int32 i = 0; i < SubDimM; ++i)
+    for (int i = 0; i < SubDimM; ++i)
     {
-      for (Int32 j = 0; j < SubDimN; ++j)
+      for (int j = 0; j < SubDimN; ++j)
       {
         if (row + i >= DimM || col + j >= DimN)
         {
@@ -475,15 +530,15 @@ public:
     return m_data;
   }
 
-  template <Int32 DimP>
+  template<int DimP>
   Mat<T, DimM, DimP> operator*(const Mat<T, DimN, DimP>& other) const
   {
     Mat<T, DimM, DimP> result;
-    for (Int32 i = 0; i < DimM; ++i)
+    for (int i = 0; i < DimM; ++i)
     {
-      for (Int32 j = 0; j < DimP; ++j)
+      for (int j = 0; j < DimP; ++j)
       {
-        for (Int32 k = 0; k < DimN; ++k)
+        for (int k = 0; k < DimN; ++k)
         {
           result.m_data[i * DimP + j] += m_data[i * DimN + k] * other.m_data[k * DimP + j];
         }
@@ -495,9 +550,9 @@ public:
   Vec<T, DimM> operator*(const Vec<T, DimN>& vec) const
   {
     Vec<T, DimM> result;
-    for (Int32 i = 0; i < DimM; ++i)
+    for (int i = 0; i < DimM; ++i)
     {
-      for (Int32 j = 0; j < DimN; ++j)
+      for (int j = 0; j < DimN; ++j)
       {
         result.get(i) += m_data[i * DimN + j] * vec.get(j);
       }
@@ -505,19 +560,19 @@ public:
     return result;
   }
 
-  T& get(Int32 row, Int32 col)
+  T& get(int row, int col)
   {
     return m_data[row * DimN + col];
   }
 
-  const T& get(Int32 row, Int32 col) const
+  T get(int row, int col) const
   {
     return m_data[row * DimN + col];
   }
 
   Mat& operator+=(const Mat& other)
   {
-    for (Int32 i = 0; i < DimM * DimN; ++i)
+    for (int i = 0; i < DimM * DimN; ++i)
     {
       m_data[i] += other.m_data[i];
     }
@@ -526,7 +581,7 @@ public:
 
   Mat& operator-=(const Mat& other)
   {
-    for (Int32 i = 0; i < DimM * DimN; ++i)
+    for (int i = 0; i < DimM * DimN; ++i)
     {
       m_data[i] -= other.m_data[i];
     }
@@ -535,7 +590,7 @@ public:
 
   Mat& operator*=(T scalar)
   {
-    for (Int32 i = 0; i < DimM * DimN; ++i)
+    for (int i = 0; i < DimM * DimN; ++i)
     {
       m_data[i] *= scalar;
     }
@@ -544,66 +599,16 @@ public:
 
   Mat& operator/=(T scalar)
   {
-    for (Int32 i = 0; i < DimM * DimN; ++i)
+    for (int i = 0; i < DimM * DimN; ++i)
     {
       m_data[i] /= scalar;
     }
     return *this;
   }
 
-  Mat operator-() const
-  {
-    Mat result;
-    for (Int32 i = 0; i < DimM * DimN; ++i)
-    {
-      result.m_data[i] = -m_data[i];
-    }
-    return result;
-  }
-
-  Mat operator+(const Mat& other) const
-  {
-    Mat result;
-    for (Int32 i = 0; i < DimM * DimN; ++i)
-    {
-      result.m_data[i] = m_data[i] + other.m_data[i];
-    }
-    return result;
-  }
-
-  Mat operator-(const Mat& other) const
-  {
-    Mat result;
-    for (Int32 i = 0; i < DimM * DimN; ++i)
-    {
-      result.m_data[i] = m_data[i] - other.m_data[i];
-    }
-    return result;
-  }
-
-  Mat operator*(T scalar) const
-  {
-    Mat result;
-    for (Int32 i = 0; i < DimM * DimN; ++i)
-    {
-      result.m_data[i] = m_data[i] * scalar;
-    }
-    return result;
-  }
-
-  Mat operator/(T scalar) const
-  {
-    Mat result;
-    for (Int32 i = 0; i < DimM * DimN; ++i)
-    {
-      result.m_data[i] = m_data[i] / scalar;
-    }
-    return result;
-  }
-
   bool operator==(const Mat& other) const
   {
-    for (Int32 i = 0; i < DimM * DimN; ++i)
+    for (int i = 0; i < DimM * DimN; ++i)
     {
       if (m_data[i] != other.m_data[i])
       {
@@ -641,9 +646,9 @@ public:
   Mat<T, DimN, DimM> transpose() const
   {
     Mat<T, DimN, DimM> result;
-    for (Int32 i = 0; i < DimM; ++i)
+    for (int i = 0; i < DimM; ++i)
     {
-      for (Int32 j = 0; j < DimN; ++j)
+      for (int j = 0; j < DimN; ++j)
       {
         result.get(j, i) = m_data[i * DimN + j];
       }
@@ -651,19 +656,20 @@ public:
     return result;
   }
 
-  T minor(Int32 row, Int32 col) const
+  T minor(int row, int col) const
   {
     static_assert(DimM == DimN, "Matrix must be square to calculate minor");
     static_assert(DimM > 1, "Matrix must be at least 2x2 to calculate minor");
 
     Mat<T, DimM - 1, DimN - 1> submatrix;
-    for (Int32 i = 0; i < DimM - 1; ++i)
+    for (int i = 0; i < DimM - 1; ++i)
     {
-      for (Int32 j = 0; j < DimN - 1; ++j)
+      for (int j = 0; j < DimN - 1; ++j)
       {
         submatrix.get(i, j) = m_data[(i < row ? i : i + 1) * DimN + (j < col ? j : j + 1)];
       }
     }
+
     return submatrix.determinant();
   }
 
@@ -688,7 +694,7 @@ public:
     else
     {
       T result = T();
-      for (Int32 i = 0; i < DimM; ++i)
+      for (int i = 0; i < DimM; ++i)
       {
         result += m_data[i] * minor(0, i) * (i % 2 == 0 ? 1 : -1);
       }
@@ -698,14 +704,14 @@ public:
 
   /// @brief Create an identity matrix
   /// @return The identity matrix
-  template <Int32 IDimM = DimM, Int32 IDimN = DimN>
-    requires (IDimM == DimM) && (IDimN == DimN)
+  template<int IDimM = DimM, int IDimN = DimN>
+    requires(IDimM == DimM) && (IDimN == DimN)
   static Mat<T, IDimM, IDimN> identity()
   {
     static_assert(DimM == DimN, "Identity matrix must be square");
 
     Mat<T, IDimM, IDimN> result;
-    for (Int32 i = 0; i < IDimM; ++i)
+    for (int i = 0; i < IDimM; ++i)
     {
       result.m_data[i * IDimN + i] = T(1);
     }
@@ -718,11 +724,9 @@ public:
   /// @param near Near plane
   /// @param far Far plane
   /// @return The perspective projection matrix
-  template <Int32 IDimM = DimM, Int32 IDimN = DimN>
+  template<int IDimM = DimM, int IDimN = DimN>
     requires std::is_floating_point_v<T> && (IDimM == DimM) && (IDimN == DimN) && (IDimM == 4)
-  static Mat<T, IDimM, IDimN> perspective(
-    T fov, T aspect, T near, T far
-  )
+  static Mat<T, IDimM, IDimN> perspective(T fov, T aspect, T near, T far)
   {
     Mat<T, IDimM, IDimN> result;
 
@@ -744,7 +748,7 @@ public:
   /// @param near The minimum z-coordinate of the view volume
   /// @param far The maximum z-coordinate of the view volume
   /// @return The orthographic projection matrix
-  template <Int32 IDimM = DimM, Int32 IDimN = DimN>
+  template<int IDimM = DimM, int IDimN = DimN>
     requires std::is_floating_point_v<T> && (IDimM == DimM) && (IDimN == DimN) && (IDimM == 4)
   static Mat<T, IDimM, IDimN> orthographic(T left, T right, T bottom, T top, T near, T far)
   {
@@ -762,114 +766,431 @@ public:
   /// @brief Create a translation matrix
   /// @param translation The translation vector
   /// @return The translation matrix
-  template <Int32 IDimM = DimM, Int32 IDimN = DimN>
+  template<int IDimM = DimM, int IDimN = DimN>
     requires std::is_arithmetic_v<T> && (IDimM == DimM) && (IDimN == DimN)
-  Mat<T, IDimM, IDimN> translation(const Vec<T, IDimM - 1>& translation)
+  static Mat<T, IDimM, IDimN> translation(const Vec<T, IDimM - 1>& translation)
   {
     static_assert(DimM == DimN && DimM >= 3, "Translation matrix must be square and at least 3x3");
 
     Mat<T, IDimM, IDimN> result = identity();
-    for (Int32 i = 0; i < IDimM - 1; ++i)
+    for (int i = 0; i < IDimM - 1; ++i)
     {
       result.get(i, IDimN - 1) = translation.get(i);
     }
     return result;
   }
 
+  /// @brief Create a rotation matrix
+  /// @param rotation The rotation vector
+  /// @return The rotation matrix
+  template<int IDimM = DimM, int IDimN = DimN>
+    requires std::is_arithmetic_v<T> && (IDimM == DimM) && (IDimN == DimN)
+  static Mat<T, IDimM, IDimN> rotation(const Vec<T, 3>& rotation)
+  {
+    static_assert(DimM == DimN && DimM == 4, "Rotation matrix must be square and 4x4");
+
+    Mat<T, IDimM, IDimN> result = identity();
+
+    T rx  = rotation.x();
+    T crx = std::cos(rx);
+    T srx = std::sin(rx);
+    T ry  = rotation.y();
+    T cry = std::cos(ry);
+    T sry = std::sin(ry);
+    T rz  = rotation.z();
+    T crz = std::cos(rz);
+    T srz = std::sin(rz);
+
+    result.get(0, 0) = crx * cry;
+    result.get(0, 1) = crx * sry * srz - srx * crz;
+    result.get(0, 2) = crx * sry * crz + srx * srz;
+
+    result.get(1, 0) = srx * cry;
+    result.get(1, 1) = srx * sry * srz + crx * crz;
+    result.get(1, 2) = srx * sry * crz - crx * srz;
+
+    result.get(2, 0) = -sry;
+    result.get(2, 1) = cry * srz;
+    result.get(2, 2) = cry * crz;
+
+    return result;
+  }
+
+  /// @brief Create a scale matrix
+  /// @param scale The scale vector
+  /// @return The scale matrix
+  template<int IDimM = DimM, int IDimN = DimN>
+    requires std::is_arithmetic_v<T> && (IDimM == DimM) && (IDimN == DimN)
+  static Mat<T, IDimM, IDimN> scale(const Vec<T, 3>& scale)
+  {
+    static_assert(DimM == DimN && DimM == 4, "Scale matrix must be square and 4x4");
+
+    Mat<T, IDimM, IDimN> result = identity();
+    result.get(0, 0)            = scale.x();
+    result.get(1, 1)            = scale.y();
+    result.get(2, 2)            = scale.z();
+    return result;
+  }
+
+  /// @brief Create a look-at matrix
+  /// @param eye The eye position
+  /// @param center The center position
+  /// @param up The up vector
+  /// @return The look-at matrix
+  template<int IDimM = DimM, int IDimN = DimN>
+    requires std::is_arithmetic_v<T> && (IDimM == DimM) && (IDimN == DimN)
+  static Mat<T, IDimM, IDimN> look_at(const Vec<T, 3>& eye, const Vec<T, 3>& center, const Vec<T, 3>& up)
+  {
+    static_assert(DimM == DimN && DimM == 4, "Look-at matrix must be square and 4x4");
+
+    Vec<T, 3> f = (center - eye).normalize();
+    Vec<T, 3> r = f.cross(up).normalize();
+    Vec<T, 3> u = r.cross(f);
+
+    Mat<T, IDimM, IDimN> result = identity();
+    result.get(0, 0)            = r.x();
+    result.get(0, 1)            = r.y();
+    result.get(0, 2)            = r.z();
+    result.get(1, 0)            = u.x();
+    result.get(1, 1)            = u.y();
+    result.get(1, 2)            = u.z();
+    result.get(2, 0)            = -f.x();
+    result.get(2, 1)            = -f.y();
+    result.get(2, 2)            = -f.z();
+    result.get(0, 3)            = -r.dot(eye);
+    result.get(1, 3)            = -u.dot(eye);
+    result.get(2, 3)            = f.dot(eye);
+    return result;
+  }
+
+
 private:
   T m_data[DimM * DimN];
 };
 
-template <Arithmetic T>
+template<Arithmetic T>
 class Quaternion
 {
 public:
-  Quaternion()
-    : m_data{0, 0, 0, 1}
+  Quaternion() : m_data{0, 0, 0, 1}
   {}
 
-  template <typename... Args>
-    requires (sizeof...(Args) == 4) && (std::is_convertible_v<Args, T> && ...)
-  Quaternion(Args... args)
-    : m_data{std::forward<Args>(args)...}
+  template<typename... Args>
+    requires(sizeof...(Args) == 4) && (std::is_convertible_v<Args, T> && ...)
+  Quaternion(Args... args) : m_data{std::forward<Args>(args)...}
   {}
+
+  Quaternion(const Quaternion& other) = default;
+  Quaternion(Quaternion&& other)      = default;
+
+  ~Quaternion() noexcept = default;
+
+  Quaternion& operator=(const Quaternion& other)     = default;
+  Quaternion& operator=(Quaternion&& other) noexcept = default;
+
+  T& x()
+  {
+    return m_data[0];
+  }
+
+  T x() const
+  {
+    return m_data[0];
+  }
+
+  T& y()
+  {
+    return m_data[1];
+  }
+
+  T y() const
+  {
+    return m_data[1];
+  }
+
+  T& z()
+  {
+    return m_data[2];
+  }
+
+  T z() const
+  {
+    return m_data[2];
+  }
+
+
+  T& w()
+  {
+    return m_data[3];
+  }
+
+  T w() const
+  {
+    return m_data[3];
+  }
+
+  Quaternion operator*(const Quaternion& other) const
+  {
+    return Quaternion(w() * other.x() + x() * other.w() + y() * other.z() - z() * other.y(),
+                      w() * other.y() - x() * other.z() + y() * other.w() + z() * other.x(),
+                      w() * other.z() + x() * other.y() - y() * other.x() + z() * other.w(),
+                      w() * other.w() - x() * other.x() - y() * other.y() - z() * other.z());
+  }
+
+  Quaternion operator*(T scalar) const
+  {
+    return Quaternion(x() * scalar, y() * scalar, z() * scalar, w() * scalar);
+  }
+
+  Quaternion operator/(T scalar) const
+  {
+    return Quaternion(x() / scalar, y() / scalar, z() / scalar, w() / scalar);
+  }
+
+  Quaternion operator+(const Quaternion& other) const
+  {
+    return Quaternion(x() + other.x(), y() + other.y(), z() + other.z(), w() + other.w());
+  }
+
+  Quaternion operator-(const Quaternion& other) const
+  {
+    return Quaternion(x() - other.x(), y() - other.y(), z() - other.z(), w() - other.w());
+  }
+
+  Quaternion operator-() const
+  {
+    return Quaternion(-x(), -y(), -z(), -w());
+  }
+
+  bool operator==(const Quaternion& other) const
+  {
+    return x() == other.x() && y() == other.y() && z() == other.z() && w() == other.w();
+  }
+
+  bool operator!=(const Quaternion& other) const
+  {
+    return !(*this == other);
+  }
+
+  Quaternion normalize() const
+  {
+    T length = std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
+    return Quaternion(x() / length, y() / length, z() / length, w() / length);
+  }
+
+  Vec<T, 3> get_euler_angles() const
+  {
+    Vec<T, 3> result;
+    T         sinr_cosp = T(2) * (w() * x() + y() * z());
+    T         cosr_cosp = T(1) - T(2) * (x() * x() + y() * y());
+    result.x()          = std::atan2(sinr_cosp, cosr_cosp);
+
+    T sinp = T(2) * (w() * y() - z() * x());
+    if (std::abs(sinp) >= T(1))
+    {
+      result.y() = std::copysign(std::numbers::pi_v<T> / T(2), sinp);
+    }
+    else
+    {
+      result.y() = std::asin(sinp);
+    }
+
+    T siny_cosp = T(2) * (w() * z() + x() * y());
+    T cosy_cosp = T(1) - T(2) * (y() * y() + z() * z());
+    result.z()  = std::atan2(siny_cosp, cosy_cosp);
+
+    return result;
+  }
+
+  Vec<T, 3> get_rotation_axis() const
+  {
+    T s = std::sqrt(1 - w() * w());
+    if (s < std::numeric_limits<T>::epsilon())
+    {
+      return Vec<T, 3>(1, 0, 0);
+    }
+    return Vec<T, 3>(x() / s, y() / s, z() / s);
+  }
+
+  T get_rotation_angle() const
+  {
+    return std::acos(w()) * 2;
+  }
 
 private:
-  T m_data[4];
+  std::array<T, 4> m_data;
 };
 
-using Vec2I = Vec<Int32, 2, VectorUsage::Math>;
-using Vec3I = Vec<Int32, 3, VectorUsage::Math>;
-using Vec4I = Vec<Int32, 4, VectorUsage::Math>;
-using Vec2U = Vec<UInt32, 2, VectorUsage::Math>;
-using Vec3U = Vec<UInt32, 3, VectorUsage::Math>;
-using Vec4U = Vec<UInt32, 4, VectorUsage::Math>;
-using Vec2F = Vec<Float, 2, VectorUsage::Math>;
-using Vec3F = Vec<Float, 3, VectorUsage::Math>;
-using Vec4F = Vec<Float, 4, VectorUsage::Math>;
-using Vec2D = Vec<Double, 2, VectorUsage::Math>;
-using Vec4D = Vec<Double, 4, VectorUsage::Math>;
-using Vec3D = Vec<Double, 3, VectorUsage::Math>;
+#pragma region Operators
 
-using Dim2I = Vec<Int32, 2, VectorUsage::Size>;
-using Dim3I = Vec<Int32, 3, VectorUsage::Size>;
-using Dim4I = Vec<Int32, 4, VectorUsage::Size>;
-using Dim3U = Vec<UInt32, 3, VectorUsage::Size>;
-using Dim4U = Vec<UInt32, 4, VectorUsage::Size>;
-using Dim2U = Vec<UInt32, 2, VectorUsage::Size>;
-using Dim2F = Vec<Float, 2, VectorUsage::Size>;
-using Dim3F = Vec<Float, 3, VectorUsage::Size>;
-using Dim4F = Vec<Float, 4, VectorUsage::Size>;
-using Dim4D = Vec<Double, 4, VectorUsage::Size>;
-using Dim2D = Vec<Double, 2, VectorUsage::Size>;
-using Dim3D = Vec<Double, 3, VectorUsage::Size>;
+template<Arithmetic T, int Dim>
+Vec<T, Dim>
+operator+(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs)
+{
+  Vec<T, Dim> result = lhs;
+  for (int i = 0; i < Dim; ++i)
+  {
+    result.get(i) += rhs.get(i);
+  }
+  return result;
+}
 
-using Color1I = Vec<Int32, 1, VectorUsage::Color>;
-using Color2I = Vec<Int32, 2, VectorUsage::Color>;
-using Color3I = Vec<Int32, 3, VectorUsage::Color>;
-using Color4I = Vec<Int32, 4, VectorUsage::Color>;
-using Color1U = Vec<UInt32, 1, VectorUsage::Color>;
-using Color2U = Vec<UInt32, 2, VectorUsage::Color>;
-using Color3U = Vec<UInt32, 3, VectorUsage::Color>;
-using Color4U = Vec<UInt32, 4, VectorUsage::Color>;
-using Color1F = Vec<Float, 1, VectorUsage::Color>;
-using Color2F = Vec<Float, 2, VectorUsage::Color>;
-using Color3F = Vec<Float, 3, VectorUsage::Color>;
-using Color4F = Vec<Float, 4, VectorUsage::Color>;
-using Color1D = Vec<Double, 1, VectorUsage::Color>;
-using Color4D = Vec<Double, 4, VectorUsage::Color>;
-using Color2D = Vec<Double, 2, VectorUsage::Color>;
-using Color3D = Vec<Double, 3, VectorUsage::Color>;
+template<Arithmetic T, int Dim>
+Vec<T, Dim>
+operator-(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs)
+{
+  Vec<T, Dim> result = lhs;
+  for (int i = 0; i < Dim; ++i)
+  {
+    result.get(i) -= rhs.get(i);
+  }
+  return result;
+}
 
-using Mat2F   = Mat<Float, 2, 2>;
-using Mat2x2F = Mat<Float, 2, 2>;
-using Mat2x3F = Mat<Float, 2, 3>;
-using Mat2x4F = Mat<Float, 2, 4>;
+template<Arithmetic T, Arithmetic U, int Dim>
+Vec<T, Dim>
+operator*(const Vec<T, Dim>& vec, U scalar)
+{
+  Vec<T, Dim> result = vec;
+  for (int i = 0; i < Dim; ++i)
+  {
+    result.get(i) *= scalar;
+  }
+  return result;
+}
 
-using Mat3F   = Mat<Float, 3, 3>;
-using Mat3x2F = Mat<Float, 3, 2>;
-using Mat3x3F = Mat<Float, 3, 3>;
-using Mat3x4F = Mat<Float, 3, 4>;
+template<Arithmetic T, Arithmetic U, int Dim>
+Vec<T, Dim>
+operator*(U scalar, const Vec<T, Dim>& vec)
+{
+  return vec * scalar;
+}
 
-using Mat4F   = Mat<Float, 4, 4>;
-using Mat4x2F = Mat<Float, 4, 2>;
-using Mat4x3F = Mat<Float, 4, 3>;
-using Mat4x4F = Mat<Float, 4, 4>;
+template<Arithmetic T, int DimM, int DimN>
+Mat<T, DimM, DimN>
+operator+(const Mat<T, DimM, DimN>& lhs, const Mat<T, DimM, DimN>& rhs)
+{
+  Mat<T, DimM, DimN> result = lhs;
+  for (int i = 0; i < DimM * DimN; ++i)
+  {
+    result.data()[i] += rhs.data()[i];
+  }
+  return result;
+}
 
-using Mat2D   = Mat<Double, 2, 2>;
-using Mat2x2D = Mat<Double, 2, 2>;
-using Mat2x3D = Mat<Double, 2, 3>;
-using Mat2x4D = Mat<Double, 2, 4>;
+template<Arithmetic T, int DimM, int DimN>
+Mat<T, DimM, DimN>
+operator-(const Mat<T, DimM, DimN>& lhs, const Mat<T, DimM, DimN>& rhs)
+{
+  Mat<T, DimM, DimN> result = lhs;
+  for (int i = 0; i < DimM * DimN; ++i)
+  {
+    result.data()[i] -= rhs.data()[i];
+  }
+  return result;
+}
 
-using Mat3D   = Mat<Double, 3, 3>;
-using Mat3x2D = Mat<Double, 3, 2>;
-using Mat3x3D = Mat<Double, 3, 3>;
-using Mat3x4D = Mat<Double, 3, 4>;
+template<Arithmetic T, Arithmetic U, int DimM, int DimN>
+Mat<T, DimM, DimN>
+operator*(const Mat<T, DimM, DimN>& mat, U scalar)
+{
+  Mat<T, DimM, DimN> result = mat;
+  for (int i = 0; i < DimM * DimN; ++i)
+  {
+    result.data()[i] *= scalar;
+  }
+  return result;
+}
 
-using Mat4D   = Mat<Double, 4, 4>;
-using Mat4x2D = Mat<Double, 4, 2>;
-using Mat4x3D = Mat<Double, 4, 3>;
-using Mat4x4D = Mat<Double, 4, 4>;
+template<Arithmetic T, Arithmetic U, int DimM, int DimN>
+Mat<T, DimM, DimN>
+operator*(U scalar, const Mat<T, DimM, DimN>& mat)
+{
+  return mat * scalar;
+}
+
+#pragma endregion
+
+#pragma region TypeAliases
+
+using Vec2I = Vec<int, 2, VectorUsage::Math>;
+using Vec3I = Vec<int, 3, VectorUsage::Math>;
+using Vec4I = Vec<int, 4, VectorUsage::Math>;
+using Vec2U = Vec<unsigned int, 2, VectorUsage::Math>;
+using Vec3U = Vec<unsigned int, 3, VectorUsage::Math>;
+using Vec4U = Vec<unsigned int, 4, VectorUsage::Math>;
+using Vec2F = Vec<float, 2, VectorUsage::Math>;
+using Vec3F = Vec<float, 3, VectorUsage::Math>;
+using Vec4F = Vec<float, 4, VectorUsage::Math>;
+using Vec2D = Vec<double, 2, VectorUsage::Math>;
+using Vec4D = Vec<double, 4, VectorUsage::Math>;
+using Vec3D = Vec<double, 3, VectorUsage::Math>;
+
+using Dim2I = Vec<int, 2, VectorUsage::Size>;
+using Dim3I = Vec<int, 3, VectorUsage::Size>;
+using Dim4I = Vec<int, 4, VectorUsage::Size>;
+using Dim3U = Vec<unsigned int, 3, VectorUsage::Size>;
+using Dim4U = Vec<unsigned int, 4, VectorUsage::Size>;
+using Dim2U = Vec<unsigned int, 2, VectorUsage::Size>;
+using Dim2F = Vec<float, 2, VectorUsage::Size>;
+using Dim3F = Vec<float, 3, VectorUsage::Size>;
+using Dim4F = Vec<float, 4, VectorUsage::Size>;
+using Dim4D = Vec<double, 4, VectorUsage::Size>;
+using Dim2D = Vec<double, 2, VectorUsage::Size>;
+using Dim3D = Vec<double, 3, VectorUsage::Size>;
+
+using Color1I = Vec<int, 1, VectorUsage::Color>;
+using Color2I = Vec<int, 2, VectorUsage::Color>;
+using Color3I = Vec<int, 3, VectorUsage::Color>;
+using Color4I = Vec<int, 4, VectorUsage::Color>;
+using Color1U = Vec<unsigned int, 1, VectorUsage::Color>;
+using Color2U = Vec<unsigned int, 2, VectorUsage::Color>;
+using Color3U = Vec<unsigned int, 3, VectorUsage::Color>;
+using Color4U = Vec<unsigned int, 4, VectorUsage::Color>;
+using Color1F = Vec<float, 1, VectorUsage::Color>;
+using Color2F = Vec<float, 2, VectorUsage::Color>;
+using Color3F = Vec<float, 3, VectorUsage::Color>;
+using Color4F = Vec<float, 4, VectorUsage::Color>;
+using Color1D = Vec<double, 1, VectorUsage::Color>;
+using Color4D = Vec<double, 4, VectorUsage::Color>;
+using Color2D = Vec<double, 2, VectorUsage::Color>;
+using Color3D = Vec<double, 3, VectorUsage::Color>;
+
+using Mat2F   = Mat<float, 2, 2>;
+using Mat2x2F = Mat<float, 2, 2>;
+using Mat2x3F = Mat<float, 2, 3>;
+using Mat2x4F = Mat<float, 2, 4>;
+
+using Mat3F   = Mat<float, 3, 3>;
+using Mat3x2F = Mat<float, 3, 2>;
+using Mat3x3F = Mat<float, 3, 3>;
+using Mat3x4F = Mat<float, 3, 4>;
+
+using Mat4F   = Mat<float, 4, 4>;
+using Mat4x2F = Mat<float, 4, 2>;
+using Mat4x3F = Mat<float, 4, 3>;
+using Mat4x4F = Mat<float, 4, 4>;
+
+using Mat2D   = Mat<double, 2, 2>;
+using Mat2x2D = Mat<double, 2, 2>;
+using Mat2x3D = Mat<double, 2, 3>;
+using Mat2x4D = Mat<double, 2, 4>;
+
+using Mat3D   = Mat<double, 3, 3>;
+using Mat3x2D = Mat<double, 3, 2>;
+using Mat3x3D = Mat<double, 3, 3>;
+using Mat3x4D = Mat<double, 3, 4>;
+
+using Mat4D   = Mat<double, 4, 4>;
+using Mat4x2D = Mat<double, 4, 2>;
+using Mat4x3D = Mat<double, 4, 3>;
+using Mat4x4D = Mat<double, 4, 4>;
 
 using Color = Color4F;
-}
+
+using QuatF = Quaternion<float>;
+using QuatD = Quaternion<double>;
+
+#pragma endregion
+
+} // namespace setsugen

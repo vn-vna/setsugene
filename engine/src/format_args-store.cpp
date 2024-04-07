@@ -1,9 +1,10 @@
-#include <setsugen/format.h>
 #include <setsugen/exception.h>
+#include <setsugen/format.h>
 
 namespace setsugen
 {
-FormatArgsStore::FormatArgsStore() = default;
+FormatArgsStore::FormatArgsStore() : m_args{}
+{}
 
 FormatArgsStore::~FormatArgsStore() = default;
 
@@ -18,14 +19,4 @@ FormatArgsStore::get(const FormatIndex& index) const
 
   return *iter->second.get();
 }
-
-Void
-FormatArgsStore::stringify(const FormatContext& context) const
-{
-  context.result
-      << typeid(FormatArgsStore).name()
-      << "{"
-      << "size=" << m_args.size() << ", "
-      << "}";
-}
-}
+} // namespace setsugen

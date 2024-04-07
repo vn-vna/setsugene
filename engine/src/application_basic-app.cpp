@@ -2,10 +2,9 @@
 
 namespace setsugen
 {
-BasicApplication::BasicApplication(ApplicationDescription&& app_desc)
-  : m_description(app_desc)
+BasicApplication::BasicApplication(ApplicationDescription&& app_desc) : m_description(app_desc)
 {
-  m_logger_factory      = std::make_shared<LoggerFactory>();
+  m_logger_factory      = std::make_unique<LoggerFactory>();
   auto console_appender = LogAppender::create_console_appender(this->m_description.logger_config.log_template);
   console_appender->set_level(LogLevel::Trace);
   m_logger_factory->add_appender(console_appender);
@@ -19,7 +18,7 @@ BasicApplication::BasicApplication(ApplicationDescription&& app_desc)
 
 BasicApplication::~BasicApplication() = default;
 
-Void
+void
 BasicApplication::run()
 {
   try
@@ -37,28 +36,27 @@ BasicApplication::run()
   }
 }
 
-SharedPtr<Logger>
-BasicApplication::create_logger(const String& name) const
+std::shared_ptr<Logger>
+BasicApplication::create_logger(const std::string& name) const
 {
   return m_logger_factory->get(name);
 }
 
-Observer<Window>
+Window*
 BasicApplication::get_window()
 {
   return m_window.get();
 }
 
-Observer<Scene>
-BasicApplication::get_current_scene()
-{
-  return m_scene.get();
-}
-
-Observer<VulkanApplication>
+VulkanApplication*
 BasicApplication::get_vulkan_app()
 {
   return m_vulkan_app.get();
 }
-} // namespace setsugen::impl__
 
+SceneManager*
+BasicApplication::get_scene_manager()
+{
+  return nullptr;
+}
+} // namespace setsugen

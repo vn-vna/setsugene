@@ -7,33 +7,33 @@
 namespace setsugen
 {
 
-class ThisLibrary final
+class  ThisLibrary final
 {
 public:
-  using UnloadEventCallback = Fn<Void()>;
+  using UnloadEventCallback = std::function<void()>;
 
 public:
-  ThisLibrary(Void* handle);
+  ThisLibrary(void* handle);
 
   ThisLibrary(const ThisLibrary&)            = delete;
   ThisLibrary(ThisLibrary&&)                 = delete;
   ThisLibrary& operator=(const ThisLibrary&) = delete;
   ThisLibrary& operator=(ThisLibrary&&)      = delete;
 
-  String                                  get_path() const;
-  Void*                                   get_handle() const;
-  const ForwardList<UnloadEventCallback>& get_unload_events() const;
+  std::string                                   get_path() const;
+  void*                                         get_handle() const;
+  const std::forward_list<UnloadEventCallback>& get_unload_events() const;
 
-  Void on_unload(const UnloadEventCallback& callback);
+  void on_unload(const UnloadEventCallback& callback);
 
 public:
-  static ThisLibrary&               get();
-  static Tuple<Int32, Int32, Int32> get_version();
+  static ThisLibrary&              get();
+  static std::tuple<int, int, int> get_version();
 
 private:
-  Void* m_handle;
+  void* m_handle;
 
-  ForwardList<UnloadEventCallback> m_on_unload;
+  std::forward_list<UnloadEventCallback> m_on_unload;
 };
 
-}  // namespace setsugen
+} // namespace setsugen

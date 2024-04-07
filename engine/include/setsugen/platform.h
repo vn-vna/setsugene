@@ -5,7 +5,7 @@
 namespace setsugen
 {
 
-String get_root_path();
-String get_assets_path();
+std::string  get_root_path();
+std::string  get_assets_path();
 
-}  // namespace setsugen
+} // namespace setsugen

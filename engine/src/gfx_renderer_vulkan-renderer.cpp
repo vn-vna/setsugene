@@ -21,60 +21,57 @@ convert_to_vulkan_topology(Topology topology)
 VkFormat
 convert_to_vulkan_format(VertexFormat format, VertexType type, VertexSize size)
 {
-  using VkFormatMapping = std::unordered_map<
-    Tuple<VertexFormat, VertexSize, VertexType>,
-    VkFormat,
-    TupleHash<VertexFormat, VertexSize, VertexType>
-  >;
+  using VkFormatMapping = std::unordered_map<std::tuple<VertexFormat, VertexSize, VertexType>, VkFormat,
+                                             TupleHash<VertexFormat, VertexSize, VertexType>>;
 
   static VkFormatMapping format_map = {
-    {{VertexFormat::R, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8_SINT},
-    {{VertexFormat::R, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8_UINT},
-    {{VertexFormat::R, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16_SINT},
-    {{VertexFormat::R, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16_UINT},
-    {{VertexFormat::R, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16_SFLOAT},
-    {{VertexFormat::R, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32_SINT},
-    {{VertexFormat::R, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32_UINT},
-    {{VertexFormat::R, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32_SFLOAT},
-    {{VertexFormat::R, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64_SINT},
-    {{VertexFormat::R, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64_UINT},
-    {{VertexFormat::R, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64_SFLOAT},
+      {{VertexFormat::R, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8_SINT},
+      {{VertexFormat::R, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8_UINT},
+      {{VertexFormat::R, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16_SINT},
+      {{VertexFormat::R, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16_UINT},
+      {{VertexFormat::R, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16_SFLOAT},
+      {{VertexFormat::R, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32_SINT},
+      {{VertexFormat::R, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32_UINT},
+      {{VertexFormat::R, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32_SFLOAT},
+      {{VertexFormat::R, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64_SINT},
+      {{VertexFormat::R, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64_UINT},
+      {{VertexFormat::R, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64_SFLOAT},
 
-    {{VertexFormat::RG, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8_SINT},
-    {{VertexFormat::RG, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8G8_UINT},
-    {{VertexFormat::RG, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16_SINT},
-    {{VertexFormat::RG, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16_UINT},
-    {{VertexFormat::RG, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16_SFLOAT},
-    {{VertexFormat::RG, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32_SINT},
-    {{VertexFormat::RG, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32_UINT},
-    {{VertexFormat::RG, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32_SFLOAT},
-    {{VertexFormat::RG, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64_SINT},
-    {{VertexFormat::RG, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64_UINT},
-    {{VertexFormat::RG, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64_SFLOAT},
+      {{VertexFormat::RG, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8_SINT},
+      {{VertexFormat::RG, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8G8_UINT},
+      {{VertexFormat::RG, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16_SINT},
+      {{VertexFormat::RG, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16_UINT},
+      {{VertexFormat::RG, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16_SFLOAT},
+      {{VertexFormat::RG, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32_SINT},
+      {{VertexFormat::RG, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32_UINT},
+      {{VertexFormat::RG, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32_SFLOAT},
+      {{VertexFormat::RG, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64_SINT},
+      {{VertexFormat::RG, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64_UINT},
+      {{VertexFormat::RG, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64_SFLOAT},
 
-    {{VertexFormat::RGB, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8B8_SINT},
-    {{VertexFormat::RGB, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8G8B8_UINT},
-    {{VertexFormat::RGB, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16B16_SINT},
-    {{VertexFormat::RGB, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16B16_UINT},
-    {{VertexFormat::RGB, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16B16_SFLOAT},
-    {{VertexFormat::RGB, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32B32_SINT},
-    {{VertexFormat::RGB, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32B32_UINT},
-    {{VertexFormat::RGB, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32B32_SFLOAT},
-    {{VertexFormat::RGB, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64B64_SINT},
-    {{VertexFormat::RGB, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64B64_UINT},
-    {{VertexFormat::RGB, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64B64_SFLOAT},
+      {{VertexFormat::RGB, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8B8_SINT},
+      {{VertexFormat::RGB, VertexSize::Size8, VertexType::UInt}, VK_FORMAT_R8G8B8_UINT},
+      {{VertexFormat::RGB, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16B16_SINT},
+      {{VertexFormat::RGB, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16B16_UINT},
+      {{VertexFormat::RGB, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16B16_SFLOAT},
+      {{VertexFormat::RGB, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32B32_SINT},
+      {{VertexFormat::RGB, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32B32_UINT},
+      {{VertexFormat::RGB, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32B32_SFLOAT},
+      {{VertexFormat::RGB, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64B64_SINT},
+      {{VertexFormat::RGB, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64B64_UINT},
+      {{VertexFormat::RGB, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64B64_SFLOAT},
 
-    {{VertexFormat::RGBA, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8B8A8_SINT},
-    {{VertexFormat::RGBA, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R8G8B8A8_UINT},
-    {{VertexFormat::RGBA, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16B16A16_SINT},
-    {{VertexFormat::RGBA, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16B16A16_UINT},
-    {{VertexFormat::RGBA, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16B16A16_SFLOAT},
-    {{VertexFormat::RGBA, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32B32A32_SINT},
-    {{VertexFormat::RGBA, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32B32A32_UINT},
-    {{VertexFormat::RGBA, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32B32A32_SFLOAT},
-    {{VertexFormat::RGBA, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64B64A64_SINT},
-    {{VertexFormat::RGBA, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64B64A64_UINT},
-    {{VertexFormat::RGBA, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64B64A64_SFLOAT},
+      {{VertexFormat::RGBA, VertexSize::Size8, VertexType::Int}, VK_FORMAT_R8G8B8A8_SINT},
+      {{VertexFormat::RGBA, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R8G8B8A8_UINT},
+      {{VertexFormat::RGBA, VertexSize::Size16, VertexType::Int}, VK_FORMAT_R16G16B16A16_SINT},
+      {{VertexFormat::RGBA, VertexSize::Size16, VertexType::UInt}, VK_FORMAT_R16G16B16A16_UINT},
+      {{VertexFormat::RGBA, VertexSize::Size16, VertexType::Float}, VK_FORMAT_R16G16B16A16_SFLOAT},
+      {{VertexFormat::RGBA, VertexSize::Size32, VertexType::Int}, VK_FORMAT_R32G32B32A32_SINT},
+      {{VertexFormat::RGBA, VertexSize::Size32, VertexType::UInt}, VK_FORMAT_R32G32B32A32_UINT},
+      {{VertexFormat::RGBA, VertexSize::Size32, VertexType::Float}, VK_FORMAT_R32G32B32A32_SFLOAT},
+      {{VertexFormat::RGBA, VertexSize::Size64, VertexType::Int}, VK_FORMAT_R64G64B64A64_SINT},
+      {{VertexFormat::RGBA, VertexSize::Size64, VertexType::UInt}, VK_FORMAT_R64G64B64A64_UINT},
+      {{VertexFormat::RGBA, VertexSize::Size64, VertexType::Float}, VK_FORMAT_R64G64B64A64_SFLOAT},
   };
 
   const auto format_tuple = std::make_tuple(format, size, type);
@@ -151,11 +148,10 @@ convert_to_vulkan_color_component_flags(const ColorBlend& color_blend)
 }
 
 VulkanWindowRenderer::VulkanWindowRenderer(const RendererConfig& config)
-  : m_vulkan_app{VulkanApplication::get_current()},
-    m_target{dynamic_cast<Observer<VulkanWindowRenderTarget>>(config.render_target)},
-    m_current_frame{0}
+    : m_vulkan_app{VulkanApplication::get_current()},
+      m_target{dynamic_cast<VulkanWindowRenderTarget*>(config.render_target)}, m_current_frame{0}
 {
-  m_logger = Application::current_app()->create_logger(typeid(VulkanWindowRenderer).name());
+  m_logger = Application::current_app()->create_logger("setsugen::VulkanWindowRenderer");
 
   if (config.render_target->type() != RenderTargetType::Window)
   {
@@ -173,7 +169,7 @@ VulkanWindowRenderer::VulkanWindowRenderer(const RendererConfig& config)
 
 VulkanWindowRenderer::~VulkanWindowRenderer()
 {
-  for (UInt32 i = 0; i < m_framebuffers.size(); ++i)
+  for (unsigned int i = 0; i < m_framebuffers.size(); ++i)
   {
     vkDestroySemaphore(m_logical_device, m_image_available_semaphores[i], nullptr);
     vkDestroySemaphore(m_logical_device, m_render_finished_semaphores[i], nullptr);
@@ -192,12 +188,15 @@ VulkanWindowRenderer::~VulkanWindowRenderer()
   vkDestroyRenderPass(m_logical_device, m_render_pass, nullptr);
 }
 
-Void
-VulkanWindowRenderer::render()
+void
+VulkanWindowRenderer::render(Scene*)
 {
-  const auto graphics_queue = m_vulkan_app->get_graphics_queue();
-  const auto swapchain      = m_target->m_swapchain;
-  UInt32     image_index;
+  const auto   graphics_queue = m_vulkan_app->get_graphics_queue();
+  const auto   swapchain      = m_target->m_swapchain;
+  unsigned int image_index;
+
+  // Build the vertex buffer
+  {}
 
   // Wait for the previous frame to be finished
   {
@@ -207,14 +206,9 @@ VulkanWindowRenderer::render()
 
   // Acquire the next image
   {
-    auto acquire_result = vkAcquireNextImageKHR(
-      m_logical_device,
-      swapchain,
-      UINT64_MAX,
-      m_image_available_semaphores[m_current_frame],
-      VK_NULL_HANDLE,
-      &image_index
-    );
+    auto acquire_result =
+        vkAcquireNextImageKHR(m_logical_device, swapchain, UINT64_MAX, m_image_available_semaphores[m_current_frame],
+                              VK_NULL_HANDLE, &image_index);
 
     if (acquire_result != VK_SUCCESS)
     {
@@ -262,8 +256,7 @@ VulkanWindowRenderer::render()
     present_info.pSwapchains    = swapchains;
     present_info.pImageIndices  = &image_index;
 
-    const auto present_result = vkQueuePresentKHR(VulkanApplication::get_current()->get_present_queue(),
-                                                  &present_info);
+    const auto present_result = vkQueuePresentKHR(VulkanApplication::get_current()->get_present_queue(), &present_info);
     if (present_result != VK_SUCCESS)
     {
       throw EngineException("Failed to present swapchain image");
@@ -273,14 +266,14 @@ VulkanWindowRenderer::render()
   m_current_frame = (m_current_frame + 1) % m_framebuffers.size();
 }
 
-Void
+void
 VulkanWindowRenderer::cleanup()
 {
   vkDeviceWaitIdle(m_logical_device);
 }
 
 
-Void
+void
 VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
 {
   auto vertex_shader   = ShaderModule(config.vertex_shader.value_or(DEFAULT_VERTEX_SHADER));
@@ -304,23 +297,16 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
 
   // Create the vertex input info
 
-  DArray<VkVertexInputBindingDescription> vertex_binding_descriptions;
+  std::vector<VkVertexInputBindingDescription> vertex_binding_descriptions;
   for (auto vertex_binding: config.vertex_bindings)
   {
     vertex_binding_descriptions.push_back({vertex_binding.binding, vertex_binding.stride});
   }
 
-  DArray<VkVertexInputAttributeDescription> vertex_attribute_descriptions;
+  std::vector<VkVertexInputAttributeDescription> vertex_attribute_descriptions;
   for (const auto& [binding, location, offset, format, type, size]: config.vertex_attributes)
   {
-    vertex_attribute_descriptions.push_back(
-      {
-        binding,
-        location,
-        convert_to_vulkan_format(format, type, size),
-        offset
-      }
-    );
+    vertex_attribute_descriptions.push_back({binding, location, convert_to_vulkan_format(format, type, size), offset});
   }
 
   VkPipelineVertexInputStateCreateInfo vertex_input_info{};
@@ -332,12 +318,10 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   input_assembly.topology               = convert_to_vulkan_topology(config.topology);
   input_assembly.primitiveRestartEnable = VK_FALSE;
 
-  DArray<VkViewport> viewports;
+  std::vector<VkViewport> viewports;
   for (const auto& [x, y, width, height, min_depth, max_depth]: config.viewports)
   {
-    viewports.push_back({
-      x, y, width, height, min_depth, max_depth
-    });
+    viewports.push_back({x, y, width, height, min_depth, max_depth});
   }
 
   if (viewports.empty())
@@ -345,13 +329,11 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
     m_logger->warn("No viewports specified");
   }
 
-  DArray<VkRect2D> scissors;
+  std::vector<VkRect2D> scissors;
   for (const auto& [x, y, width, height]: config.scissors)
   {
-    scissors.push_back({
-      {static_cast<Int32>(x), static_cast<Int32>(y)},
-      {static_cast<UInt32>(width), static_cast<UInt32>(height)}
-    });
+    scissors.push_back({{static_cast<int>(x), static_cast<int>(y)},
+                        {static_cast<unsigned int>(width), static_cast<unsigned int>(height)}});
   }
 
   if (scissors.empty())
@@ -361,9 +343,9 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
 
   VkPipelineViewportStateCreateInfo viewport_state{};
   viewport_state.sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-  viewport_state.viewportCount = (UInt32) viewports.size();
+  viewport_state.viewportCount = (unsigned int) viewports.size();
   viewport_state.pViewports    = viewports.data();
-  viewport_state.scissorCount  = (UInt32) scissors.size();
+  viewport_state.scissorCount  = (unsigned int) scissors.size();
   viewport_state.pScissors     = scissors.data();
 
   VkPipelineRasterizationStateCreateInfo rasterizer{};
@@ -381,7 +363,7 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   multisampling.sampleShadingEnable  = VK_FALSE;
   multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
-  DArray<VkPipelineColorBlendAttachmentState> color_blend_attachments;
+  std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachments;
   for (auto color_blend: config.color_blends)
   {
     VkPipelineColorBlendAttachmentState color_blend_attachment{};
@@ -394,14 +376,14 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   color_blending.sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   color_blending.logicOpEnable   = VK_FALSE;
   color_blending.logicOp         = VK_LOGIC_OP_COPY;
-  color_blending.attachmentCount = (UInt32) color_blend_attachments.size();
+  color_blending.attachmentCount = (unsigned int) color_blend_attachments.size();
   color_blending.pAttachments    = color_blend_attachments.data();
 
   VkPipelineLayoutCreateInfo pipeline_layout_info = {};
   pipeline_layout_info.sType                      = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-  auto pipeline_layout_result = vkCreatePipelineLayout(m_logical_device, &pipeline_layout_info, nullptr,
-                                                       &m_pipeline_layout);
+  auto pipeline_layout_result =
+      vkCreatePipelineLayout(m_logical_device, &pipeline_layout_info, nullptr, &m_pipeline_layout);
   if (pipeline_layout_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create pipeline layout");
@@ -466,15 +448,15 @@ VulkanWindowRenderer::create_graphics_pipeline(const RendererConfig& config)
   pipeline_info.subpass                      = 0;
   pipeline_info.basePipelineHandle           = VK_NULL_HANDLE;
 
-  auto pipeline_result = vkCreateGraphicsPipelines(m_logical_device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr,
-                                                   &m_pipeline);
+  auto pipeline_result =
+      vkCreateGraphicsPipelines(m_logical_device, VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &m_pipeline);
   if (pipeline_result != VK_SUCCESS)
   {
     throw EngineException("Failed to create graphics pipeline");
   }
 }
 
-Void
+void
 VulkanWindowRenderer::create_framebuffers(const RendererConfig& config)
 {
   const auto device           = m_vulkan_app->get_logical_device();
@@ -482,7 +464,7 @@ VulkanWindowRenderer::create_framebuffers(const RendererConfig& config)
 
   m_framebuffers.resize(swapchain_images.size());
 
-  for (UInt32 i = 0; i < swapchain_images.size(); ++i)
+  for (unsigned int i = 0; i < swapchain_images.size(); ++i)
   {
     const VkImageView attachments[] = {m_target->m_swapchain_image_views[i]};
 
@@ -503,7 +485,7 @@ VulkanWindowRenderer::create_framebuffers(const RendererConfig& config)
   }
 }
 
-Void
+void
 VulkanWindowRenderer::create_command_pool(const RendererConfig& config)
 {
   const auto& [graphics_family, present_family] = m_vulkan_app->get_queue_family_indices();
@@ -520,7 +502,7 @@ VulkanWindowRenderer::create_command_pool(const RendererConfig& config)
   }
 }
 
-Void
+void
 VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
 {
   m_command_buffers.resize(m_framebuffers.size());
@@ -529,7 +511,7 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
   alloc_info.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   alloc_info.commandPool                 = m_command_pool;
   alloc_info.level                       = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  alloc_info.commandBufferCount          = (UInt32) m_command_buffers.size();
+  alloc_info.commandBufferCount          = (unsigned int) m_command_buffers.size();
 
   auto command_buffer_result = vkAllocateCommandBuffers(m_logical_device, &alloc_info, m_command_buffers.data());
   if (command_buffer_result != VK_SUCCESS)
@@ -539,7 +521,7 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
 
   m_logger->trace("Allocated {} command buffers", m_command_buffers.size());
 
-  for (UInt32 i = 0; i < m_command_buffers.size(); ++i)
+  for (unsigned int i = 0; i < m_command_buffers.size(); ++i)
   {
     VkCommandBufferBeginInfo begin_info = {};
     begin_info.sType                    = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -555,11 +537,11 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
     render_pass_info.renderPass            = m_render_pass;
     render_pass_info.framebuffer           = m_framebuffers[i];
     render_pass_info.renderArea.offset     = {0, 0};
-    render_pass_info.renderArea.extent     = {(UInt32) m_target->width(), (UInt32) m_target->height()};
+    render_pass_info.renderArea.extent     = {(unsigned int) m_target->width(), (unsigned int) m_target->height()};
 
     VkClearValue clear_color = {
-      config.clear_color.r(), config.clear_color.g(), //
-      config.clear_color.b(), config.clear_color.a()  //
+        config.clear_color.r(), config.clear_color.g(), //
+        config.clear_color.b(), config.clear_color.a()  //
     };
     render_pass_info.clearValueCount = 1;
     render_pass_info.pClearValues    = &clear_color;
@@ -579,7 +561,7 @@ VulkanWindowRenderer::create_command_buffers(const RendererConfig& config)
   }
 }
 
-Void
+void
 VulkanWindowRenderer::create_synchronization_objects(const RendererConfig& config)
 {
   m_image_available_semaphores.resize(m_framebuffers.size());
@@ -593,10 +575,10 @@ VulkanWindowRenderer::create_synchronization_objects(const RendererConfig& confi
   fence_info.sType             = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
   fence_info.flags             = VK_FENCE_CREATE_SIGNALED_BIT;
 
-  for (UInt32 i = 0; i < m_framebuffers.size(); ++i)
+  for (unsigned int i = 0; i < m_framebuffers.size(); ++i)
   {
-    auto semaphore_result = vkCreateSemaphore(m_logical_device, &semaphore_info, nullptr,
-                                              &m_image_available_semaphores[i]);
+    auto semaphore_result =
+        vkCreateSemaphore(m_logical_device, &semaphore_info, nullptr, &m_image_available_semaphores[i]);
     if (semaphore_result != VK_SUCCESS)
     {
       throw EngineException("Failed to create semaphores");

@@ -5,49 +5,48 @@
 
 namespace setsugen
 {
-constexpr const UInt64 cv_milliseconds = 10;
-constexpr const UInt64 cv_seconds      = 1000 * cv_milliseconds;
-constexpr const UInt64 cv_minutes      = 60 * cv_seconds;
-constexpr const UInt64 cv_hours        = 60 * cv_minutes;
-constexpr const UInt64 cv_days         = 24 * cv_hours;
+constexpr const unsigned long long cv_milliseconds = 10;
+constexpr const unsigned long long cv_seconds      = 1000 * cv_milliseconds;
+constexpr const unsigned long long cv_minutes      = 60 * cv_seconds;
+constexpr const unsigned long long cv_hours        = 60 * cv_minutes;
+constexpr const unsigned long long cv_days         = 24 * cv_hours;
 
-Duration::Duration(UInt64 duration)
-  : m_data{duration}
+Duration::Duration(unsigned long long duration) : m_data{duration}
 {}
 
 Duration::~Duration() noexcept = default;
 
-UInt64
+unsigned long long
 Duration::get_day() const
 {
   return m_data / cv_days;
 }
 
-UInt64
+unsigned long long
 Duration::get_hour() const
 {
   return m_data / cv_hours;
 }
 
-UInt64
+unsigned long long
 Duration::get_minute() const
 {
   return m_data / cv_minutes;
 }
 
-UInt64
+unsigned long long
 Duration::get_second() const
 {
   return m_data / cv_seconds;
 }
 
-UInt64
+unsigned long long
 Duration::get_millisecond() const
 {
   return m_data / cv_milliseconds;
 }
 
-Void
+void
 Duration::stringify(const FormatContext& context) const
 {}
 
@@ -76,13 +75,13 @@ Duration::operator-(const Duration& other) const
 
 TimePoint::~TimePoint() noexcept = default;
 
-Void
-TimePoint::set_format(const String& format)
+void
+TimePoint::set_format(const std::string& format)
 {
   m_format = Formatter::format("{{{}}}", format);
 }
 
-Void
+void
 TimePoint::stringify(const FormatContext& context) const
 {}
 

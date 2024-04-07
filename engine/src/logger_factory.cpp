@@ -3,25 +3,27 @@
 namespace setsugen
 {
 
-LoggerFactory::LoggerFactory()
-    : m_settings {}
+LoggerFactory::LoggerFactory() : m_settings{}
 {}
 
 LoggerFactory::~LoggerFactory() = default;
 
-SharedPtr<Logger> LoggerFactory::get(const String& tag)
+std::shared_ptr<Logger>
+LoggerFactory::get(const std::string& tag)
 {
-  return SharedPtr<Logger>(new Logger(m_settings, tag));
+  return std::shared_ptr<Logger>(new Logger(m_settings, tag));
 }
 
-Void LoggerFactory::add_appender(const SharedPtr<LogAppender>& appender)
+void
+LoggerFactory::add_appender(const std::shared_ptr<LogAppender>& appender)
 {
   m_settings.appender_mapping.add_appender(appender);
 }
 
-Void LoggerFactory::remove_appender(const String& name)
+void
+LoggerFactory::remove_appender(const std::string& name)
 {
   m_settings.appender_mapping.remove_appender(name);
 }
 
-}  // namespace setsugen
+} // namespace setsugen

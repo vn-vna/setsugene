@@ -6,35 +6,34 @@
 
 namespace setsugen
 {
-TimePoint::TimePoint(UInt64 timepoint)
-  : m_data{timepoint}
+TimePoint::TimePoint(unsigned long long timepoint) : m_data{timepoint}
 {}
 
-TimePoint::TimePoint(const String& time_str, const String& format)
+TimePoint::TimePoint(const std::string& time_str, const std::string& format)
 {}
 
-Int32
+int
 TimePoint::get_year() const
 {
   auto dp = date::floor<date::days>(TimePointUnit{DurationUnit{this->m_data}});
-  return (Int32) date::year_month_day(dp).year();
+  return (int) date::year_month_day(dp).year();
 }
 
-Int32
+int
 TimePoint::get_month() const
 {
   auto dp = date::floor<date::days>(TimePointUnit{DurationUnit{this->m_data}});
-  return (UInt32) date::year_month_day(dp).month();
+  return (unsigned int) date::year_month_day(dp).month();
 }
 
-Int32
+int
 TimePoint::get_day() const
 {
   auto dp = date::floor<date::days>(TimePointUnit{DurationUnit{this->m_data}});
-  return (UInt32) date::year_month_day(dp).day();
+  return (unsigned int) date::year_month_day(dp).day();
 }
 
-Int32
+int
 TimePoint::get_hour() const
 {
   auto tp = TimePointUnit{DurationUnit{this->m_data}};
@@ -42,7 +41,7 @@ TimePoint::get_hour() const
   return date::hh_mm_ss(tp - dp).hours().count();
 }
 
-Int32
+int
 TimePoint::get_minute() const
 {
   auto tp = TimePointUnit{DurationUnit{this->m_data}};
@@ -50,28 +49,28 @@ TimePoint::get_minute() const
   return date::hh_mm_ss(tp - dp).minutes().count();
 }
 
-Int32
+int
 TimePoint::get_second() const
 {
   auto tp = TimePointUnit{DurationUnit{this->m_data}};
   auto dp = date::floor<std::chrono::milliseconds>(tp);
-  return (Int32) date::hh_mm_ss(tp - dp).seconds().count();
+  return (int) date::hh_mm_ss(tp - dp).seconds().count();
 }
 
-Int32
+int
 TimePoint::get_millisecond() const
 {
   auto tp = TimePointUnit{DurationUnit{this->m_data}};
   auto dp = date::floor<std::chrono::milliseconds>(tp);
-  return (Int32) date::hh_mm_ss(tp - dp).subseconds().count();
+  return (int) date::hh_mm_ss(tp - dp).subseconds().count();
 }
 
-Int32
+int
 TimePoint::get_day_of_week() const
 {
   auto tp = TimePointUnit{DurationUnit{this->m_data}};
   auto dp = date::floor<date::days>(tp);
-  return (Int32) date::weekday(dp).c_encoding();
+  return (int) date::weekday(dp).c_encoding();
 }
 
 TimePoint&

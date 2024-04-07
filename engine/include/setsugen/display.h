@@ -3,10 +3,10 @@
 namespace setsugen
 {
 
-class Monitor
+class  Monitor
 {
 public:
 private:
 };
 
-}  // namespace setsugen
+} // namespace setsugen

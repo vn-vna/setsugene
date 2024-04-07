@@ -30,7 +30,8 @@ on_unload()
 }
 
 #ifdef SETSUGENE_WINDOWS
-BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL WINAPI
+DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
   switch (fdwReason)
   {
@@ -45,19 +46,18 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 namespace setsugen
 {
-ThisLibrary::ThisLibrary(Void* handle)
-  : m_handle(handle)
+ThisLibrary::ThisLibrary(void* handle) : m_handle(handle)
 {}
 
-String
+std::string
 ThisLibrary::get_path() const
 {
-  Char path[MAX_PATH];
+  char path[MAX_PATH];
   GetModuleFileNameA((HMODULE) m_handle, path, MAX_PATH);
-  return String(path);
+  return std::string(path);
 }
 
-Void*
+void*
 ThisLibrary::get_handle() const
 {
   return m_handle;
@@ -69,13 +69,13 @@ ThisLibrary::get_unload_events() const
   return m_on_unload;
 }
 
-Void
+void
 ThisLibrary::on_unload(const UnloadEventCallback& callback)
 {
   m_on_unload.push_front(callback);
 }
 
-std::tuple<Int32, Int32, Int32>
+std::tuple<int, int, int>
 ThisLibrary::get_version()
 {
   return std::make_tuple(SETSUGENE_VERSION_MAJOR, SETSUGENE_VERSION_MINOR, SETSUGENE_VERSION_PATCH);

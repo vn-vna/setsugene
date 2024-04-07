@@ -6,22 +6,22 @@
 namespace setsugen
 {
 
-WindowCommandQueue::WindowCommandQueue()
-    : m_queue {},
-      m_mutex {}
+WindowCommandQueue::WindowCommandQueue() : m_queue{}, m_mutex{}
 {}
 
 WindowCommandQueue::~WindowCommandQueue() = default;
 
-Void WindowCommandQueue::push(WindowCommand command)
+void
+WindowCommandQueue::push(WindowCommand command)
 {
-  std::lock_guard<std::mutex> lock {m_mutex};
+  std::lock_guard<std::mutex> lock{m_mutex};
   m_queue.push(command);
 }
 
-Void WindowCommandQueue::execute()
+void
+WindowCommandQueue::execute()
 {
-  std::lock_guard<std::mutex> lock {m_mutex};
+  std::lock_guard<std::mutex> lock{m_mutex};
   while (!m_queue.empty())
   {
     std::invoke(m_queue.front());
@@ -29,4 +29,4 @@ Void WindowCommandQueue::execute()
   }
 }
 
-}  // namespace setsugen
+} // namespace setsugen

@@ -2,25 +2,22 @@
 
 namespace setsugen
 {
-Logger::Logger(LoggerSettings& settings)
-  : Logger(settings, "default")
+Logger::Logger(LoggerSettings& settings) : Logger(settings, "default")
 {}
 
-Logger::Logger(LoggerSettings& settings, const String& tag)
-  : m_tag(tag),
-    m_settings(settings)
+Logger::Logger(LoggerSettings& settings, const std::string& tag) : m_tag(tag), m_settings(settings)
 {}
 
-Void
-Logger::push_log(LogLevel level, const String& message, const FormatArgsStore& args)
+void
+Logger::push_log(LogLevel level, const std::string& message, const FormatArgsStore& args)
 {
   LogData data;
 
-  data.level   = level;
+  data.level = level;
 
   auto message_fmt = Formatter(message);
-  data.message = message_fmt.format(args);
-  data.tag     = this->m_tag;
+  data.message     = message_fmt.format(args);
+  data.tag         = this->m_tag;
 
   for (auto& appender: m_settings.appender_mapping)
   {
@@ -28,7 +25,7 @@ Logger::push_log(LogLevel level, const String& message, const FormatArgsStore& a
   }
 }
 
-Void
+void
 Logger::stringify(const FormatContext& context) const
 {}
 } // namespace setsugen

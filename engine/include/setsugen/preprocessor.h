@@ -8,20 +8,20 @@
 
 #define SETSUGEN_UNIQUE_NAME(base) SETSUGEN_CONCAT(base, __COUNTER__)
 
-#define SETSUGEN_TRY_CATCH(expr)                            \
-  try                                                       \
-  {                                                         \
-    expr;                                                   \
-  }                                                         \
-  catch (const ::setsugen::SetsugenException& e)            \
-  {                                                         \
-    std::cerr << "Exception: " << e.what() << std::endl;    \
-  }                                                         \
-  catch (const std::exception& e)                           \
-  {                                                         \
-    std::cerr << "Exception: " << e.what() << std::endl;    \
-  }                                                         \
-  catch (...)                                               \
-  {                                                         \
-    std::cerr << "An unknown error occurred" << std::endl;  \
+#define SETSUGEN_TRY_CATCH(expr)                                                                                       \
+  try                                                                                                                  \
+  {                                                                                                                    \
+    expr;                                                                                                              \
+  }                                                                                                                    \
+  catch (const ::setsugen::SetsugenException& e)                                                                       \
+  {                                                                                                                    \
+    std::cerr << "Exception: " << e.what() << std::endl;                                                               \
+  }                                                                                                                    \
+  catch (const std::exception& e)                                                                                      \
+  {                                                                                                                    \
+    std::cerr << "Exception: " << e.what() << std::endl;                                                               \
+  }                                                                                                                    \
+  catch (...)                                                                                                          \
+  {                                                                                                                    \
+    std::cerr << "An unknown error occurred" << std::endl;                                                             \
   }

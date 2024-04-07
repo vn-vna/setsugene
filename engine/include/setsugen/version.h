@@ -10,24 +10,24 @@
 
 namespace setsugen
 {
-class Version
+class  Version
 {
 public:
   Version();
-  Version(UInt32 major, UInt32 minor, UInt32 patch);
+  Version(unsigned int major, unsigned int minor, unsigned int patch);
   ~Version();
 
 public:
-  static Version create_version(UInt32 major, UInt32 minor, UInt32 patch);
+  static Version create_version(unsigned int major, unsigned int minor, unsigned int patch);
 
 public:
-  UInt32 get_major() const;
-  UInt32 get_minor() const;
-  UInt32 get_patch() const;
+  unsigned int get_major() const;
+  unsigned int get_minor() const;
+  unsigned int get_patch() const;
 
-  Void stringify(const FormatContext& context) const;
+  void stringify(const FormatContext& context) const;
 
 private:
-  UInt32 m_version;
+  unsigned int m_version;
 };
 } // namespace setsugen

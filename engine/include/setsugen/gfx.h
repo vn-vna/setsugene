@@ -9,8 +9,9 @@ struct RenderContext;
 class Window;
 class Renderer;
 class RenderTarget;
+class Scene;
 
-using ColorFlag = Vec<Bool, 4, VectorUsage::Color>;
+using ColorFlag = Vec<bool, 4, VectorUsage::Color>;
 
 enum class RenderTargetType
 {
@@ -72,15 +73,15 @@ enum class VertexSize
 
 struct VertexBindingDescription
 {
-  UInt32 binding = 0;
-  UInt32 stride  = 0;
+  unsigned int binding = 0;
+  unsigned int stride  = 0;
 };
 
 struct VertexAttributeDescription
 {
-  UInt32       binding  = 0;
-  UInt32       location = 0;
-  UInt32       offset   = 0;
+  unsigned int binding  = 0;
+  unsigned int location = 0;
+  unsigned int offset   = 0;
   VertexFormat format   = VertexFormat::RGBA;
   VertexType   type     = VertexType::Int;
   VertexSize   size     = VertexSize::Size32;
@@ -88,48 +89,48 @@ struct VertexAttributeDescription
 
 struct ViewPort
 {
-  Float x         = 0;
-  Float y         = 0;
-  Float width     = 0;
-  Float height    = 0;
-  Float min_depth = 0;
-  Float max_depth = 0;
+  float x         = 0;
+  float y         = 0;
+  float width     = 0;
+  float height    = 0;
+  float min_depth = 0;
+  float max_depth = 0;
 };
 
 struct Scissor
 {
-  Float x      = 0;
-  Float y      = 0;
-  Float width  = 0;
-  Float height = 0;
+  float x      = 0;
+  float y      = 0;
+  float width  = 0;
+  float height = 0;
 };
 
 struct ColorBlend
 {
-  Bool      blend_enable    = false;
+  bool      blend_enable    = false;
   ColorFlag blend_component = {true, true, true, true};
 };
 
 struct RendererConfig
 {
-  Optional<String>                   vertex_shader;
-  Optional<String>                   fragment_shader;
-  DArray<VertexBindingDescription>   vertex_bindings;
-  DArray<VertexAttributeDescription> vertex_attributes;
-  DArray<ViewPort>                   viewports;
-  DArray<Scissor>                    scissors;
-  DArray<ColorBlend>                 color_blends;
-  CullMode                           cull_mode;
-  FrontFace                          front_face;
-  PolygonMode                        polygon_mode;
-  Topology                           topology;
-  Color4F                            clear_color;
-  Observer<RenderTarget>             render_target;
+  std::optional<std::string>              vertex_shader;
+  std::optional<std::string>              fragment_shader;
+  std::vector<VertexBindingDescription>   vertex_bindings;
+  std::vector<VertexAttributeDescription> vertex_attributes;
+  std::vector<ViewPort>                   viewports;
+  std::vector<Scissor>                    scissors;
+  std::vector<ColorBlend>                 color_blends;
+  CullMode                                cull_mode;
+  FrontFace                               front_face;
+  PolygonMode                             polygon_mode;
+  Topology                                topology;
+  Color4F                                 clear_color;
+  RenderTarget*                           render_target;
 };
 
 struct RenderContext
 {
-  Observer<Renderer> renderer;
+  Renderer* renderer;
 };
 
 
@@ -139,46 +140,46 @@ public:
   virtual ~RenderTarget() = default;
 
 public:
-  virtual Void resize(Int32 width, Int32 height) = 0;
-  virtual Void present() = 0;
+  virtual void resize(int width, int height) = 0;
+  virtual void present()                     = 0;
 
-  virtual Int32 width() const = 0;
-  virtual Int32 height() const = 0;
+  virtual int width() const  = 0;
+  virtual int height() const = 0;
 
   virtual RenderTargetType type() const = 0;
 
 public:
-  static SharedPtr<RenderTarget> create_window_target(Window* window);
+  static  std::shared_ptr<RenderTarget> create_window_target(Window* window);
 };
 
-class RendererBuilder
+class  RendererBuilder
 {
 public:
   RendererBuilder()  = default;
   ~RendererBuilder() = default;
 
-  static UniquePtr<RendererBuilder> create();
+  static std::unique_ptr<RendererBuilder> create();
 
-  Observer<RendererBuilder> with_vertex_shader(const String& vertex_shader);
-  Observer<RendererBuilder> with_fragment_shader(const String& fragment_shader);
-  Observer<RendererBuilder> with_render_target(Observer<RenderTarget> render_target);
-  Observer<RendererBuilder> with_topology(Topology topology);
-  Observer<RendererBuilder> add_vertex_binding(const VertexBindingDescription& vertex_binding);
-  Observer<RendererBuilder> add_vertex_attribute(const VertexAttributeDescription& vertex_attribute);
-  Observer<RendererBuilder> set_vertex_bindings(DArray<VertexBindingDescription> vertex_bindings);
-  Observer<RendererBuilder> set_vertex_attributes(DArray<VertexAttributeDescription> vertex_attributes);
-  Observer<RendererBuilder> add_viewport(const ViewPort& viewport);
-  Observer<RendererBuilder> add_scissor(const Scissor& scissor);
-  Observer<RendererBuilder> set_viewports(DArray<ViewPort> viewports);
-  Observer<RendererBuilder> set_scissors(DArray<Scissor> scissors);
-  Observer<RendererBuilder> add_color_blend(const ColorBlend& color_blend);
-  Observer<RendererBuilder> set_color_blends(DArray<ColorBlend> color_blends);
-  Observer<RendererBuilder> set_cull_mode(CullMode cull_mode);
-  Observer<RendererBuilder> set_front_face(FrontFace front_face);
-  Observer<RendererBuilder> set_polygon_mode(PolygonMode polygon_mode);
-  Observer<RendererBuilder> with_clear_color(const Color4F& clear_color);
+  RendererBuilder* with_vertex_shader(const std::string& vertex_shader);
+  RendererBuilder* with_fragment_shader(const std::string& fragment_shader);
+  RendererBuilder* with_render_target(RenderTarget* render_target);
+  RendererBuilder* with_topology(Topology topology);
+  RendererBuilder* add_vertex_binding(const VertexBindingDescription& vertex_binding);
+  RendererBuilder* add_vertex_attribute(const VertexAttributeDescription& vertex_attribute);
+  RendererBuilder* set_vertex_bindings(std::vector<VertexBindingDescription> vertex_bindings);
+  RendererBuilder* set_vertex_attributes(std::vector<VertexAttributeDescription> vertex_attributes);
+  RendererBuilder* add_viewport(const ViewPort& viewport);
+  RendererBuilder* add_scissor(const Scissor& scissor);
+  RendererBuilder* set_viewports(std::vector<ViewPort> viewports);
+  RendererBuilder* set_scissors(std::vector<Scissor> scissors);
+  RendererBuilder* add_color_blend(const ColorBlend& color_blend);
+  RendererBuilder* set_color_blends(std::vector<ColorBlend> color_blends);
+  RendererBuilder* set_cull_mode(CullMode cull_mode);
+  RendererBuilder* set_front_face(FrontFace front_face);
+  RendererBuilder* set_polygon_mode(PolygonMode polygon_mode);
+  RendererBuilder* with_clear_color(const Color4F& clear_color);
 
-  SharedPtr<Renderer> build();
+  std::shared_ptr<Renderer> build();
 
 private:
   RendererConfig m_config;
@@ -189,7 +190,7 @@ class Renderer
 public:
   virtual ~Renderer() = default;
 
-  virtual Void render() = 0;
-  virtual Void cleanup() = 0;
+  virtual void render(Scene*) = 0;
+  virtual void cleanup()      = 0;
 };
 } // namespace setsugen

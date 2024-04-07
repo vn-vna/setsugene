@@ -3,27 +3,27 @@
 namespace setsugen
 {
 
-template <typename ...Ts>
-struct TupleHash : Fn<Size(const Tuple<Ts...>&)>
+template<typename... Ts>
+struct TupleHash : std::function<size_t(const std::tuple<Ts...>&)>
 {
-  Size operator()(const Tuple<Ts...>& t) const
+  size_t operator()(const std::tuple<Ts...>& t) const
   {
     return hash_combine<0>(t);
   }
 
-  template <Size I, typename ...Ts>
-  Size hash_combine(const Tuple<Ts...>& t) const
+  template<size_t I, typename... Tys>
+  size_t hash_combine(const std::tuple<Tys...>& t) const
   {
-    if constexpr (I >= sizeof...(Ts))
+    if constexpr (I >= sizeof...(Tys))
     {
       return 0;
     }
     else
     {
       auto next = hash_combine<I + 1>(t);
-      return std::hash<std::tuple_element_t<I, Tuple<Ts...>>>()(std::get<I>(t)) ^ next ^ (next << 6) ^ (next >> 2);
+      return std::hash<std::tuple_element_t<I, std::tuple<Ts...>>>()(std::get<I>(t)) ^ next ^ (next << 6) ^ (next >> 2);
     }
   }
 };
 
-}
+} // namespace setsugen

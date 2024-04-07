@@ -3,7 +3,7 @@
 
 namespace setsugen
 {
-Atomic<Observer<Application>> Application::s_current_app = {};
+std::atomic<Application*> Application::s_current_app = {};
 
 Application::Application()
 {
@@ -20,9 +20,9 @@ Application::~Application()
   s_current_app = nullptr;
 }
 
-Observer<Application>
+Application*
 Application::current_app()
 {
   return s_current_app;
 }
-}
+} // namespace setsugen

@@ -5,11 +5,9 @@
 
 namespace setsugen
 {
-VulkanWindowRenderTarget::VulkanWindowRenderTarget(Observer<Window> window)
-  : m_window{window},
-    m_vulkan_app{VulkanApplication::get_current()}
+VulkanWindowRenderTarget::VulkanWindowRenderTarget(Window* window)
+    : m_window{window}, m_vulkan_app{VulkanApplication::get_current()}
 {
-  m_window_handler = static_cast<GLFWwindow*>(m_window->get_handler());
   m_logical_device = m_vulkan_app->get_logical_device();
 
   create_surface();
@@ -28,26 +26,26 @@ VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
   vkDestroySurfaceKHR(m_vulkan_app->get_instance(), m_surface, nullptr);
 }
 
-Void
-VulkanWindowRenderTarget::resize(Int32 width, Int32 height)
+void
+VulkanWindowRenderTarget::resize(int width, int height)
 {}
 
-Void
+void
 VulkanWindowRenderTarget::present()
 {}
 
-Int32
+int
 VulkanWindowRenderTarget::width() const
 {
-  Int32 width;
+  int width;
   glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), &width, nullptr);
   return width;
 }
 
-Int32
+int
 VulkanWindowRenderTarget::height() const
 {
-  Int32 height;
+  int height;
   glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), nullptr, &height);
   return height;
 }
@@ -58,7 +56,7 @@ VulkanWindowRenderTarget::type() const
   return RenderTargetType::Window;
 }
 
-Void
+void
 VulkanWindowRenderTarget::create_surface()
 {
   const auto instance       = m_vulkan_app->get_instance();
@@ -73,7 +71,7 @@ VulkanWindowRenderTarget::create_surface()
   m_surface = surface;
 }
 
-Void
+void
 VulkanWindowRenderTarget::create_swapchain()
 {
   auto physical_device = m_vulkan_app->get_physical_device();
@@ -81,17 +79,17 @@ VulkanWindowRenderTarget::create_swapchain()
   VkSurfaceCapabilitiesKHR surface_capabilities;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, m_surface, &surface_capabilities);
 
-  UInt32 format_count;
+  unsigned int format_count;
   vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface, &format_count, nullptr);
   if (format_count == 0)
   {
     throw EngineException("No surface formats found");
   }
 
-  DArray<VkSurfaceFormatKHR> surface_formats(format_count);
+  std::vector<VkSurfaceFormatKHR> surface_formats(format_count);
   vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface, &format_count, surface_formats.data());
 
-  Optional<VkSurfaceFormatKHR> surface_format;
+  std::optional<VkSurfaceFormatKHR> surface_format;
   for (const auto& format: surface_formats)
   {
     if (format.format == VK_FORMAT_B8G8R8A8_SRGB && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
@@ -103,17 +101,17 @@ VulkanWindowRenderTarget::create_swapchain()
 
   m_surface_format = surface_format.value_or(surface_formats[0]);
 
-  UInt32 present_mode_count;
+  unsigned int present_mode_count;
   vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &present_mode_count, nullptr);
   if (present_mode_count == 0)
   {
     throw EngineException("No present modes found");
   }
 
-  DArray<VkPresentModeKHR> present_modes(present_mode_count);
+  std::vector<VkPresentModeKHR> present_modes(present_mode_count);
   vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, m_surface, &present_mode_count, present_modes.data());
 
-  Optional<VkPresentModeKHR> present_mode;
+  std::optional<VkPresentModeKHR> present_mode;
   for (const auto& mode: present_modes)
   {
     if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -126,21 +124,21 @@ VulkanWindowRenderTarget::create_swapchain()
   m_present_mode = present_mode.value_or(VK_PRESENT_MODE_FIFO_KHR);
 
   VkExtent2D extent;
-  if (surface_capabilities.currentExtent.width != std::numeric_limits<UInt32>::max())
+  if (surface_capabilities.currentExtent.width != std::numeric_limits<unsigned int>::max())
   {
     extent = surface_capabilities.currentExtent;
   }
   else
   {
     auto size     = m_window->get_size();
-    extent.width  = static_cast<UInt32>(size.width());
-    extent.height = static_cast<UInt32>(size.height());
+    extent.width  = static_cast<unsigned int>(size.width());
+    extent.height = static_cast<unsigned int>(size.height());
   }
 
-  extent.width = std::clamp(extent.width, surface_capabilities.minImageExtent.width,
-                            surface_capabilities.maxImageExtent.width);
-  extent.height = std::clamp(extent.height, surface_capabilities.minImageExtent.height,
-                             surface_capabilities.maxImageExtent.height);
+  extent.width =
+      std::clamp(extent.width, surface_capabilities.minImageExtent.width, surface_capabilities.maxImageExtent.width);
+  extent.height =
+      std::clamp(extent.height, surface_capabilities.minImageExtent.height, surface_capabilities.maxImageExtent.height);
 
   m_swapchain_extent = extent;
 
@@ -154,8 +152,8 @@ VulkanWindowRenderTarget::create_swapchain()
   create_info.imageArrayLayers = 1;
   create_info.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-  auto   indices                = m_vulkan_app->get_queue_family_indices();
-  UInt32 queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
+  auto         indices                = m_vulkan_app->get_queue_family_indices();
+  unsigned int queue_family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
   if (indices.graphics_family != indices.present_family)
   {
     create_info.imageSharingMode      = VK_SHARING_MODE_CONCURRENT;
@@ -183,20 +181,20 @@ VulkanWindowRenderTarget::create_swapchain()
 
   m_swapchain = swapchain;
 
-  UInt32 image_count;
+  unsigned int image_count;
   vkGetSwapchainImagesKHR(m_vulkan_app->get_logical_device(), m_swapchain, &image_count, nullptr);
-  DArray<VkImage> images(image_count);
+  std::vector<VkImage> images(image_count);
   vkGetSwapchainImagesKHR(m_vulkan_app->get_logical_device(), m_swapchain, &image_count, images.data());
 
   m_swapchain_images = std::move(images);
 }
 
-Void
+void
 VulkanWindowRenderTarget::create_image_views()
 {
-  DArray<VkImageView> image_views(m_swapchain_images.size());
+  std::vector<VkImageView> image_views(m_swapchain_images.size());
 
-  for (UInt32 i = 0; i < m_swapchain_images.size(); ++i)
+  for (unsigned int i = 0; i < m_swapchain_images.size(); ++i)
   {
     VkImageViewCreateInfo create_info{};
     create_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -223,7 +221,7 @@ VulkanWindowRenderTarget::create_image_views()
   m_swapchain_image_views = std::move(image_views);
 }
 
-SharedPtr<RenderTarget>
+std::shared_ptr<RenderTarget>
 RenderTarget::create_window_target(Window* window)
 {
   return std::make_shared<VulkanWindowRenderTarget>(window);

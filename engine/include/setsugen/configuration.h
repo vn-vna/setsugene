@@ -15,16 +15,14 @@ class Configuration;
 class ConfigurationSource;
 class ConfigurationBuilder;
 
-class NoSectionFoundException;
-
-class Configuration
+class  Configuration
 {
 public:
   Configuration();
 
 public:
 private:
-  DArray<ConfigurationSource> m_sources;
+  std::vector<ConfigurationSource> m_sources;
 };
 
 class ConfigurationSource
@@ -42,19 +40,19 @@ public:
   virtual ~ConfigurationSource() = default;
 
 public:
-  virtual Void   load(IStream& stream)                                = 0;
-  virtual String get_config(const String& section, const String& key) = 0;
+  virtual void        load(std::istream& stream)                                     = 0;
+  virtual std::string get_config(const std::string& section, const std::string& key) = 0;
 
 public:
-  static ConfigurationSource from_stream(Stream& stream);
-  static ConfigurationSource from_file(const String& file_name);
+  static ConfigurationSource from_stream(std::istream& stream);
+  static ConfigurationSource from_file(const std::string& file_name);
 };
 
 class NoSectionFoundException : virtual public SetsugenException
 {
 public:
-  explicit NoSectionFoundException(const String& section);
+  explicit NoSectionFoundException(const std::string& section);
   ~NoSectionFoundException() override = default;
 };
 
-}  // namespace setsugen
+} // namespace setsugen

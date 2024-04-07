@@ -4,16 +4,15 @@
 
 namespace setsugen
 {
-Formatter::Formatter(const String& fmt_template)
-  : m_fmt_template(fmt_template)
+Formatter::Formatter(const std::string& fmt_template) : m_fmt_template(fmt_template)
 {
   parse_template();
 }
 
-String
+std::string
 Formatter::format(const FormatArgsStore& args) const
 {
-  StringStream result;
+  std::stringstream result;
 
   for (const auto& token: m_tokens)
   {
@@ -21,7 +20,7 @@ Formatter::format(const FormatArgsStore& args) const
     {
       case TokenType::Text:
       {
-        result << std::get<StringView>(token.details);
+        result << std::get<std::string_view>(token.details);
       }
       break;
       case TokenType::Placeholder:
@@ -35,14 +34,14 @@ Formatter::format(const FormatArgsStore& args) const
   return result.str();
 }
 
-Void
+void
 Formatter::stringify(const FormatContext& context) const
 {}
 
-Void
+void
 Formatter::parse_template()
 {
-  Size auto_index = 0;
+  size_t auto_index = 0;
 
   auto iter        = m_fmt_template.begin();
   auto check_point = iter;
@@ -58,7 +57,7 @@ Formatter::parse_template()
       {
         FormatToken token{};
         token.type    = TokenType::Text;
-        token.details = StringView{check_point, iter};
+        token.details = std::string_view{check_point, iter};
         m_tokens.push_back(token);
         ++iter;
         continue;
@@ -69,7 +68,7 @@ Formatter::parse_template()
       {
         FormatToken token{};
         token.type    = TokenType::Text;
-        token.details = StringView{check_point, iter};
+        token.details = std::string_view{check_point, iter};
         m_tokens.push_back(token);
       }
 
@@ -98,13 +97,13 @@ Formatter::parse_template()
   {
     FormatToken token{};
     token.type    = TokenType::Text;
-    token.details = StringView{check_point, end};
+    token.details = std::string_view{check_point, end};
     m_tokens.push_back(token);
   }
 }
 
-Void
-parse_index(const String& index, Size& auto_index, FormatPlaceholder& placeholder)
+void
+parse_index(const std::string& index, size_t& auto_index, FormatPlaceholder& placeholder)
 {
   if (index.empty())
   {
@@ -115,7 +114,7 @@ parse_index(const String& index, Size& auto_index, FormatPlaceholder& placeholde
   {
     try
     {
-      placeholder.index = static_cast<Size>(std::stoi(index));
+      placeholder.index = static_cast<size_t>(std::stoi(index));
     }
     catch (const std::invalid_argument&)
     {
@@ -125,19 +124,19 @@ parse_index(const String& index, Size& auto_index, FormatPlaceholder& placeholde
 }
 
 FormatPlaceholder
-Formatter::parse_placeholder(StringIter& start, StringIter end, Size& auto_index)
+Formatter::parse_placeholder(StringIter start, StringIter end, size_t& auto_index)
 {
   FormatPlaceholder placeholder{};
 
   auto iter  = start;
-  Bool colon = false;
+  bool colon = false;
   while (iter != end)
   {
     if (*iter == ':')
     {
-      parse_index(String{start + 1, iter}, auto_index, placeholder);
+      parse_index(std::string{start + 1, iter}, auto_index, placeholder);
 
-      placeholder.format = StringView{iter + 1, end};
+      placeholder.format = std::string_view{iter + 1, end};
       placeholder.specs  = parse_specs(placeholder.format);
       colon              = true;
       break;
@@ -148,26 +147,26 @@ Formatter::parse_placeholder(StringIter& start, StringIter end, Size& auto_index
 
   if (!colon)
   {
-    parse_index(String{start + 1, iter}, auto_index, placeholder);
-    placeholder.format = StringView{};
+    parse_index(std::string{start + 1, iter}, auto_index, placeholder);
+    placeholder.format = std::string_view{};
     placeholder.specs  = {};
   }
 
   return placeholder;
 }
 
-Void
-Formatter::emplace_placeholder(StringStream&            ss, const FormatArgsStore& args,
+void
+Formatter::emplace_placeholder(std::stringstream& ss, const FormatArgsStore& args,
                                const FormatPlaceholder& placeholder) const
 {
   const auto& desc = args.get(placeholder.index);
-  desc.fmt_call(ss, desc.data, placeholder);
+  desc(ss, placeholder);
 }
 
-UnorderedMap<Char, StringView>
-Formatter::parse_specs(StringView format)
+std::unordered_map<char, std::string_view>
+Formatter::parse_specs(std::string_view format)
 {
-  UnorderedMap<Char, StringView> specs;
+  std::unordered_map<char, std::string_view> specs;
 
   auto iter        = format.begin();
   auto end         = format.end();
@@ -179,7 +178,7 @@ Formatter::parse_specs(StringView format)
     {
       if (auto next = check_point + 1; next != end && *next == '=')
       {
-        specs[*check_point] = StringView{check_point + 2, iter};
+        specs[*check_point] = std::string_view{check_point + 2, iter};
         check_point         = iter + 1;
       }
       else
@@ -195,7 +194,7 @@ Formatter::parse_specs(StringView format)
   {
     if (const auto next = check_point + 1; next != end && *next == '=')
     {
-      specs[*check_point] = StringView{check_point + 2, iter};
+      specs[*check_point] = std::string_view{check_point + 2, iter};
     }
     else
     {
@@ -204,5 +203,11 @@ Formatter::parse_specs(StringView format)
   }
 
   return specs;
+}
+
+const std::string&
+Formatter::get_template() const
+{
+  return m_fmt_template;
 }
 } // namespace setsugen

@@ -5,16 +5,17 @@
 namespace setsugen::impl__
 {
 
-ConfigurationSource_Yaml::ConfigurationSource_Yaml()
-    : mp_root {}
+ConfigurationSource_Yaml::ConfigurationSource_Yaml() : mp_root{}
 {}
 
-Void ConfigurationSource_Yaml::load(std::istream& stream)
+void
+ConfigurationSource_Yaml::load(std::istream& stream)
 {
   mp_root = std::make_unique<YAML::Node>(YAML::Load(stream));
 }
 
-String ConfigurationSource_Yaml::get_config(const String& section, const String& key)
+std::string
+ConfigurationSource_Yaml::get_config(const std::string& section, const std::string& key)
 {
   auto root = *this->mp_root;
 
@@ -25,4 +26,4 @@ String ConfigurationSource_Yaml::get_config(const String& section, const String&
   return {};
 }
 
-}  // namespace setsugen::impl__
+} // namespace setsugen::impl__

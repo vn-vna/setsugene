@@ -9,7 +9,7 @@ namespace lib
 template <typename T>
 void do_sth(T value)
 {
-  std::cout << "Called with type: " << typeid(T).raw_name() << std::endl;
+  std::cout << "Called with type: " << typeid(T).name() << std::endl;
 }
 
 template void do_sth(int8_t);
