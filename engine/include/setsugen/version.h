@@ -10,7 +10,7 @@
 
 namespace setsugen
 {
-class  Version
+class Version
 {
 public:
   Version();

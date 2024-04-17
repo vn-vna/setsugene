@@ -1,7 +1,13 @@
 #pragma once
 
-#include <setsugen/format.h>
 #include <setsugen/pch.h>
+
+#include <setsugen/executor.h>
+#include <setsugen/format.h>
+#include <setsugen/logger.h>
+
+#include <memory>
+
 
 namespace setsugen
 {
@@ -13,13 +19,16 @@ class Component;
 class Camera;
 class MeshData;
 
-class  Scene final
+class Scene final
 {
 public:
-  Scene(const std::string& name);
-  Scene(const Scene&);
+  explicit Scene(const std::string& name);
+
+  Scene(const Scene&) = delete;
+
   Scene(Scene&&) noexcept;
-  ~Scene() = default;
+
+  ~Scene() noexcept;
 
   const std::string& get_name() const;
 
@@ -79,6 +88,12 @@ public:
   MeshData* get_meshdata(const std::string& path) const;
 
   /**
+   * Get all mesh data in the scene.
+   * @return a dynamic array of observers to the mesh data
+   */
+  std::vector<MeshData*> get_all_meshdata() const;
+
+  /**
    * Get the number of entities in the scene.
    * @return entity count
    */
@@ -91,17 +106,32 @@ public:
    */
   Entity* create_entity(const std::string& name, Entity* parent = nullptr);
 
+  /**
+   * Get all entities in the scene.
+   * @return a dynamic array of observers to the entities
+   */
+  std::vector<Entity*> get_entities() const;
+
+  /** Check if the scene is loaded. */
+  bool is_loaded() const;
+
+  /** Update the scene. */
+  void update();
+
 private:
   Camera*                                                    m_main_camera;
   std::string                                                m_name;
   std::unordered_map<size_t, std::unique_ptr<Entity>>        m_entities;
   std::unordered_set<Entity*>                                m_root_entities;
   std::unordered_map<std::string, std::unique_ptr<MeshData>> m_meshdata;
+  std::unique_ptr<Executor<FixedThreadPoolExecutor>>         m_executor;
+  std::shared_ptr<Logger>                                    m_logger;
+  std::atomic<bool>                                          m_loaded;
 
   friend class Entity;
 };
 
-class  SceneManager final
+class SceneManager final
 {
 public:
   using SceneMapping = std::unordered_map<std::string, std::unique_ptr<Scene>>;
@@ -122,5 +152,10 @@ private:
 
 template<>
 class Stringify<Scene>
-{};
+{
+  static void stringify(const FormatContext& context, const Scene& value)
+  {
+    context.result << "[[Scene: name = " << value.get_name() << "]]";
+  }
+};
 } // namespace setsugen

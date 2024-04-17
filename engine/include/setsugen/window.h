@@ -30,7 +30,7 @@ enum class WindowEventMode
   Wait
 };
 
-class  WindowCommandQueue
+class WindowCommandQueue
 {
 public:
   WindowCommandQueue();
@@ -48,7 +48,7 @@ private:
   friend class Window;
 };
 
-class  Window
+class Window
 {
 public:
   using Handler = void*;
@@ -58,10 +58,9 @@ public:
 
   static std::unique_ptr<Window> create(const std::string& title, int width, int height);
 
-  std::shared_ptr<RenderTarget> create_render_target();
-  Dim2I                         get_size() const;
-  Dim2I                         get_framebuffer_size() const;
-  bool                          is_visible() const;
+  Dim2I get_size() const;
+  Dim2I get_framebuffer_size() const;
+  bool  is_visible() const;
 
   void set_event_mode(WindowEventMode event_mode);
   void set_title(const std::string& title);
@@ -69,20 +68,27 @@ public:
 
   void show_window();
   void hide_window();
+
+  void loop();
   void join();
 
   Handler get_handler() const;
 
 private:
+  std::unique_ptr<RenderTarget> create_render_target();
+
   void window_thread_func(const char* title, int width, int height);
 
   void*                         m_handler;
   std::thread                   m_thread;
+  std::function<void()>         m_main_loop;
   WindowEventMode               m_event_mode;
   WindowCommandQueue            m_command_queue;
   std::shared_ptr<InputManager> m_input_manager;
-  std::shared_ptr<Renderer>     m_renderer;
+  Renderer*                     m_renderer;
   std::shared_ptr<Logger>       m_logger;
+  std::condition_variable       m_window_ready_condition;
+  std::mutex                    m_window_ready_mutex;
 
   friend class WindowCommandQueue;
 };

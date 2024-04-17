@@ -17,9 +17,7 @@ class FormatArgsStore;
 
 template<typename T>
 concept StringConstructable = requires(T&& t) {
-  {
-    std::string{std::forward<T>(t)}
-  };
+  { std::string{std::forward<T>(t)} };
 };
 
 template<typename T>
@@ -28,9 +26,7 @@ concept Formattable = []() constexpr
   using ErasedType = std::remove_cvref_t<T>;
 
   return requires(const FormatContext& context, const ErasedType& value) {
-    {
-      Stringify<ErasedType>::stringify(context, value)
-    };
+    { Stringify<ErasedType>::stringify(context, value) };
   };
 }();
 
@@ -65,7 +61,7 @@ struct FormatContext
   FormatPlaceholder  placeholder;
 };
 
-class  ArgDescription
+class ArgDescription
 {
 public:
   using FmtCall = std::function<void(std::stringstream&, const void*, const FormatPlaceholder&)>;
@@ -103,7 +99,7 @@ private:
   FmtCall m_fmt_call;
 };
 
-class  FormatArgsStore final
+class FormatArgsStore final
 {
 public:
   FormatArgsStore();
@@ -165,7 +161,7 @@ private:
 };
 
 
-class  Formatter final
+class Formatter final
 {
 public:
   using SpecsMapping = FormatPlaceholder::SpecsMapping;

@@ -1,4 +1,5 @@
 #include <setsugen/entity.h>
+#include <setsugen/scripting.h>
 
 namespace setsugen
 {
@@ -64,5 +65,24 @@ size_t
 Entity::id_of(Entity* entity)
 {
   return std::hash<Entity*>()(entity);
+}
+
+void
+Entity::update()
+{
+  for (const auto& [id, comp]: m_components)
+  {
+    auto behaviour = dynamic_cast<Behavior*>(comp.get());
+
+    if (behaviour)
+    {
+      behaviour->update();
+    }
+  }
+
+  for (const auto& [id, entity]: m_children)
+  {
+    entity->update();
+  }
 }
 } // namespace setsugen

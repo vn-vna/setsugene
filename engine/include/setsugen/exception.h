@@ -13,8 +13,7 @@ class SetsugenException : public std::runtime_error
 public:
   template<typename... Args>
   explicit SetsugenException(const std::string& message, Args&&... args)
-      : m_message(Formatter::format(message, std::forward<Args>(args)...).c_str()),
-        std::runtime_error(m_message.c_str())
+      : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...))
   {}
 
   ~SetsugenException() override = default;
@@ -23,9 +22,6 @@ public:
   {
     return "SetsugenException";
   }
-
-private:
-  std::string m_message;
 };
 
 class NotImplementedException : public SetsugenException
@@ -133,7 +129,7 @@ class Stringify<Ex>
 public:
   static void stringify(const FormatContext& context, const Ex& value)
   {
-    context.result << "[[ Exception: type = " << value.exception_type() << " ,message = " << value.what() << " ]]";
+    context.result << "[[ Exception: type = " << value.exception_type() << ", message = " << value.what() << " ]]";
   }
 };
 

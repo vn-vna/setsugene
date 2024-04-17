@@ -10,7 +10,7 @@ namespace setsugen
 
 class Scene;
 
-class  Entity
+class Entity
 {
 public:
   using ComponentManager = std::unordered_map<size_t, std::unique_ptr<Component>>;
@@ -79,6 +79,7 @@ protected:
   ComponentManager m_components;
 
   friend class Scene;
+  void update();
 };
 
 template<>

@@ -14,6 +14,7 @@
 
 namespace setsugen
 {
+
 enum class LogLevel;
 struct LogData;
 class LogAppender;
@@ -39,7 +40,7 @@ struct LogData
   std::string tag;
 };
 
-class  LogAppender
+class LogAppender
 {
 public:
   struct AppenderSettings
@@ -69,13 +70,13 @@ public:
   static std::shared_ptr<LogAppender> create_console_appender(const std::string& name,
                                                               const std::string& format = DEFAULT_FORMAT);
 
-  static constexpr const char* DEFAULT_FORMAT = "[{level:w=6}] {tag:w=30} :: {message}";
+  static constexpr const char* DEFAULT_FORMAT = "[{level:w=6}] {tag:w=40} ->> {message}";
 
 protected:
   AppenderSettings m_settings;
 };
 
-class  LogAppenderMapping
+class LogAppenderMapping
 {
 public:
   using AppenderList        = std::list<std::shared_ptr<LogAppender>>;
@@ -108,7 +109,7 @@ private:
   AppenderLookupTable m_lookup_table;
 };
 
-class  Logger
+class Logger
 {
 public:
   struct LoggerSettings
@@ -178,7 +179,7 @@ private:
   LoggerSettings& m_settings;
 };
 
-class  LoggerFactory
+class LoggerFactory
 {
 public:
   LoggerFactory();
@@ -194,7 +195,7 @@ private:
   Logger::LoggerSettings m_settings;
 };
 
-class  ConsoleLogAppender : virtual public LogAppender
+class ConsoleLogAppender : virtual public LogAppender
 {
 public:
   ConsoleLogAppender(const std::string& name, const std::string& format = LogAppender::DEFAULT_FORMAT);
@@ -224,4 +225,5 @@ public:
     }
   }
 };
+
 } // namespace setsugen

@@ -4,6 +4,14 @@
 
 namespace setsugen
 {
+
 class Behavior : public Component
-{};
+{
+public:
+  Behavior(Entity* entity);
+  ~Behavior() override;
+
+  virtual void update() = 0;
+};
+
 } // namespace setsugen

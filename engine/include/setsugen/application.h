@@ -46,7 +46,7 @@ struct ApplicationDescription
  * and description. Once all of these fields have been set, the application can be built by calling
  * the build() method.
  */
-class  ApplicationBuilder
+class ApplicationBuilder
 {
 public:
   using LoggerConfigCallback = std::function<void(ApplicationBuilder&, LoggerFactory&)>;
@@ -70,19 +70,22 @@ private:
   LoggerFactory          m_logger_factory;
 };
 
-class  Application
+class Application
 {
 public:
   Application();
   virtual ~Application();
 
-  virtual void run() = 0;
+  virtual Application* run() = 0;
+  virtual Application* join() = 0;
 
   virtual std::shared_ptr<Logger> create_logger(const std::string& name) const = 0;
   virtual Window*                 get_window()                                 = 0;
   virtual SceneManager*           get_scene_manager()                          = 0;
 
   static Application* current_app();
+  static std::string  get_assets_path();
+  static std::string  get_root_path();
 
 protected:
   static std::atomic<Application*> s_current_app;

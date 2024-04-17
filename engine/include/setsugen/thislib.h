@@ -7,7 +7,7 @@
 namespace setsugen
 {
 
-class  ThisLibrary final
+class ThisLibrary final
 {
 public:
   using UnloadEventCallback = std::function<void()>;

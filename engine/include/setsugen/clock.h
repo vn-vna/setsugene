@@ -10,7 +10,7 @@
 
 namespace setsugen
 {
-class  Duration final
+class Duration final
 {
 public:
   explicit Duration(unsigned long long duration = 0);
@@ -34,7 +34,7 @@ private:
   friend class TimePoint;
 };
 
-class  TimePoint final
+class TimePoint final
 {
 public:
   TimePoint(unsigned long long timepoint = 0);

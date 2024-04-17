@@ -8,6 +8,7 @@
 
 // Dpenedency headers
 #include <glfw/glfw3.h>
+#include <setsugen/transform.h>
 
 // Private headers
 #include "setsugen/camera.h"
@@ -19,12 +20,12 @@ constexpr auto window_wait_event_timeout = 0.1;
 namespace setsugen
 {
 Window::Window(const std::string& title, int width, int height)
-    : m_handler{nullptr}, m_event_mode{WindowEventMode::Polling}
+    : m_handler{nullptr}, m_event_mode{WindowEventMode::Polling}, m_window_ready_condition{}, m_window_ready_mutex{}
 {
   auto app = Application::current_app();
   m_logger = app->create_logger("setsugen::Window");
 
-  auto threadfn = [=, this]
+  m_main_loop = [=, this]
   {
     try
     {
@@ -39,13 +40,11 @@ Window::Window(const std::string& title, int width, int height)
       m_logger->error("An unknown error occurred in the window thread");
     }
   };
-
-  m_thread = std::thread{threadfn};
 }
 
 Window::~Window() = default;
 
-std::shared_ptr<RenderTarget>
+std::unique_ptr<RenderTarget>
 Window::create_render_target()
 {
   return RenderTarget::create_window_target(this);
@@ -109,6 +108,19 @@ Window::join()
   m_thread.join();
 }
 
+void
+Window::loop()
+{
+  m_thread = std::thread{m_main_loop};
+
+  m_logger->trace("Waiting for window to be ready");
+
+  std::unique_lock<std::mutex> lock{m_window_ready_mutex};
+  m_window_ready_condition.wait(lock);
+
+  m_logger->trace("Window is ready");
+}
+
 Window::Handler
 Window::get_handler() const
 {
@@ -118,42 +130,55 @@ Window::get_handler() const
 void
 Window::window_thread_func(const char* title, int width, int height)
 {
-  GLFWwindow* handler = GlfwInstance::get_instance()->create_default_window();
-  m_handler           = handler;
+  std::unique_ptr<Renderer> renderer;
 
-  if (!m_handler)
   {
-    throw InvalidStateException{"Cannot instantiate a new window"};
+    std::lock_guard<std::mutex> lock{m_window_ready_mutex};
+
+    m_logger->trace("Initializing window");
+
+    GLFWwindow* handler = GlfwInstance::get_instance()->create_default_window();
+    m_handler           = handler;
+
+    if (!m_handler)
+    {
+      throw InvalidStateException{"Cannot instantiate a new window"};
+    }
+
+    glfwSetWindowTitle(handler, title);
+    glfwSetWindowSize(handler, width, height);
+
+    m_logger->trace("Window created successfully");
+
+    renderer = RendererBuilder::create()
+                        ->with_render_target(create_render_target())
+                        ->with_vertex_shader("test.vert")
+                        ->with_fragment_shader("test.frag")
+                        ->with_topology(Topology::TriangleList)
+                        ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
+                        ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
+                        ->add_color_blend({false, ColorFlag{true, true, true, true}})
+                        ->set_vertex_buffer_layouts({{VertexElement::Position, VertexElement::Normal}})
+                        ->set_uniform_buffer_layouts({{
+                                                          UniformStage::Vertex,
+                                                          {UniformElement::View, UniformElement::Projection},
+                                                      },
+                                                      {
+                                                          UniformStage::Vertex,
+                                                          {UniformElement::Model},
+                                                      }})
+                        ->build();
+
+    m_renderer = renderer.get();
+
+    m_logger->trace("Initializing window complete");
   }
 
-  glfwSetWindowTitle(handler, title);
-  glfwSetWindowSize(handler, width, height);
-
-  m_logger->info("Window created successfully");
-
-  const auto render_target = this->create_render_target();
-  const auto renderer      = RendererBuilder::create()
-                            ->with_render_target(render_target.get())
-                            ->with_vertex_shader("test.vert")
-                            ->with_fragment_shader("test.frag")
-                            ->with_topology(Topology::TriangleList)
-                            ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
-                            ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
-                            ->add_color_blend({false, ColorFlag{true, true, true, true}})
-                            ->build();
-
-  const auto scene         = std::make_shared<Scene>("MAIN");
-  const auto entity        = scene->create_entity("Root");
-  const auto entity_camera = scene->create_entity("Camera");
-
-  entity->add_component<Mesh>("/user/mesh/untitled.fbx");
-  const auto camera = entity_camera->add_component<PerspectiveCamera>();
-  scene->set_main_camera(camera);
-
-  scene->load();
-
-  while (!glfwWindowShouldClose(handler))
+  while (!glfwWindowShouldClose((GLFWwindow*) m_handler))
   {
+    auto begin_time = std::chrono::high_resolution_clock::now();
+
+    m_window_ready_condition.notify_all();
     m_command_queue.execute();
 
     switch (m_event_mode)
@@ -171,13 +196,25 @@ Window::window_thread_func(const char* title, int width, int height)
       default: break;
     }
 
-    renderer->render(scene.get());
+    m_renderer->render();
+    auto crr_scene = Application::current_app()->get_scene_manager()->get_current_scene();
+    if (crr_scene)
+    {
+      crr_scene->update();
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count();
+    auto sleep_time = 16 - elapsed_time;
+
+    if (sleep_time > 0)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+    }
   }
 
-  scene->unload();
-
-  renderer->cleanup();
-  glfwDestroyWindow(handler);
+  m_renderer->cleanup();
+  glfwDestroyWindow((GLFWwindow*) m_handler);
 }
 
 std::unique_ptr<Window>
@@ -185,4 +222,5 @@ Window::create(const std::string& title, int width, int height)
 {
   return std::make_unique<Window>(title, width, height);
 }
+
 } // namespace setsugen

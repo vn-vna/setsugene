@@ -32,7 +32,7 @@ BraceWrapping:
 BreakBeforeBraces: Custom
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IncludeCategories: 
   - Regex: '^<.*'
     Priority: 1

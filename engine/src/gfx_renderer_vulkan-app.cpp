@@ -3,12 +3,12 @@
 namespace setsugen
 {
 #ifndef NDEBUG
-static constexpr bool enable_validation_layers = true;
+static constexpr bool enable_validation_layers = false;
 #else
 static constexpr bool enable_validation_layers = false;
 #endif
 
-std::atomic<VulkanApplication*> VulkanApplication::s_current_app;
+std::atomic<GfxApplication*> GfxApplication::s_current_app;
 
 static const std::vector<const char*> s_validation_layers = {
     "VK_LAYER_KHRONOS_validation",
@@ -55,7 +55,7 @@ DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debu
   }
 }
 
-VulkanApplication::VulkanApplication() : m_instance{nullptr}, m_debug_messenger{nullptr}, m_physical_device_index{-1}
+GfxApplication::GfxApplication() : m_instance{nullptr}, m_debug_messenger{nullptr}, m_physical_device_index{-1}
 {
   if (s_current_app)
   {
@@ -70,7 +70,7 @@ VulkanApplication::VulkanApplication() : m_instance{nullptr}, m_debug_messenger{
   create_logical_device();
 }
 
-VulkanApplication::~VulkanApplication()
+GfxApplication::~GfxApplication()
 {
   vkDestroyDevice(m_logical_device, nullptr);
 
@@ -85,37 +85,37 @@ VulkanApplication::~VulkanApplication()
 }
 
 VkInstance
-VulkanApplication::get_instance() const
+GfxApplication::get_instance() const
 {
   return m_instance;
 }
 
-VulkanApplication::QueueFamilyIndices
-VulkanApplication::get_queue_family_indices() const
+GfxApplication::QueueFamilyIndices
+GfxApplication::get_queue_family_indices() const
 {
   return m_queue_family_indices;
 }
 
 VkQueue
-VulkanApplication::get_graphics_queue() const
+GfxApplication::get_graphics_queue() const
 {
   return m_graphics_queue;
 }
 
 VkQueue
-VulkanApplication::get_present_queue() const
+GfxApplication::get_present_queue() const
 {
   return m_present_queue;
 }
 
 VkDevice
-VulkanApplication::get_logical_device() const
+GfxApplication::get_logical_device() const
 {
   return m_logical_device;
 }
 
 void
-VulkanApplication::initialize_instance()
+GfxApplication::initialize_instance()
 {
   VkApplicationInfo app_info{};
   app_info.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -145,7 +145,7 @@ VulkanApplication::initialize_instance()
 }
 
 std::vector<const char*>
-VulkanApplication::get_instance_layers()
+GfxApplication::get_instance_layers()
 {
   std::vector<const char*> layers;
 
@@ -163,7 +163,7 @@ VulkanApplication::get_instance_layers()
 }
 
 bool
-VulkanApplication::check_layers_support(const std::vector<const char*>& layers)
+GfxApplication::check_layers_support(const std::vector<const char*>& layers)
 {
   unsigned int available_layer_count;
   vkEnumerateInstanceLayerProperties(&available_layer_count, nullptr);
@@ -193,14 +193,13 @@ VulkanApplication::check_layers_support(const std::vector<const char*>& layers)
 }
 
 std::vector<const char*>
-VulkanApplication::get_instance_extensions()
+GfxApplication::get_instance_extensions()
 {
   std::vector<const char*> extensions;
 
 #ifdef SETSUGENE_WINDOWS
   extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
   extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-  extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
   if constexpr (enable_validation_layers)
@@ -217,7 +216,7 @@ VulkanApplication::get_instance_extensions()
 }
 
 bool
-VulkanApplication::check_extensions_support(const std::vector<const char*>& extensions)
+GfxApplication::check_extensions_support(const std::vector<const char*>& extensions)
 {
   unsigned int extensionCount;
   vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -232,6 +231,7 @@ VulkanApplication::check_extensions_support(const std::vector<const char*>& exte
     {
       if (strcmp(extensionName, extension.extensionName) == 0)
       {
+        std::cout << "Found extension: " << extension.extensionName << "\n";
         extensionFound = true;
         break;
       }
@@ -247,7 +247,7 @@ VulkanApplication::check_extensions_support(const std::vector<const char*>& exte
 }
 
 void
-VulkanApplication::setup_debug_messenger()
+GfxApplication::setup_debug_messenger()
 {
   if (!enable_validation_layers)
   {
@@ -276,7 +276,7 @@ VulkanApplication::setup_debug_messenger()
 }
 
 void
-VulkanApplication::query_physical_devices()
+GfxApplication::query_physical_devices()
 {
   unsigned int device_count = 0;
   vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
@@ -303,7 +303,7 @@ VulkanApplication::query_physical_devices()
 }
 
 bool
-VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device)
+GfxApplication::check_physical_device_extensions(VkPhysicalDevice device)
 {
   unsigned int extension_count;
   vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
@@ -321,7 +321,7 @@ VulkanApplication::check_physical_device_extensions(VkPhysicalDevice device)
 }
 
 int
-VulkanApplication::auto_select_physical_device()
+GfxApplication::auto_select_physical_device()
 {
   for (unsigned int i = 0; i < m_physical_devices.size(); ++i)
   {
@@ -352,7 +352,7 @@ VulkanApplication::auto_select_physical_device()
 }
 
 VkPhysicalDevice
-VulkanApplication::get_physical_device() const
+GfxApplication::get_physical_device() const
 {
   if (m_physical_device_index < 0)
   {
@@ -362,8 +362,8 @@ VulkanApplication::get_physical_device() const
   return m_physical_devices[m_physical_device_index];
 }
 
-VulkanApplication::QueueFamilyIndices
-VulkanApplication::find_queue_families(VkPhysicalDevice device) const
+GfxApplication::QueueFamilyIndices
+GfxApplication::find_queue_families(VkPhysicalDevice device) const
 {
   QueueFamilyIndices indices;
 
@@ -405,7 +405,7 @@ VulkanApplication::find_queue_families(VkPhysicalDevice device) const
 }
 
 void
-VulkanApplication::create_logical_device()
+GfxApplication::create_logical_device()
 {
   std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
   std::set<unsigned int>               unique_queue_families = {m_queue_family_indices.graphics_family.value(),
@@ -466,15 +466,51 @@ VulkanApplication::create_logical_device()
   }
 }
 
-VulkanApplication*
-VulkanApplication::get_current()
+GfxApplication*
+GfxApplication::get_current()
 {
   return s_current_app;
 }
 
-std::unique_ptr<VulkanApplication>
-VulkanApplication::create()
+std::unique_ptr<GfxApplication>
+GfxApplication::create()
 {
-  return std::make_unique<VulkanApplication>();
+  return std::make_unique<GfxApplication>();
 }
+
+unsigned int
+GfxApplication::find_memory_type(unsigned int type_filter, VkMemoryPropertyFlags properties) const
+{
+  VkPhysicalDeviceMemoryProperties memory_properties;
+  vkGetPhysicalDeviceMemoryProperties(get_physical_device(), &memory_properties);
+
+  for (unsigned int i = 0; i < memory_properties.memoryTypeCount; ++i)
+  {
+    if ((type_filter & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & properties) == properties)
+    {
+      return i;
+    }
+  }
+
+  throw EngineException("Failed to find suitable memory type");
+}
+
+void
+GfxApplication::execute_one_time_commands(VkQueue queue, const std::vector<GfxCommandBuffer*>& commands)
+{
+  std::vector<VkCommandBuffer> command_buffers;
+  for (const auto& command: commands)
+  {
+    command_buffers.push_back(command->get_handler());
+  }
+
+  VkSubmitInfo submit_info{};
+  submit_info.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  submit_info.commandBufferCount = static_cast<unsigned int>(command_buffers.size());
+  submit_info.pCommandBuffers    = command_buffers.data();
+
+  vkQueueSubmit(queue, 1, &submit_info, VK_NULL_HANDLE);
+  vkQueueWaitIdle(queue);
+}
+
 } // namespace setsugen

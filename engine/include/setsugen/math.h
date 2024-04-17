@@ -13,6 +13,7 @@
 
 namespace setsugen
 {
+
 enum class VectorUsage
 {
   Math,
@@ -295,7 +296,7 @@ public:
   {
     Vec result = *this;
     T   len    = length();
-    if (len != T())
+    if (len == T(0))
     {
       throw InvalidOperationException("Cannot normalize a zero vector");
     }
@@ -562,12 +563,12 @@ public:
 
   T& get(int row, int col)
   {
-    return m_data[row * DimN + col];
+    return m_data[col * DimN + row];
   }
 
   T get(int row, int col) const
   {
-    return m_data[row * DimN + col];
+    return m_data[col * DimN + row];
   }
 
   Mat& operator+=(const Mat& other)
@@ -687,9 +688,9 @@ public:
     }
     else if constexpr (DimM == 3)
     {
-      return m_data[0] * (m_data[4] * m_data[8] - m_data[5] * m_data[7]) -
-             m_data[1] * (m_data[3] * m_data[8] - m_data[5] * m_data[6]) +
-             m_data[2] * (m_data[3] * m_data[7] - m_data[4] * m_data[6]);
+      return get(0, 0) * (get(1, 1) * get(2, 2) - get(1, 2) * get(2, 1)) -
+             get(0, 1) * (get(1, 0) * get(2, 2) - get(1, 2) * get(2, 0)) +
+             get(0, 2) * (get(1, 0) * get(2, 1) - get(1, 1) * get(2, 0));
     }
     else
     {
@@ -713,7 +714,7 @@ public:
     Mat<T, IDimM, IDimN> result;
     for (int i = 0; i < IDimM; ++i)
     {
-      result.m_data[i * IDimN + i] = T(1);
+      result.get(i, i) = T(1);
     }
     return result;
   }
@@ -730,12 +731,13 @@ public:
   {
     Mat<T, IDimM, IDimN> result;
 
-    T f              = T(1) / std::tan(fov / T(2));
+    T f = T(1) / std::tan(fov * T(0.5) * std::numbers::pi_v<float> / T(180));
     result.get(0, 0) = f / aspect;
     result.get(1, 1) = f;
     result.get(2, 2) = (far + near) / (near - far);
-    result.get(2, 3) = (T(2) * far * near) / (near - far);
-    result.get(3, 2) = T(-1);
+    result.get(2, 3) = T(-1);
+    result.get(3, 2) = (T(2) * far * near) / (near - far);
+    result.get(3, 3) = T(0);
 
     return result;
   }
@@ -843,23 +845,29 @@ public:
   {
     static_assert(DimM == DimN && DimM == 4, "Look-at matrix must be square and 4x4");
 
-    Vec<T, 3> f = (center - eye).normalize();
-    Vec<T, 3> r = f.cross(up).normalize();
-    Vec<T, 3> u = r.cross(f);
-
     Mat<T, IDimM, IDimN> result = identity();
-    result.get(0, 0)            = r.x();
-    result.get(0, 1)            = r.y();
-    result.get(0, 2)            = r.z();
-    result.get(1, 0)            = u.x();
-    result.get(1, 1)            = u.y();
-    result.get(1, 2)            = u.z();
-    result.get(2, 0)            = -f.x();
-    result.get(2, 1)            = -f.y();
-    result.get(2, 2)            = -f.z();
-    result.get(0, 3)            = -r.dot(eye);
-    result.get(1, 3)            = -u.dot(eye);
-    result.get(2, 3)            = f.dot(eye);
+    // Calculate view matrix look at center from eye with up direction being up
+
+    auto fwd = (center - eye).normalize();
+    auto side = fwd.cross(up).normalize();
+    auto upv = side.cross(fwd);
+
+    result.get(0, 0) = side.x();
+    result.get(0, 1) = side.y();
+    result.get(0, 2) = side.z();
+
+    result.get(1, 0) = upv.x();
+    result.get(1, 1) = upv.y();
+    result.get(1, 2) = upv.z();
+
+    result.get(2, 0) = -fwd.x();
+    result.get(2, 1) = -fwd.y();
+    result.get(2, 2) = -fwd.z();
+
+    result.get(0, 3) = -side.dot(eye);
+    result.get(1, 3) = -upv.dot(eye);
+    result.get(2, 3) = fwd.dot(eye);
+
     return result;
   }
 

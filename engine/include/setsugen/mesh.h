@@ -20,14 +20,14 @@ public:
   void load();
   void unload();
 
-  const VerticiesArray* get_vertices() const;
+  const VerticiesArray* get_positions() const;
   const NormalsArray*   get_normals() const;
   const IndicesArray*   get_indices() const;
 
   bool is_loaded() const;
 
 private:
-  std::unique_ptr<VerticiesArray> m_vertices;
+  std::unique_ptr<VerticiesArray> m_positions;
   std::unique_ptr<NormalsArray>   m_normals;
   std::unique_ptr<IndicesArray>   m_indices;
   std::string                     m_file_path;
@@ -39,6 +39,7 @@ public:
   Mesh(Entity* entity, const std::string& file_path);
   ~Mesh() override;
 
+  MeshData*   get_meshdata() const;
   const char* get_type() override;
 
 private:

@@ -3,10 +3,6 @@
 namespace setsugen
 {
 
-class Monitor
-{
-public:
-private:
-};
+void terminate_thread(std::thread& thread);
 
 } // namespace setsugen

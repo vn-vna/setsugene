@@ -5,7 +5,6 @@
 
 namespace setsugen
 {
-struct RenderContext;
 class Window;
 class Renderer;
 class RenderTarget;
@@ -71,20 +70,32 @@ enum class VertexSize
   Size64,
 };
 
-struct VertexBindingDescription
+enum class VertexElement
 {
-  unsigned int binding = 0;
-  unsigned int stride  = 0;
+  Position,
+  Normal,
+  Uv,
 };
 
-struct VertexAttributeDescription
+enum class UniformElement
 {
-  unsigned int binding  = 0;
-  unsigned int location = 0;
-  unsigned int offset   = 0;
-  VertexFormat format   = VertexFormat::RGBA;
-  VertexType   type     = VertexType::Int;
-  VertexSize   size     = VertexSize::Size32;
+  Model,
+  View,
+  Projection,
+};
+
+enum class UniformStage
+{
+  Vertex,
+  Fragment,
+};
+
+using VertexBufferLayout = std::vector<VertexElement>;
+
+struct UniformBufferLayout
+{
+  UniformStage                stage    = UniformStage::Vertex;
+  std::vector<UniformElement> elements = {};
 };
 
 struct ViewPort
@@ -113,26 +124,79 @@ struct ColorBlend
 
 struct RendererConfig
 {
-  std::optional<std::string>              vertex_shader;
-  std::optional<std::string>              fragment_shader;
-  std::vector<VertexBindingDescription>   vertex_bindings;
-  std::vector<VertexAttributeDescription> vertex_attributes;
-  std::vector<ViewPort>                   viewports;
-  std::vector<Scissor>                    scissors;
-  std::vector<ColorBlend>                 color_blends;
-  CullMode                                cull_mode;
-  FrontFace                               front_face;
-  PolygonMode                             polygon_mode;
-  Topology                                topology;
-  Color4F                                 clear_color;
-  RenderTarget*                           render_target;
-};
+  /**
+   * @brief The vertex shader filename that will be used by the renderer.
+   * (The vertex shader file path is relative to the assets folder `assets/shaders`)
+   */
+  std::optional<std::string> vertex_shader = {};
 
-struct RenderContext
-{
-  Renderer* renderer;
-};
+  /**
+   * @brief The fragment shader filename that will be used by the renderer.
+   * (The vertex fragment file path is relative to the assets folder `assets/shaders`)
+   */
+  std::optional<std::string> fragment_shader = {};
 
+  /**
+   * @brief The vertex buffer layouts that will be used by the renderer.
+   * A renderer can have multiple vertex buffer layouts, each layout can have different vertex elements.
+   * Remember each vertex buffer element can only appear once a layout.
+   */
+  std::vector<VertexBufferLayout> vertex_buffer_layouts = {};
+
+  /**
+   * @brief The uniform buffer layouts that will be used by the renderer.
+   * A renderer can have multiple uniform buffer layouts, each layout can have different uniform elements.
+   */
+  std::vector<UniformBufferLayout> uniform_buffer_layouts = {};
+
+  /**
+   * @brief The viewports that will be used by the renderer.
+   */
+  std::vector<ViewPort> viewports = {};
+
+  /**
+   * @brief The scissors that will be used by the renderer.
+   */
+  std::vector<Scissor> scissors = {};
+
+  /**
+   * @brief The color blends that will be used by the renderer.
+   */
+  std::vector<ColorBlend> color_blends = {};
+
+  /**
+   * @brief The cull mode that will be used by the renderer.
+   */
+  CullMode cull_mode = CullMode::Front;
+
+  /**
+   * @brief The front face that will be used by the renderer.
+   * The front face is the face of the triangle that is being drawn that is considered the front face.
+   */
+  FrontFace front_face = FrontFace::CounterClockwise;
+
+  /**
+   * @brief The polygon mode that will be used by the renderer.
+   * The polygon mode determines how the rasterizer will fill the polygons.
+   */
+  PolygonMode polygon_mode = PolygonMode::Fill;
+
+  /**
+   * @brief The topology that will be used by the renderer.
+   * The topology determines how the vertices will be interpreted by the renderer.
+   */
+  Topology topology = Topology::TriangleList;
+
+  /**
+   * @brief The clear color that will be used by the renderer.
+   */
+  Color4F clear_color = {0.0f, 0.0f, 0.0f, 1.0f};
+
+  /**
+   * @brief The render target that will be used by the renderer.
+   */
+  std::unique_ptr<RenderTarget> render_target = nullptr;
+};
 
 class RenderTarget
 {
@@ -149,10 +213,10 @@ public:
   virtual RenderTargetType type() const = 0;
 
 public:
-  static  std::shared_ptr<RenderTarget> create_window_target(Window* window);
+  static std::unique_ptr<RenderTarget> create_window_target(Window* window);
 };
 
-class  RendererBuilder
+class RendererBuilder
 {
 public:
   RendererBuilder()  = default;
@@ -162,24 +226,24 @@ public:
 
   RendererBuilder* with_vertex_shader(const std::string& vertex_shader);
   RendererBuilder* with_fragment_shader(const std::string& fragment_shader);
-  RendererBuilder* with_render_target(RenderTarget* render_target);
+  RendererBuilder* with_render_target(std::unique_ptr<RenderTarget>&& render_target);
   RendererBuilder* with_topology(Topology topology);
-  RendererBuilder* add_vertex_binding(const VertexBindingDescription& vertex_binding);
-  RendererBuilder* add_vertex_attribute(const VertexAttributeDescription& vertex_attribute);
-  RendererBuilder* set_vertex_bindings(std::vector<VertexBindingDescription> vertex_bindings);
-  RendererBuilder* set_vertex_attributes(std::vector<VertexAttributeDescription> vertex_attributes);
+  RendererBuilder* add_vertex_buffer_layout(const VertexBufferLayout& layout);
+  RendererBuilder* set_vertex_buffer_layouts(std::vector<VertexBufferLayout>&& layouts);
+  RendererBuilder* add_uniform_buffer_layout(const UniformBufferLayout& layout);
+  RendererBuilder* set_uniform_buffer_layouts(std::vector<UniformBufferLayout>&& layouts);
   RendererBuilder* add_viewport(const ViewPort& viewport);
+  RendererBuilder* set_viewports(std::vector<ViewPort>&& viewports);
   RendererBuilder* add_scissor(const Scissor& scissor);
-  RendererBuilder* set_viewports(std::vector<ViewPort> viewports);
-  RendererBuilder* set_scissors(std::vector<Scissor> scissors);
+  RendererBuilder* set_scissors(std::vector<Scissor>&& scissors);
   RendererBuilder* add_color_blend(const ColorBlend& color_blend);
-  RendererBuilder* set_color_blends(std::vector<ColorBlend> color_blends);
+  RendererBuilder* set_color_blends(std::vector<ColorBlend>&& color_blends);
   RendererBuilder* set_cull_mode(CullMode cull_mode);
   RendererBuilder* set_front_face(FrontFace front_face);
   RendererBuilder* set_polygon_mode(PolygonMode polygon_mode);
   RendererBuilder* with_clear_color(const Color4F& clear_color);
 
-  std::shared_ptr<Renderer> build();
+  std::unique_ptr<Renderer> build();
 
 private:
   RendererConfig m_config;
@@ -190,7 +254,8 @@ class Renderer
 public:
   virtual ~Renderer() = default;
 
-  virtual void render(Scene*) = 0;
-  virtual void cleanup()      = 0;
+  virtual void render() = 0;
+  virtual void cleanup()            = 0;
 };
+
 } // namespace setsugen

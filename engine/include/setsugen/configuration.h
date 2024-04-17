@@ -11,11 +11,9 @@
 
 namespace setsugen
 {
-class Configuration;
 class ConfigurationSource;
-class ConfigurationBuilder;
 
-class  Configuration
+class Configuration
 {
 public:
   Configuration();

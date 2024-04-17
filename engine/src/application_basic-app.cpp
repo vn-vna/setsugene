@@ -10,7 +10,8 @@ BasicApplication::BasicApplication(ApplicationDescription&& app_desc) : m_descri
   m_logger_factory->add_appender(console_appender);
 
   m_glfw_instance = GlfwInstance::create();
-  m_vulkan_app    = VulkanApplication::create();
+  m_vulkan_app    = GfxApplication::create();
+  m_scene_manager = std::make_unique<SceneManager>();
 
   const auto& [title, width, height] = this->m_description.window_config;
   m_window                           = Window::create(title, width, height);
@@ -18,13 +19,13 @@ BasicApplication::BasicApplication(ApplicationDescription&& app_desc) : m_descri
 
 BasicApplication::~BasicApplication() = default;
 
-void
+Application*
 BasicApplication::run()
 {
   try
   {
     m_window->show_window();
-    m_window->join();
+    m_window->loop();
   }
   catch (const SetsugenException& e)
   {
@@ -34,6 +35,15 @@ BasicApplication::run()
   {
     std::cerr << "An unknown error occurred" << std::endl;
   }
+
+  return this;
+}
+
+Application*
+BasicApplication::join()
+{
+  m_window->join();
+  return this;
 }
 
 std::shared_ptr<Logger>
@@ -48,7 +58,7 @@ BasicApplication::get_window()
   return m_window.get();
 }
 
-VulkanApplication*
+GfxApplication*
 BasicApplication::get_vulkan_app()
 {
   return m_vulkan_app.get();
@@ -57,6 +67,6 @@ BasicApplication::get_vulkan_app()
 SceneManager*
 BasicApplication::get_scene_manager()
 {
-  return nullptr;
+  return m_scene_manager.get();
 }
 } // namespace setsugen

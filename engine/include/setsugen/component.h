@@ -7,7 +7,7 @@ namespace setsugen
 {
 class Entity;
 
-class  Component
+class Component
 {
 public:
   Component(Entity* entity);

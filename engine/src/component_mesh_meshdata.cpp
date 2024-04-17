@@ -1,4 +1,5 @@
 
+#include <setsugen/application.h>
 #include <setsugen/entity.h>
 #include <setsugen/mesh.h>
 #include <setsugen/platform.h>
@@ -19,7 +20,7 @@ MeshData::load()
 {
   Assimp::Importer importer;
 
-  auto abs_path = get_assets_path() + m_file_path;
+  auto abs_path = Application::get_assets_path() + m_file_path;
   auto scene    = importer.ReadFile(abs_path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -28,9 +29,9 @@ MeshData::load()
   }
 
   // Load vertices and normals
-  m_vertices = std::make_unique<VerticiesArray>();
-  m_normals  = std::make_unique<NormalsArray>();
-  m_indices  = std::make_unique<IndicesArray>();
+  m_positions = std::make_unique<VerticiesArray>();
+  m_normals   = std::make_unique<NormalsArray>();
+  m_indices   = std::make_unique<IndicesArray>();
 
   unsigned int last_vertex_index = 0;
 
@@ -40,7 +41,7 @@ MeshData::load()
     for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
     {
       const auto& [vx, vy, vz] = mesh->mVertices[j];
-      m_vertices->emplace_back(vx, vy, vz);
+      m_positions->emplace_back(vx, vy, vz);
       const auto& [nx, ny, nz] = mesh->mNormals[j];
       m_normals->emplace_back(nx, ny, nz);
     }
@@ -61,15 +62,15 @@ MeshData::load()
 void
 MeshData::unload()
 {
-  m_vertices.reset();
+  m_positions.reset();
   m_normals.reset();
   m_indices.reset();
 }
 
 const MeshData::VerticiesArray*
-MeshData::get_vertices() const
+MeshData::get_positions() const
 {
-  return m_vertices.get();
+  return m_positions.get();
 }
 
 const MeshData::NormalsArray*
@@ -87,7 +88,7 @@ MeshData::get_indices() const
 bool
 MeshData::is_loaded() const
 {
-  return m_vertices && m_normals && m_indices;
+  return m_positions && m_normals && m_indices;
 }
 
 } // namespace setsugen

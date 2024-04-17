@@ -5,8 +5,8 @@
 
 namespace setsugen
 {
-VulkanWindowRenderTarget::VulkanWindowRenderTarget(Window* window)
-    : m_window{window}, m_vulkan_app{VulkanApplication::get_current()}
+GfxWindowRenderTarget::GfxWindowRenderTarget(Window* window)
+    : m_window{window}, m_vulkan_app{GfxApplication::get_current()}
 {
   m_logical_device = m_vulkan_app->get_logical_device();
 
@@ -15,7 +15,7 @@ VulkanWindowRenderTarget::VulkanWindowRenderTarget(Window* window)
   create_image_views();
 }
 
-VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
+GfxWindowRenderTarget::~GfxWindowRenderTarget()
 {
   for (const auto image_view: m_swapchain_image_views)
   {
@@ -27,15 +27,15 @@ VulkanWindowRenderTarget::~VulkanWindowRenderTarget()
 }
 
 void
-VulkanWindowRenderTarget::resize(int width, int height)
+GfxWindowRenderTarget::resize(int width, int height)
 {}
 
 void
-VulkanWindowRenderTarget::present()
+GfxWindowRenderTarget::present()
 {}
 
 int
-VulkanWindowRenderTarget::width() const
+GfxWindowRenderTarget::width() const
 {
   int width;
   glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), &width, nullptr);
@@ -43,7 +43,7 @@ VulkanWindowRenderTarget::width() const
 }
 
 int
-VulkanWindowRenderTarget::height() const
+GfxWindowRenderTarget::height() const
 {
   int height;
   glfwGetFramebufferSize(static_cast<GLFWwindow*>(m_window->get_handler()), nullptr, &height);
@@ -51,13 +51,13 @@ VulkanWindowRenderTarget::height() const
 }
 
 RenderTargetType
-VulkanWindowRenderTarget::type() const
+GfxWindowRenderTarget::type() const
 {
   return RenderTargetType::Window;
 }
 
 void
-VulkanWindowRenderTarget::create_surface()
+GfxWindowRenderTarget::create_surface()
 {
   const auto instance       = m_vulkan_app->get_instance();
   const auto window_handler = static_cast<GLFWwindow*>(m_window->get_handler());
@@ -72,7 +72,7 @@ VulkanWindowRenderTarget::create_surface()
 }
 
 void
-VulkanWindowRenderTarget::create_swapchain()
+GfxWindowRenderTarget::create_swapchain()
 {
   auto physical_device = m_vulkan_app->get_physical_device();
 
@@ -190,7 +190,7 @@ VulkanWindowRenderTarget::create_swapchain()
 }
 
 void
-VulkanWindowRenderTarget::create_image_views()
+GfxWindowRenderTarget::create_image_views()
 {
   std::vector<VkImageView> image_views(m_swapchain_images.size());
 
@@ -221,9 +221,44 @@ VulkanWindowRenderTarget::create_image_views()
   m_swapchain_image_views = std::move(image_views);
 }
 
-std::shared_ptr<RenderTarget>
+VkSurfaceKHR
+GfxWindowRenderTarget::get_surface() const
+{
+  return m_surface;
+}
+
+VkSwapchainKHR
+GfxWindowRenderTarget::get_swapchain() const
+{
+  return m_swapchain;
+}
+
+VkExtent2D
+GfxWindowRenderTarget::get_swapchain_extent() const
+{
+  return m_swapchain_extent;
+}
+
+VkFormat
+GfxWindowRenderTarget::get_surface_format() const
+{
+  return m_surface_format.format;
+}
+
+VkImage
+GfxWindowRenderTarget::get_next_image()
+{
+  unsigned int image_index;
+  vkAcquireNextImageKHR(m_logical_device, m_swapchain, std::numeric_limits<unsigned long>::max(), VK_NULL_HANDLE,
+                        VK_NULL_HANDLE, &image_index);
+
+  return m_swapchain_images[image_index];
+}
+
+std::unique_ptr<RenderTarget>
 RenderTarget::create_window_target(Window* window)
 {
-  return std::make_shared<VulkanWindowRenderTarget>(window);
+  return std::make_unique<GfxWindowRenderTarget>(window);
 }
+
 } // namespace setsugen

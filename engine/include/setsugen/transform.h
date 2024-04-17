@@ -7,11 +7,11 @@
 
 namespace setsugen
 {
-class  Transform : virtual public Component
+class Transform : public Component
 {
 public:
   Transform(Entity* entity, const Vec3F& position = Vec3F{}, const Vec3F& rotation = Vec3F{},
-            const Vec3F& scale = Vec3F{});
+            const Vec3F& scale = Vec3F{1, 1, 1});
 
   ~Transform() override = default;
 
@@ -19,7 +19,13 @@ public:
   const Vec3F& get_rotation() const;
   const Vec3F& get_scale() const;
 
+  void set_position(const Vec3F& position);
+  void set_rotation(const Vec3F& rotation);
+  void set_scale(const Vec3F& scale);
+
   Mat4x4F get_model_matrix() const;
+
+  const char* get_type() override;
 
 protected:
   Vec3F m_position;

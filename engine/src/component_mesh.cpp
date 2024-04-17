@@ -23,4 +23,10 @@ Mesh::get_type()
   return "Mesh";
 }
 
+MeshData*
+Mesh::get_meshdata() const
+{
+  return m_data;
+}
+
 } // namespace setsugen

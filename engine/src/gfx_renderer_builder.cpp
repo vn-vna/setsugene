@@ -1,4 +1,6 @@
+#include <setsugen/gfx.h>
 #include <utility>
+
 
 #include "gfx_renderer.h"
 
@@ -25,7 +27,7 @@ RendererBuilder::with_fragment_shader(const std::string& file_path)
 }
 
 RendererBuilder*
-RendererBuilder::with_render_target(RenderTarget* render_target)
+RendererBuilder::with_render_target(std::unique_ptr<RenderTarget>&& render_target)
 {
   m_config.render_target = std::move(render_target);
   return this;
@@ -39,37 +41,16 @@ RendererBuilder::with_topology(Topology topology)
 }
 
 RendererBuilder*
-RendererBuilder::add_vertex_binding(const VertexBindingDescription& vertex_binding)
-{
-  m_config.vertex_bindings.push_back(vertex_binding);
-  return this;
-}
-
-RendererBuilder*
-RendererBuilder::add_vertex_attribute(const VertexAttributeDescription& vertex_attribute)
-{
-  m_config.vertex_attributes.push_back(vertex_attribute);
-  return this;
-}
-
-RendererBuilder*
-RendererBuilder::set_vertex_bindings(std::vector<VertexBindingDescription> vertex_bindings)
-{
-  m_config.vertex_bindings = std::move(vertex_bindings);
-  return this;
-}
-
-RendererBuilder*
-RendererBuilder::set_vertex_attributes(std::vector<VertexAttributeDescription> vertex_attributes)
-{
-  m_config.vertex_attributes = std::move(vertex_attributes);
-  return this;
-}
-
-RendererBuilder*
 RendererBuilder::add_viewport(const ViewPort& viewport)
 {
   m_config.viewports.push_back(viewport);
+  return this;
+}
+
+RendererBuilder*
+RendererBuilder::set_viewports(std::vector<ViewPort>&& viewports)
+{
+  m_config.viewports = std::move(viewports);
   return this;
 }
 
@@ -81,14 +62,7 @@ RendererBuilder::add_scissor(const Scissor& scissor)
 }
 
 RendererBuilder*
-RendererBuilder::set_viewports(std::vector<ViewPort> viewports)
-{
-  m_config.viewports = std::move(viewports);
-  return this;
-}
-
-RendererBuilder*
-RendererBuilder::set_scissors(std::vector<Scissor> scissors)
+RendererBuilder::set_scissors(std::vector<Scissor>&& scissors)
 {
   m_config.scissors = std::move(scissors);
   return this;
@@ -102,7 +76,7 @@ RendererBuilder::add_color_blend(const ColorBlend& color_blend)
 }
 
 RendererBuilder*
-RendererBuilder::set_color_blends(std::vector<ColorBlend> color_blends)
+RendererBuilder::set_color_blends(std::vector<ColorBlend>&& color_blends)
 {
   m_config.color_blends = std::move(color_blends);
   return this;
@@ -136,14 +110,14 @@ RendererBuilder::with_clear_color(const Color4F& clear_color)
   return this;
 }
 
-std::shared_ptr<Renderer>
+std::unique_ptr<Renderer>
 RendererBuilder::build()
 {
   switch (m_config.render_target->type())
   {
     case RenderTargetType::Window:
     {
-      return std::dynamic_pointer_cast<Renderer>(std::make_shared<VulkanWindowRenderer>(m_config));
+      return std::unique_ptr<Renderer>(dynamic_cast<Renderer*>(new GfxVulkanRenderer(std::move(m_config))));
     }
     default:
     {
@@ -151,4 +125,33 @@ RendererBuilder::build()
     }
   }
 }
+
+RendererBuilder*
+RendererBuilder::add_vertex_buffer_layout(const VertexBufferLayout& layout)
+{
+  m_config.vertex_buffer_layouts.push_back(layout);
+  return this;
+}
+
+RendererBuilder*
+RendererBuilder::set_vertex_buffer_layouts(std::vector<VertexBufferLayout>&& layouts)
+{
+  m_config.vertex_buffer_layouts = std::move(layouts);
+  return this;
+}
+
+RendererBuilder*
+RendererBuilder::add_uniform_buffer_layout(const UniformBufferLayout& layout)
+{
+  m_config.uniform_buffer_layouts.push_back(layout);
+  return this;
+}
+
+RendererBuilder*
+RendererBuilder::set_uniform_buffer_layouts(std::vector<UniformBufferLayout>&& layouts)
+{
+  m_config.uniform_buffer_layouts = std::move(layouts);
+  return this;
+}
+
 } // namespace setsugen
