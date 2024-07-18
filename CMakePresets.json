@@ -1,0 +1,21 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "Debug - Windows",
+      "generator": "Ninja",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic",
+        "CMAKE_MAKE_PROGRAM": "${env.MINGW_BIN}/ninja.exe",
+        "CMAKE_C_COMPILER": "${env.MINGW_BIN}/gcc.exe",
+        "CMAKE_CXX_COMPILER": "${env.MINGW_BIN}/g++.exe",
+        "CMAKE_LIBRARY_PATH": "${env.MINGW_ROOT}/lib"
+      },
+      "environment": {
+        "MINGW_BIN": "${sourceDir}/deps/mingw/bin",
+        "MINGW_ROOT": "${sourceDir}/deps/mingw"
+      }
+    }
+  ]
+}

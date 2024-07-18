@@ -1,9 +1,16 @@
 #pragma once
 
+#include <iostream>
+#include <type_traits>
+
 namespace lib
 {
 
-template <typename T>
-void do_sth(T value);
+class Foo
+{
+public:
+  template<typename T>
+  Foo(T&& value);
+};
 
-}
+} // namespace lib

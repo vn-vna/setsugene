@@ -6,7 +6,7 @@
 #include <setsugen/mesh.h>
 #include <setsugen/window.h>
 
-#include "gfx_renderer.h"
+#include "../gfx/vulkan/gfx_renderer.h"
 
 namespace setsugen
 {

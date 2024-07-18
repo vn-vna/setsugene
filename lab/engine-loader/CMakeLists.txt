@@ -6,5 +6,4 @@ add_executable(lab-engine-loader
 
 target_link_libraries(lab-engine-loader
         PRIVATE engine
-        PRIVATE yaml-cpp::yaml-cpp
-        PRIVATE fmt::fmt)
+)

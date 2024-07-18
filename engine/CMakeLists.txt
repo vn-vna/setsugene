@@ -3,6 +3,8 @@ project(setsugen-engine)
 set(CMAKE_CXX_STANDARD 20)
 
 find_package(Vulkan REQUIRED COMPONENTS glslc)
+find_package(OpenFBX REQUIRED)
+find_package(glfw3 REQUIRED)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 
 set(ENGINE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -77,22 +79,26 @@ foreach (file ${ENGINE_SOURCE_FILES} ${ENGINE_INCLUDE_FILES})
     message(STATUS "Source file found: ${file}")
 endforeach ()
 
-add_library(engine SHARED ${ENGINE_SOURCE_FILES})
-target_compile_definitions(engine 
-        PRIVATE SETSUGEN_EXPORT_SIGNATURES)
-target_include_directories(engine 
-        PUBLIC "${ENGINE_INCLUDE_DIR}")
-target_precompile_headers(engine PRIVATE "${ENGINE_INCLUDE_DIR}/setsugen/pch.h")
+add_library(engine
+        SHARED ${ENGINE_SOURCE_FILES})
+target_compile_definitions(engine
+        PRIVATE SETSUGEN_EXPORT_SIGNATURES
+)
+target_include_directories(engine
+        PUBLIC "${ENGINE_INCLUDE_DIR}"
+)
+target_precompile_headers(engine
+        PRIVATE "${ENGINE_INCLUDE_DIR}/setsugen/pch.h"
+)
 target_link_libraries(engine
         PRIVATE glfw
-        PRIVATE yaml-cpp::yaml-cpp
-        PRIVATE date::date
         PRIVATE Vulkan::Vulkan
-        PRIVATE assimp::assimp
+        PRIVATE OpenFBX
+)
+target_compile_definitions(engine
+        PRIVATE SETSUGEN_BUILD_LIBRARY
 )
 
 add_dependencies(engine engine-shaders user-assets)
 
 add_library(setsugen::engine ALIAS engine)
-
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/test")

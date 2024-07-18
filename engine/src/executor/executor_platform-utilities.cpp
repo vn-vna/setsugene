@@ -7,8 +7,9 @@ void
 terminate_thread(std::thread& thread)
 {
   auto handle = thread.native_handle();
-
-#if defined(_WIN32)
+#if defined(__GNUC__)
+  pthread_kill(handle, SIGINT);
+#elif defined(_WIN32)
   TerminateThread(handle, 0);
 #elif
   pthread_cancel(handle);

@@ -3,134 +3,64 @@
 #include <setsugen/format.h>
 #include <setsugen/pch.h>
 
+#define SETSUGENE_DECLARE_EXCEPTION(ExName) \
+  class ExName : virtual public SetsugenException \
+  { \
+    public: \
+    template <typename... Args> \
+    explicit ExName(const std::string& message, Args&&... args) \
+      : SetsugenException(message, std::forward<Args>(args)...) \
+    { } \
+    ~ExName() override = default; \
+    const char* exception_name() const \
+    {\
+      return #ExName; \
+    } \
+  }
 
 namespace setsugen
 {
 struct FormatContext;
 
+
 class SetsugenException : public std::runtime_error
 {
 public:
   template<typename... Args>
-  explicit SetsugenException(const std::string& message, Args&&... args)
-      : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...))
+  explicit SetsugenException(const std::string &message, Args &&... args)
+    : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...))
   {}
+
 
   ~SetsugenException() override = default;
 
-  virtual const char* exception_type() const
+
+  virtual const char *exception_type() const
   {
     return "SetsugenException";
   }
 };
 
-class NotImplementedException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit NotImplementedException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~NotImplementedException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "NotImplementedException";
-  }
-};
-
-class InvalidStateException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit InvalidStateException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~InvalidStateException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "InvalidStateException";
-  }
-};
-
-class InvalidFormatException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit InvalidFormatException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~InvalidFormatException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "InvalidFormatException";
-  }
-};
-
-class InvalidArgumentException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit InvalidArgumentException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~InvalidArgumentException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "InvalidArgumentException";
-  }
-};
-
-class InvalidOperationException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit InvalidOperationException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~InvalidOperationException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "InvalidOperationException";
-  }
-};
-
-class EngineException : public SetsugenException
-{
-public:
-  template<typename... Args>
-  explicit EngineException(const std::string& message, Args&&... args)
-      : SetsugenException(message, std::forward<Args>(args)...)
-  {}
-
-  ~EngineException() override = default;
-
-  const char* exception_type() const override
-  {
-    return "EngineException";
-  }
-};
+SETSUGENE_DECLARE_EXCEPTION(NotImplementedException);
+SETSUGENE_DECLARE_EXCEPTION(FileNotFoundException);
+SETSUGENE_DECLARE_EXCEPTION(InvalidStateException);
+SETSUGENE_DECLARE_EXCEPTION(InvalidFormatException);
+SETSUGENE_DECLARE_EXCEPTION(InvalidSyntaxException);
+SETSUGENE_DECLARE_EXCEPTION(InvalidArgumentException);
+SETSUGENE_DECLARE_EXCEPTION(InvalidOperationException);
+SETSUGENE_DECLARE_EXCEPTION(EngineException);
 
 template<typename T>
 concept ExceptionType = std::is_base_of_v<SetsugenException, T>;
+
 
 template<ExceptionType Ex>
 class Stringify<Ex>
 {
 public:
-  static void stringify(const FormatContext& context, const Ex& value)
+  static void stringify(const FormatContext &context, const Ex &value)
   {
     context.result << "[[ Exception: type = " << value.exception_type() << ", message = " << value.what() << " ]]";
   }
 };
-
 } // namespace setsugen

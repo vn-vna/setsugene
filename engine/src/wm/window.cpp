@@ -7,7 +7,7 @@
 #include <setsugen/preprocessor.h>
 
 // Dpenedency headers
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <setsugen/transform.h>
 
 // Private headers
