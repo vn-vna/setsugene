@@ -531,6 +531,11 @@ public:
     return m_data;
   }
 
+  const T* data() const
+  {
+    return m_data;
+  }
+
   template<int DimP>
   Mat<T, DimM, DimP> operator*(const Mat<T, DimN, DimP>& other) const
   {
