@@ -37,15 +37,15 @@ class DataStorage<SerializedType::Null>
 public:
   DataStorage();
   DataStorage(std::nullptr_t value);
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other);
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other);
   ~DataStorage() noexcept;
 
-  DataStorage &operator=(const DataStorage &other);
-  DataStorage &operator=(DataStorage &&other);
+  DataStorage& operator=(const DataStorage& other);
+  DataStorage& operator=(DataStorage&& other);
 
-  bool operator==(const DataStorage &other) const;
-  bool operator!=(const DataStorage &other) const;
+  bool operator==(const DataStorage& other) const;
+  bool operator!=(const DataStorage& other) const;
 
   operator bool() const noexcept;
 };
@@ -56,17 +56,17 @@ class DataStorage<SerializedType::Bool>
 {
 public:
   DataStorage(bool b);
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other) noexcept;
 
-  DataStorage &operator=(bool b);
-  DataStorage &operator=(const DataStorage &other);
-  DataStorage &operator=(DataStorage &&other) noexcept;
+  DataStorage& operator=(bool b);
+  DataStorage& operator=(const DataStorage& other);
+  DataStorage& operator=(DataStorage&& other) noexcept;
 
-  bool operator==(const DataStorage &other) const;
-  bool operator!=(const DataStorage &other) const;
+  bool operator==(const DataStorage& other) const;
+  bool operator!=(const DataStorage& other) const;
 
-  bool get() const noexcept;
+  bool value() const noexcept;
 
   operator bool() const noexcept;
 
@@ -80,21 +80,21 @@ class DataStorage<SerializedType::Integer>
 {
 public:
   DataStorage(int64_t value);
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other) noexcept;
 
-  int64_t get() const noexcept;
+  int64_t value() const noexcept;
 
-  DataStorage &operator=(int64_t value);
-  DataStorage &operator=(const DataStorage &other);
-  DataStorage &operator=(DataStorage &&other) noexcept;
+  DataStorage& operator=(int64_t value);
+  DataStorage& operator=(const DataStorage& other);
+  DataStorage& operator=(DataStorage&& other) noexcept;
 
-  bool operator==(const DataStorage &other) const;
-  bool operator!=(const DataStorage &other) const;
-  bool operator<(const DataStorage &other) const;
-  bool operator>(const DataStorage &other) const;
-  bool operator<=(const DataStorage &other) const;
-  bool operator>=(const DataStorage &other) const;
+  bool operator==(const DataStorage& other) const;
+  bool operator!=(const DataStorage& other) const;
+  bool operator<(const DataStorage& other) const;
+  bool operator>(const DataStorage& other) const;
+  bool operator<=(const DataStorage& other) const;
+  bool operator>=(const DataStorage& other) const;
 
   explicit operator bool() const noexcept;
 
@@ -107,26 +107,26 @@ template<>
 class DataStorage<SerializedType::String>
 {
 public:
-  DataStorage(const char *value);
-  DataStorage(const std::string &value);
-  DataStorage(std::string &&value);
+  DataStorage(const char* value);
+  DataStorage(const std::string& value);
+  DataStorage(std::string&& value);
   DataStorage(std::string_view value);
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other) noexcept;
 
   template<typename T>
-    requires StringConstructable<T>
-  DataStorage &operator=(T &&value);
+    requires StringType<T>
+  DataStorage& operator=(T&& value);
 
-  DataStorage &operator=(const DataStorage &other);
+  DataStorage& operator=(const DataStorage& other);
 
-  DataStorage &operator=(DataStorage &&other) noexcept;
+  DataStorage& operator=(DataStorage&& other) noexcept;
 
-  bool operator==(const DataStorage &other) const;
+  bool operator==(const DataStorage& other) const;
 
-  bool operator!=(const DataStorage &other) const;
+  bool operator!=(const DataStorage& other) const;
 
-  std::string get() const noexcept;
+  std::string value() const noexcept;
 
 private:
   std::string m_value;
@@ -138,21 +138,21 @@ class DataStorage<SerializedType::Float>
 {
 public:
   DataStorage(double value);
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other) noexcept;
 
-  DataStorage &operator=(double value);
-  DataStorage &operator=(const DataStorage &other);
-  DataStorage &operator=(DataStorage &&other);
+  DataStorage& operator=(double value);
+  DataStorage& operator=(const DataStorage& other);
+  DataStorage& operator=(DataStorage&& other);
 
-  bool operator==(const DataStorage &other) const;
-  bool operator!=(const DataStorage &other) const;
-  bool operator<(const DataStorage &other) const;
-  bool operator>(const DataStorage &other) const;
-  bool operator<=(const DataStorage &other) const;
-  bool operator>=(const DataStorage &other) const;
+  bool operator==(const DataStorage& other) const;
+  bool operator!=(const DataStorage& other) const;
+  bool operator<(const DataStorage& other) const;
+  bool operator>(const DataStorage& other) const;
+  bool operator<=(const DataStorage& other) const;
+  bool operator>=(const DataStorage& other) const;
 
-  double get() const noexcept;
+  double value() const noexcept;
   operator bool() const noexcept;
 
 private:
@@ -164,47 +164,46 @@ template<>
 class DataStorage<SerializedType::Array>
 {
 public:
-  using Iter = std::vector<SerializedData>::iterator;
-  using CIter = std::vector<SerializedData>::const_iterator;
-  using RIter = std::vector<SerializedData>::reverse_iterator;
+  using Iter   = std::vector<SerializedData>::iterator;
+  using CIter  = std::vector<SerializedData>::const_iterator;
+  using RIter  = std::vector<SerializedData>::reverse_iterator;
   using CRIter = std::vector<SerializedData>::const_reverse_iterator;
 
   DataStorage() noexcept;
-  DataStorage(const DataStorage &other) noexcept;
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other) noexcept;
+  DataStorage(DataStorage&& other) noexcept;
   DataStorage(std::initializer_list<SerializedData> list);
 
-  DataStorage &operator=(const DataStorage &other) noexcept;
-  DataStorage &operator=(DataStorage &&other) noexcept;
+  DataStorage& operator=(const DataStorage& other) noexcept;
+  DataStorage& operator=(DataStorage&& other) noexcept;
 
-  DataStorage &push_back(const SerializedData &data);
-  DataStorage &push_back(SerializedData &&data);
-  DataStorage &pop_back();
-  DataStorage &clear();
-  DataStorage &erase(size_t index);
-  DataStorage &insert(size_t index, const SerializedData &data);
-  DataStorage &insert(size_t index, SerializedData &&data);
-  DataStorage &resize(size_t size);
-  DataStorage &reserve(size_t size);
-  DataStorage &swap(DataStorage &other) noexcept;
-  DataStorage &shrink_to_fit();
+  DataStorage& push_back(const SerializedData& data);
+  DataStorage& push_back(SerializedData&& data);
+  DataStorage& pop_back();
+  DataStorage& clear();
+  DataStorage& erase(size_t index);
+  DataStorage& insert(size_t index, const SerializedData& data);
+  DataStorage& insert(size_t index, SerializedData&& data);
+  DataStorage& resize(size_t size);
+  DataStorage& reserve(size_t size);
+  DataStorage& swap(DataStorage& other) noexcept;
+  DataStorage& shrink_to_fit();
 
-  DataStorage &
-  sort(std::function<int(const SerializedData &, const SerializedData &)> pred);
+  DataStorage& sort(std::function<int(const SerializedData&, const SerializedData&)> pred);
 
-  bool empty() const;
+  bool   empty() const;
   size_t size() const;
-  Iter begin();
-  Iter end();
-  CIter begin() const;
-  CIter end() const;
-  RIter rbegin();
-  RIter rend();
+  Iter   begin();
+  Iter   end();
+  CIter  begin() const;
+  CIter  end() const;
+  RIter  rbegin();
+  RIter  rend();
   CRIter rbegin() const;
   CRIter rend() const;
 
-  SerializedData &operator[](size_t index);
-  const SerializedData &operator[](size_t index) const;
+  SerializedData&       operator[](size_t index);
+  const SerializedData& operator[](size_t index) const;
 
   explicit operator bool() const noexcept;
 
@@ -217,25 +216,27 @@ template<>
 class DataStorage<SerializedType::Object>
 {
 public:
-  using Iter = std::unordered_map<std::string, SerializedData>::iterator;
+  using Iter  = std::unordered_map<std::string, SerializedData>::iterator;
   using CIter = std::unordered_map<std::string, SerializedData>::const_iterator;
 
   DataStorage();
-  DataStorage(const DataStorage &other);
-  DataStorage(DataStorage &&other) noexcept;
+  DataStorage(const DataStorage& other);
+  DataStorage(DataStorage&& other) noexcept;
   DataStorage(std::initializer_list<SerializedData> list);
 
-  DataStorage &operator=(const DataStorage &other);
-  DataStorage &operator=(DataStorage &&other) noexcept;
+  DataStorage& operator=(const DataStorage& other);
+  DataStorage& operator=(DataStorage&& other) noexcept;
 
-  SerializedData &operator[](const std::string &key);
-  const SerializedData &operator[](const std::string &key) const;
+  SerializedData&       operator[](const std::string& key);
+  const SerializedData& operator[](const std::string& key) const;
+
+  bool has_key(const std::string& key) const;
 
   size_t size() const;
-  Iter begin();
-  Iter end();
-  CIter begin() const;
-  CIter end() const;
+  Iter   begin();
+  Iter   end();
+  CIter  begin() const;
+  CIter  end() const;
 
 private:
   std::unordered_map<std::string, SerializedData> m_map;
@@ -245,10 +246,10 @@ private:
 class SerializedData
 {
 public:
-  using RefSerialziedArray = DataStorage<SerializedType::Array> &;
-  using RefSerializedObject = DataStorage<SerializedType::Object> &;
-  using CRefSerialziedArray = const DataStorage<SerializedType::Array> &;
-  using CRefSerializedObject = const DataStorage<SerializedType::Object> &;
+  using RefSerialziedArray   = DataStorage<SerializedType::Array>&;
+  using RefSerializedObject  = DataStorage<SerializedType::Object>&;
+  using CRefSerialziedArray  = const DataStorage<SerializedType::Array>&;
+  using CRefSerializedObject = const DataStorage<SerializedType::Object>&;
 
   using SerializedVariant = std::variant<
     DataStorage<SerializedType::Null>,
@@ -261,110 +262,87 @@ public:
   >;
 
   SerializedData() noexcept;
-  SerializedData(const SerializedData &other) noexcept;
-  SerializedData(SerializedData &&other) noexcept;
-  SerializedData(std::nullptr_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(const std::string &value, SerializedType type = SerializedType::Auto);
-  SerializedData(const char *value, SerializedType type = SerializedType::Auto);
-  SerializedData(char *value, SerializedType type = SerializedType::Auto);
-  SerializedData(bool value, SerializedType type = SerializedType::Auto);
-  SerializedData(int64_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(int32_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(int16_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(int8_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(uint64_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(uint32_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(uint16_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(uint8_t value, SerializedType type = SerializedType::Auto);
-  SerializedData(double value, SerializedType type = SerializedType::Auto);
-  SerializedData(float value, SerializedType type = SerializedType::Auto);
   SerializedData(std::initializer_list<SerializedData> value, SerializedType type = SerializedType::Auto);
+  SerializedData(const SerializedData& other) noexcept;
+  SerializedData(SerializedData&& other) noexcept;
+
+  template<ScalarType T>
+  SerializedData(T value, SerializedType type = SerializedType::Auto);
 
 
   template<SerializedType Type>
-  SerializedData(DataStorage<Type> &&data) noexcept;
+  explicit SerializedData(DataStorage<Type>&& data) noexcept;
 
 
   ~SerializedData() noexcept;
 
-  SerializedData &operator=(std::nullptr_t value);
-  SerializedData &operator=(bool value);
-  SerializedData &operator=(int64_t value);
-  SerializedData &operator=(int32_t value);
-  SerializedData &operator=(int16_t value);
-  SerializedData &operator=(int8_t value);
-  SerializedData &operator=(uint64_t value);
-  SerializedData &operator=(uint32_t value);
-  SerializedData &operator=(uint16_t value);
-  SerializedData &operator=(uint8_t value);
-  SerializedData &operator=(double value);
-  SerializedData &operator=(float value);
-  SerializedData &operator=(const std::string &value);
-  SerializedData &operator=(const char *value);
-  SerializedData &operator=(char * &value);
-  SerializedData &operator=(std::initializer_list<SerializedData> value);
-  SerializedData &operator=(const SerializedData &other) noexcept;
-  SerializedData &operator=(SerializedData &&other) noexcept;
+  template<ScalarType T>
+  SerializedData& operator=(T value) noexcept(ScalarType<T>);
+
+  SerializedData& operator=(std::initializer_list<SerializedData> value);
+  SerializedData& operator=(const SerializedData& other) noexcept;
+  SerializedData& operator=(SerializedData&& other) noexcept;
 
   SerializedType get_type() const noexcept;
 
   size_t size() const;
   size_t hash() const;
 
-  DataStorage<SerializedType::Bool> &get_bool();
-  DataStorage<SerializedType::Integer> &get_integer();
-  DataStorage<SerializedType::Float> &get_float();
-  DataStorage<SerializedType::String> &get_string();
-  DataStorage<SerializedType::Array> &get_array();
-  DataStorage<SerializedType::Object> &get_object();
+  DataStorage<SerializedType::Bool>&    get_bool();
+  DataStorage<SerializedType::Integer>& get_integer();
+  DataStorage<SerializedType::Float>&   get_float();
+  DataStorage<SerializedType::String>&  get_string();
+  DataStorage<SerializedType::Array>&   get_array();
+  DataStorage<SerializedType::Object>&  get_object();
 
-  const DataStorage<SerializedType::Bool> &get_bool() const;
-  const DataStorage<SerializedType::Integer> &get_integer() const;
-  const DataStorage<SerializedType::Float> &get_float() const;
-  const DataStorage<SerializedType::String> &get_string() const;
-  const DataStorage<SerializedType::Array> &get_array() const;
-  const DataStorage<SerializedType::Object> &get_object() const;
+  const DataStorage<SerializedType::Bool>&    get_bool() const;
+  const DataStorage<SerializedType::Integer>& get_integer() const;
+  const DataStorage<SerializedType::Float>&   get_float() const;
+  const DataStorage<SerializedType::String>&  get_string() const;
+  const DataStorage<SerializedType::Array>&   get_array() const;
+  const DataStorage<SerializedType::Object>&  get_object() const;
 
   operator bool() const noexcept;
 
-  bool operator==(const SerializedData &other) const;
-  bool operator!=(const SerializedData &other) const;
-  bool operator<(const SerializedData &other) const;
-  bool operator>(const SerializedData &other) const;
-  bool operator<=(const SerializedData &other) const;
-  bool operator>=(const SerializedData &other) const;
+  template<typename T>
+  bool operator==(T&& other) const;
 
-  SerializedData &operator[](const std::string &key);
-  SerializedData &operator[](size_t index);
+  template<typename T>
+  bool operator!=(T&& other) const;
 
-  const SerializedData &operator[](const std::string &key) const;
-  const SerializedData &operator[](size_t index) const;
+  bool operator<(const SerializedData& other) const;
+  bool operator>(const SerializedData& other) const;
+  bool operator<=(const SerializedData& other) const;
+  bool operator>=(const SerializedData& other) const;
+
+  template<typename T>
+  constexpr SerializedData& operator[](T&& key);
+
+  template<typename T>
+  constexpr const SerializedData& operator[](T&& key) const;
 
   static SerializedData null();
   static SerializedData boolean(bool value);
   static SerializedData integer(int64_t value);
   static SerializedData floating(double value);
-  static SerializedData string(const std::string &value);
+  static SerializedData string(const std::string& value);
   static SerializedData array(std::initializer_list<SerializedData> value);
   static SerializedData object(std::initializer_list<SerializedData> value);
 
-
   template<SerializerFormat T>
-  void serialize(std::ostream &stream) const
-  {
-    T{}.serialize(stream, *this);
-  }
-
+  void serialize(std::ostream& stream, const T& serializer = T{}) const;
 
   template<DeserializerFormat T>
-  void deserialize(std::istream &stream)
-  {
-    T{}.deserialize(stream, *this);
-  }
+  void deserialize(std::istream& stream, const T& deserializer = T{});
 
 private:
-  bool check_object_initializer(
-    const std::initializer_list<SerializedData> &list) const;
+  bool check_object_initializer(const std::initializer_list<SerializedData>& list) const;
+  bool try_compare_object(const SerializedData& other) const;
+  bool try_compare_array(const SerializedData& other) const;
+  bool try_compare_number(const SerializedData& other) const;
+  bool try_compare_boolean(const SerializedData& other) const;
+  bool try_compare_string(const SerializedData& other) const;
+  bool try_compare_null(const SerializedData& other) const;
 
   SerializedVariant m_actual;
 };
@@ -373,57 +351,44 @@ private:
 class Json
 {
 public:
-  void serialize(std::ostream &stream, const SerializedData &data);
-
-  void deserialize(std::istream &stream, SerializedData &data);
+  void serialize(std::ostream& stream, const SerializedData& data) const;
+  void deserialize(std::istream& stream, SerializedData& data) const;
 
 private:
-  void skip_whitespace(std::istream &stream);
-
-  void parse_object(std::istream &stream, SerializedData &data);
-
-  void parse_array(std::istream &stream, SerializedData &data);
-
-  void parse_string(std::istream &stream, SerializedData &data);
-
-  void parse_number(std::istream &stream, SerializedData &data);
-
-  int64_t parse_integer(const std::string &str);
-
-  double parse_floating(const std::string &str);
-
-  double parse_exponental(const std::string &str);
-
-  void parse_bool(std::istream &stream, SerializedData &data);
-
-  void parse_null(std::istream &stream, SerializedData &data);
+  void    skip_whitespace(std::istream& stream) const;
+  void    parse_object(std::istream& stream, SerializedData& data) const;
+  void    parse_array(std::istream& stream, SerializedData& data) const;
+  void    parse_string(std::istream& stream, SerializedData& data) const;
+  void    parse_number(std::istream& stream, SerializedData& data) const;
+  int64_t parse_integer(const std::string& str) const;
+  double  parse_floating(const std::string& str) const;
+  double  parse_exponental(const std::string& str) const;
+  void    parse_bool(std::istream& stream, SerializedData& data) const;
+  void    parse_null(std::istream& stream, SerializedData& data) const;
 };
 
 
 class Yaml
 {
 public:
-  void serialize(std::ostream &stream, const SerializedData &data);
-
-  void deserialize(std::istream &stream, SerializedData &data);
+  void serialize(std::ostream& stream, const SerializedData& data);
+  void deserialize(std::istream& stream, SerializedData& data);
 };
 
 
 class Toml
 {
 public:
-  void serialize(std::ostream &stream, const SerializedData &data);
-
-  void deserialize(std::istream &stream, SerializedData &data);
+  void serialize(std::ostream& stream, const SerializedData& data);
+  void deserialize(std::istream& stream, SerializedData& data);
 };
 
 
 class Feticnia
 {
 public:
-  void serialize(std::ostream &stream, const SerializedData &data);
-
-  void deserialize(std::istream &stream, SerializedData &data);
+  void serialize(std::ostream& stream, const SerializedData& data);
+  void deserialize(std::istream& stream, SerializedData& data);
 };
 
 
@@ -431,11 +396,11 @@ template<>
 class Stringify<SerializedType>
 {
 public:
-  static void stringify(const FormatContext &ctx, const SerializedType &value);
+  static void stringify(const FormatContext& ctx, const SerializedType& value);
 };
 
 
-std::ostream &operator<<(std::ostream &os, const SerializedData &data);
+std::ostream& operator<<(std::ostream& os, const SerializedData& data);
 
 template<IntegralType T>
 DataStorage(T) -> DataStorage<SerializedType::Integer>;
@@ -443,24 +408,223 @@ DataStorage(T) -> DataStorage<SerializedType::Integer>;
 template<BooleanType T>
 DataStorage(T) -> DataStorage<SerializedType::Bool>;
 
-template<StringConstructable T>
+template<StringType T>
 DataStorage(T) -> DataStorage<SerializedType::String>;
 
 template<FloatingPointType T>
 DataStorage(T) -> DataStorage<SerializedType::Float>;
 
 template<SerializedType Type>
-DataStorage(DataStorage<Type> &&) -> DataStorage<Type>;
+DataStorage(DataStorage<Type>&&) -> DataStorage<Type>;
 
 DataStorage(std::nullptr_t) -> DataStorage<SerializedType::Null>;
 
 template<SerializedType Type>
-DataStorage(const DataStorage<Type> &) -> DataStorage<Type>;
+DataStorage(const DataStorage<Type>&) -> DataStorage<Type>;
 } // namespace setsugen
 
+#define SHARED_DEFINITION_SERIALIZEDDATA_OPERATOR_SUBSCRIPT_(is_const) \
+
+
+template<typename T>
+constexpr setsugen::SerializedData&
+setsugen::SerializedData::operator[](T&& key)
+{
+  using DecayedType = std::decay_t<T>;
+  if constexpr (std::is_same_v<DecayedType, SerializedData>)
+  {
+    if (key.get_type() == SerializedType::Integer)
+    {
+      return (*this)[key.get_integer().value()];
+    }
+
+    if (key.get_type() == SerializedType::String)
+    {
+      return (*this)[key.get_string().value()];
+    }
+
+    throw InvalidArgumentException(
+      "SerializedData::operator[] do not accept SerializedData with type {}",
+      key.get_type());
+  }
+  else if constexpr (IntegralType<DecayedType>)
+  {
+    return this->get_array()[std::forward<T>(key)];
+  }
+  else if constexpr (StringType<DecayedType>)
+  {
+    return this->get_object()[std::forward<T>(key)];
+  }
+  else
+  {
+    throw NotImplementedException(
+      "SerializedData::operator[] for type {}",
+      typeid(T).name());
+  }
+}
+
+template<typename T>
+constexpr const setsugen::SerializedData&
+setsugen::SerializedData::operator[](T&& key) const
+{
+  using DecayedType = std::decay_t<T>;
+  if constexpr (std::is_same_v<DecayedType, SerializedData>)
+  {
+    if (key.get_type() == SerializedType::Integer)
+    {
+      return (*this)[key.get_integer().value()];
+    }
+
+    if (key.get_type() == SerializedType::String)
+    {
+      return (*this)[key.get_string().value()];
+    }
+
+    throw InvalidArgumentException(
+      "SerializedData::operator[] do not accept SerializedData with type {}",
+      key.get_type());
+  }
+  else if constexpr (IntegralType<DecayedType>)
+  {
+    return this->get_array()[std::forward<T>(key)];
+  }
+  else if constexpr (StringType<DecayedType>)
+  {
+    return this->get_object()[std::forward<T>(key)];
+  }
+  else
+  {
+    throw NotImplementedException(
+      "SerializedData::operator[] for type {}",
+      typeid(DecayedType).name());
+  }
+}
+
+
+template<setsugen::ScalarType T>
+setsugen::SerializedData::SerializedData(T value, SerializedType type)
+{
+  switch (type)
+  {
+    case SerializedType::Auto:
+    {
+      m_actual = DataStorage(value);
+      break;
+    }
+    case SerializedType::Null:
+    {
+      m_actual = DataStorage<SerializedType::Null>();
+      break;
+    }
+    case SerializedType::Bool:
+    {
+      if constexpr (BooleanType<T>)
+      {
+        m_actual = DataStorage<SerializedType::Bool>(value);
+      }
+      else
+      {
+        throw InvalidArgumentException("Cannot construct an Boolean SerializedData from a non-bool value");
+      }
+      break;
+    }
+    case SerializedType::Integer:
+    {
+      if constexpr (IntegralType<T>)
+      {
+        m_actual = DataStorage<SerializedType::Integer>(value);
+      }
+      else
+      {
+        throw InvalidArgumentException("Cannot construct an Integer SerializedData from a non-integer value");
+      }
+      break;
+    }
+    case SerializedType::Float:
+    {
+      if constexpr (FloatingPointType<T>)
+      {
+        m_actual = DataStorage<SerializedType::Float>(value);
+      }
+      else
+      {
+        throw InvalidArgumentException("Cannot construct a Float SerializedData from a non-float value");
+      }
+      break;
+    }
+    case SerializedType::String:
+    {
+      if constexpr (StringType<T>)
+      {
+        m_actual = DataStorage<SerializedType::String>(value);
+      }
+      else
+      {
+        throw InvalidArgumentException("Cannot construct a String SerializedData from a non-string value");
+      }
+      break;
+    }
+    case SerializedType::Object:
+    {
+      throw InvalidArgumentException("Cannot construct an Object SerializedData from a scalar value");
+    }
+    case SerializedType::Array:
+    {
+      throw InvalidArgumentException("Cannot construct an Array SerializedData from a scalar value");
+    }
+  }
+}
 
 template<setsugen::SerializedType Type>
-setsugen::SerializedData::SerializedData(setsugen::DataStorage<Type> &&data) noexcept
+setsugen::SerializedData::SerializedData(setsugen::DataStorage<Type>&& data) noexcept
 {
   m_actual = std::move(data);
+}
+
+template<typename T>
+bool
+setsugen::SerializedData::operator==(T&& other) const
+{
+  using DecayedType = std::decay<T>;
+  using ErasedType  = std::remove_cv_t<std::remove_reference_t<T>>;
+
+  if constexpr (std::is_same_v<SerializedData, ErasedType>)
+  {
+    return
+        this->try_compare_object(other) ||
+        this->try_compare_array(other) ||
+        this->try_compare_number(other) ||
+        this->try_compare_boolean(other) ||
+        this->try_compare_string(other) ||
+        this->try_compare_null(other);
+  }
+  else if constexpr (ScalarType<ErasedType>)
+  {
+    return *this == SerializedData(other);
+  }
+  else
+  {
+    return false;
+  }
+}
+
+template<typename T>
+bool
+setsugen::SerializedData::operator!=(T&& other) const
+{
+  return !(*this == other);
+}
+
+template<setsugen::SerializerFormat T>
+void
+setsugen::SerializedData::serialize(std::ostream& stream, const T& serializer) const
+{
+  serializer.serialize(stream, *this);
+}
+
+template<setsugen::DeserializerFormat T>
+void
+setsugen::SerializedData::deserialize(std::istream& stream, const T& deserializer)
+{
+  deserializer.deserialize(stream, *this);
 }

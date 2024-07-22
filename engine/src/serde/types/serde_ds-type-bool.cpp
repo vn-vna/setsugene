@@ -57,7 +57,7 @@ DataStorage<Bool>::operator!=(const DataStorage &other) const
 
 
 bool
-DataStorage<Bool>::get() const noexcept
+DataStorage<Bool>::value() const noexcept
 {
   return m_value;
 }

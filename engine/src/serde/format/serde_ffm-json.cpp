@@ -4,12 +4,12 @@
 namespace setsugen
 {
 void
-Json::serialize(std::ostream &stream, const SerializedData &data)
+Json::serialize(std::ostream &stream, const SerializedData &data) const
 {}
 
 
 void
-Json::deserialize(std::istream &stream, SerializedData &data)
+Json::deserialize(std::istream &stream, SerializedData &data) const
 {
   this->skip_whitespace(stream);
   char c = stream.peek();
@@ -49,7 +49,7 @@ Json::deserialize(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_object(std::istream &stream, SerializedData &data)
+Json::parse_object(std::istream &stream, SerializedData &data) const
 {
   data = SerializedData::object({});
   auto &obj = data.get_object();
@@ -84,7 +84,7 @@ Json::parse_object(std::istream &stream, SerializedData &data)
     SerializedData value;
     this->deserialize(stream, value);
 
-    obj[key.get_string().get()] = std::move(value);
+    obj[key.get_string().value()] = std::move(value);
 
     this->skip_whitespace(stream);
 
@@ -106,7 +106,7 @@ Json::parse_object(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_array(std::istream &stream, SerializedData &data)
+Json::parse_array(std::istream &stream, SerializedData &data) const
 {
   data = SerializedData::array({});
   auto &arr = data.get_array();
@@ -144,7 +144,7 @@ Json::parse_array(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_string(std::istream &stream, SerializedData &data)
+Json::parse_string(std::istream &stream, SerializedData &data) const
 {
   stream.get(); // Skip '"'
   std::string value;
@@ -162,7 +162,7 @@ Json::parse_string(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_number(std::istream &stream, SerializedData &data)
+Json::parse_number(std::istream &stream, SerializedData &data) const
 {
   bool is_float = false;
   bool is_exponent = false;
@@ -173,14 +173,15 @@ Json::parse_number(std::istream &stream, SerializedData &data)
   {
     char c = stream.peek();
 
-    if (std::isdigit(c))
-    {
-      value.push_back(c);
-    }
-
     if (std::isspace(c) || c == ',' || c == ']' || c == '}' || c == EOF)
     {
       break;
+    }
+
+    if (std::isdigit(c))
+    {
+      value.push_back(stream.get());
+      continue;
     }
 
     switch (c)
@@ -244,7 +245,7 @@ Json::parse_number(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_bool(std::istream &stream, SerializedData &data)
+Json::parse_bool(std::istream &stream, SerializedData &data) const
 {
   if (stream.peek() == 't')
   {
@@ -270,7 +271,7 @@ Json::parse_bool(std::istream &stream, SerializedData &data)
 
 
 void
-Json::parse_null(std::istream &stream, SerializedData &data)
+Json::parse_null(std::istream &stream, SerializedData &data) const
 {
   if (stream.get() == 'n' && stream.get() == 'u' && stream.get() == 'l' &&
       stream.get() == 'l')
@@ -284,7 +285,7 @@ Json::parse_null(std::istream &stream, SerializedData &data)
 
 
 int64_t
-Json::parse_integer(const std::string &str)
+Json::parse_integer(const std::string &str) const
 {
   int64_t number;
   try
@@ -299,7 +300,7 @@ Json::parse_integer(const std::string &str)
 
 
 double
-Json::parse_floating(const std::string &str)
+Json::parse_floating(const std::string &str) const
 {
   double number;
   try
@@ -314,7 +315,7 @@ Json::parse_floating(const std::string &str)
 
 
 double
-Json::parse_exponental(const std::string &str)
+Json::parse_exponental(const std::string &str) const
 {
   double number;
   try
@@ -329,7 +330,7 @@ Json::parse_exponental(const std::string &str)
 
 
 void
-Json::skip_whitespace(std::istream &stream)
+Json::skip_whitespace(std::istream &stream) const
 {
   while (std::isspace(stream.peek()))
   {

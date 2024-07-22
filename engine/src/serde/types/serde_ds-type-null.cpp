@@ -18,7 +18,7 @@ DataStorage<SerializedType::Null>::DataStorage(DataStorage &&other)
 {}
 
 
-DataStorage<SerializedType::Null>::~DataStorage()
+DataStorage<SerializedType::Null>::~DataStorage() noexcept
 {}
 
 

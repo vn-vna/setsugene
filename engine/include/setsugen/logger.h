@@ -136,39 +136,39 @@ public:
   }
 
   template<typename... Args>
-  inline void trace(const std::string& message, Args... args)
+  inline void trace(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Trace, message, args...);
+    log(LogLevel::Trace, message, std::forward<Args>(args)...);
   }
 
   template<typename... Args>
-  inline void debug(const std::string& message, Args... args)
+  inline void debug(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Debug, message, args...);
+    log(LogLevel::Debug, message, std::forward<Args>(args)...);
   }
 
   template<typename... Args>
-  inline void info(const std::string& message, Args... args)
+  inline void info(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Info, message, args...);
+    log(LogLevel::Info, message, std::forward<Args>(args)...);
   }
 
   template<typename... Args>
-  inline void warn(const std::string& message, Args... args)
+  inline void warn(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Warn, message, args...);
+    log(LogLevel::Warn, message, std::forward<Args>(args)...);
   }
 
   template<typename... Args>
-  inline void error(const std::string& message, Args... args)
+  inline void error(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Error, message, args...);
+    log(LogLevel::Error, message, std::forward<Args>(args)...);
   }
 
   template<typename... Args>
-  inline void fatal(const std::string& message, Args... args)
+  inline void fatal(const std::string& message, Args&&... args)
   {
-    log(LogLevel::Fatal, message, args...);
+    log(LogLevel::Fatal, message, std::forward<Args>(args)...);
   }
 
 private:

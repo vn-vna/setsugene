@@ -1,4 +1,5 @@
 include(FetchContent)
+set(gtest_force_shared_crt on)
 
 FetchContent_Declare(
   googletest

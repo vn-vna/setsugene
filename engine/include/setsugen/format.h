@@ -136,7 +136,7 @@ private:
   template<typename T>
   inline static FormatIndex create_index(T &&index)
   {
-    if constexpr (StringConstructable<std::remove_cvref_t<T>>)
+    if constexpr (StringType<std::remove_cvref_t<T>>)
     {
       return std::string(index);
     } else

@@ -63,7 +63,7 @@ DataStorage<SerializedType::String>::operator!=(const DataStorage &other) const
 
 
 std::string
-DataStorage<SerializedType::String>::get() const noexcept
+DataStorage<SerializedType::String>::value() const noexcept
 {
     return m_value;
 }

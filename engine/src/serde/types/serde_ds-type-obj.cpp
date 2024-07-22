@@ -32,7 +32,7 @@ ObjectStorage::DataStorage(std::initializer_list<SerializedData> list)
       throw InvalidArgumentException("ObjectStorage initializer list array first element must be a string");
     }
 
-    m_map[arr[0].get_string().get()] = arr[1];
+    m_map[arr[0].get_string().value()] = arr[1];
   }
 }
 

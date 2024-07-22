@@ -18,7 +18,7 @@ DataStorage<SerializedType::Integer>::DataStorage(DataStorage &&other) noexcept
 {}
 
 
-int64_t DataStorage<SerializedType::Integer>::get() const noexcept
+int64_t DataStorage<SerializedType::Integer>::value() const noexcept
 {
   return m_value;
 }

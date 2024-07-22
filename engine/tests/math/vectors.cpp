@@ -1,4 +1,5 @@
 #include "../test.hpp"
+#include <gtest/gtest.h>
 
 TEST(Vector2I, Creation)
 {

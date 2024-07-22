@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 find_package(OpenFBX REQUIRED)
 find_package(glfw REQUIRED)
-find_package(asio REQUIRED)
+#find_package(asio REQUIRED)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 
 set(ENGINE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -63,22 +63,11 @@ file(GLOB_RECURSE ENGINE_INCLUDE_FILES
         "${ENGINE_INCLUDE_DIR}/*.hpp"
         "${ENGINE_INCLUDE_DIR}/*.h")
 
-foreach (file ${ENGINE_INCLUDE_FILES})
-    # Print out the collected source files
-    message(STATUS "Include file found: ${file}")
-endforeach ()
-
-
 # Collect all the source files in the src directory
 file(GLOB_RECURSE ENGINE_SOURCE_FILES
         "${ENGINE_SOURCE_DIR}/*.cpp"
         "${ENGINE_SOURCE_DIR}/*.hpp"
         "${ENGINE_SOURCE_DIR}/*.h")
-
-foreach (file ${ENGINE_SOURCE_FILES} ${ENGINE_INCLUDE_FILES})
-    # Print out the collected source files
-    message(STATUS "Source file found: ${file}")
-endforeach ()
 
 add_library(engine
         SHARED ${ENGINE_SOURCE_FILES}
@@ -96,7 +85,7 @@ target_link_libraries(engine
         PRIVATE glfw
         PRIVATE Vulkan::Vulkan
         PRIVATE OpenFBX
-        INTERFACE asio
+#        INTERFACE asio
 )
 target_compile_definitions(engine
         PRIVATE SETSUGEN_BUILD_LIBRARY

@@ -78,7 +78,7 @@ DataStorage<SerializedType::Float>::operator>=(const DataStorage& other) const
 }
 
 
-double DataStorage<SerializedType::Float>::get() const noexcept
+double DataStorage<SerializedType::Float>::value() const noexcept
 {
   return m_value;
 }
