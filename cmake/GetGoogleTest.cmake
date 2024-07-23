@@ -8,4 +8,5 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS NAMES GTest
 )
 
+message("Making googletest available")
 FetchContent_MakeAvailable(googletest)

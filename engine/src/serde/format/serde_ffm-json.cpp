@@ -3,13 +3,136 @@
 
 namespace setsugen
 {
-void
-Json::serialize(std::ostream &stream, const SerializedData &data) const
+const Json::Configurations Json::DEFAULT_CONFIG = Configurations{};
+
+Json::Json() noexcept
+  : m_config(DEFAULT_CONFIG)
+{}
+
+Json::Json(const Configurations& configurations) noexcept
+  : m_config(configurations)
 {}
 
 
 void
-Json::deserialize(std::istream &stream, SerializedData &data) const
+Json::serialize(std::ostream& stream, const SerializedData& data) const
+{
+  this->serialize_recursively(stream, data, 0);
+}
+
+void
+Json::serialize_recursively(std::ostream& stream, const SerializedData& data, int indent) const
+{
+  switch (data.get_type())
+  {
+    case SerializedType::Null:
+    {
+      stream << "null";
+    }
+    break;
+
+    case SerializedType::Bool:
+    {
+      stream << (data.get_bool().value() ? "true" : "false");
+    }
+    break;
+
+    case SerializedType::Integer:
+    {
+      stream << data.get_integer().value();
+    }
+    break;
+
+    case SerializedType::Float:
+    {
+      stream << data.get_float().value();
+    }
+    break;
+
+    case SerializedType::String:
+    {
+      stream << '"'
+          << data.get_string().value()
+          << '"';
+    }
+    break;
+
+    case SerializedType::Array:
+    {
+      stream << '[';
+
+      int i    = 0;
+      int size = data.get_array().size();
+      for (const auto& value: data.get_array())
+      {
+        if (m_config.serializer_config.pretty_print)
+        {
+          stream << '\n';
+          this->indent(stream, indent + m_config.serializer_config.indent);
+        }
+        this->serialize_recursively(stream, value, indent + m_config.serializer_config.indent);
+        if (i < size - 1)
+        {
+          stream << ',';
+        }
+        i++;
+      }
+
+      if (m_config.serializer_config.pretty_print)
+      {
+        stream << "\n";
+        this->indent(stream, indent);
+      }
+      stream << ']';
+    }
+    break;
+
+    case SerializedType::Object:
+    {
+      stream << '{';
+      int i    = 0;
+      int size = data.get_object().size();
+      for (const auto& [key, value]: data.get_object())
+      {
+        if (m_config.serializer_config.pretty_print)
+        {
+          stream << '\n';
+        }
+        this->indent(stream, indent + m_config.serializer_config.indent);
+        stream << '"' << key << "\": ";
+        this->serialize_recursively(stream, value, indent + m_config.serializer_config.indent);
+        if (i < size - 1)
+        {
+          stream << ',';
+        }
+        i++;
+      }
+
+      if (m_config.serializer_config.pretty_print)
+      {
+        stream << '\n';
+        this->indent(stream, indent);
+      }
+      stream << '}';
+    }
+    break;
+
+    default: throw InvalidSyntaxException("Operation JSON serialization failed: invalid JSON data");
+  }
+}
+
+void
+Json::indent(std::ostream& stream, int indent) const
+{
+  for (int i = 0; i < indent; i++)
+  {
+    stream << ' ';
+  }
+}
+
+
+void
+Json::deserialize(std::istream& stream, SerializedData& data) const
 {
   this->skip_whitespace(stream);
   char c = stream.peek();
@@ -49,10 +172,10 @@ Json::deserialize(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_object(std::istream &stream, SerializedData &data) const
+Json::parse_object(std::istream& stream, SerializedData& data) const
 {
-  data = SerializedData::object({});
-  auto &obj = data.get_object();
+  data      = SerializedData::object({});
+  auto& obj = data.get_object();
 
   stream.get(); // Skip '{'
   while (true)
@@ -106,10 +229,10 @@ Json::parse_object(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_array(std::istream &stream, SerializedData &data) const
+Json::parse_array(std::istream& stream, SerializedData& data) const
 {
-  data = SerializedData::array({});
-  auto &arr = data.get_array();
+  data      = SerializedData::array({});
+  auto& arr = data.get_array();
 
   stream.get(); // Skip '['
   while (true)
@@ -144,7 +267,7 @@ Json::parse_array(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_string(std::istream &stream, SerializedData &data) const
+Json::parse_string(std::istream& stream, SerializedData& data) const
 {
   stream.get(); // Skip '"'
   std::string value;
@@ -162,9 +285,9 @@ Json::parse_string(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_number(std::istream &stream, SerializedData &data) const
+Json::parse_number(std::istream& stream, SerializedData& data) const
 {
-  bool is_float = false;
+  bool is_float    = false;
   bool is_exponent = false;
 
   std::string value;
@@ -226,18 +349,19 @@ Json::parse_number(std::istream &stream, SerializedData &data) const
         break;
       }
 
-      default:
-        throw InvalidSyntaxException( "Invalid JSON number: Invalid character {} in number", c);
+      default: throw InvalidSyntaxException("Invalid JSON number: Invalid character {} in number", c);
     }
   }
 
   if (is_float)
   {
     data = SerializedData::floating(this->parse_floating(value));
-  } else if (is_exponent)
+  }
+  else if (is_exponent)
   {
     data = SerializedData::floating(this->parse_exponental(value));
-  } else
+  }
+  else
   {
     data = SerializedData::integer(this->parse_integer(value));
   }
@@ -245,7 +369,7 @@ Json::parse_number(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_bool(std::istream &stream, SerializedData &data) const
+Json::parse_bool(std::istream& stream, SerializedData& data) const
 {
   if (stream.peek() == 't')
   {
@@ -271,7 +395,7 @@ Json::parse_bool(std::istream &stream, SerializedData &data) const
 
 
 void
-Json::parse_null(std::istream &stream, SerializedData &data) const
+Json::parse_null(std::istream& stream, SerializedData& data) const
 {
   if (stream.get() == 'n' && stream.get() == 'u' && stream.get() == 'l' &&
       stream.get() == 'l')
@@ -285,13 +409,14 @@ Json::parse_null(std::istream &stream, SerializedData &data) const
 
 
 int64_t
-Json::parse_integer(const std::string &str) const
+Json::parse_integer(const std::string& str) const
 {
   int64_t number;
   try
   {
     number = std::stoll(str);
-  } catch (const std::exception &)
+  }
+  catch (const std::exception&)
   {
     throw InvalidSyntaxException("Invalid JSON integer value");
   }
@@ -300,13 +425,14 @@ Json::parse_integer(const std::string &str) const
 
 
 double
-Json::parse_floating(const std::string &str) const
+Json::parse_floating(const std::string& str) const
 {
   double number;
   try
   {
     number = std::stod(str);
-  } catch (const std::exception &)
+  }
+  catch (const std::exception&)
   {
     throw InvalidSyntaxException("Invalid JSON floating value");
   }
@@ -315,13 +441,14 @@ Json::parse_floating(const std::string &str) const
 
 
 double
-Json::parse_exponental(const std::string &str) const
+Json::parse_exponental(const std::string& str) const
 {
   double number;
   try
   {
     number = std::stod(str);
-  } catch (const std::exception &)
+  }
+  catch (const std::exception&)
   {
     throw InvalidSyntaxException("Invalid JSON exponental value");
   }
@@ -330,7 +457,7 @@ Json::parse_exponental(const std::string &str) const
 
 
 void
-Json::skip_whitespace(std::istream &stream) const
+Json::skip_whitespace(std::istream& stream) const
 {
   while (std::isspace(stream.peek()))
   {

@@ -91,10 +91,18 @@ main(int, char**)
         },
       }},
       {"children", {}},
+      {"stuffs", {1, 2, 3, 4, 5, "LMFAOOOOO"}},
       {"spouse", nullptr},
     };
 
-    std::cout << Formatter::format("Data is a {}: {}", obj.get_type(), obj);
+    std::cout << "\n\n\n";
+
+    obj.serialize(std::cout, Json{Json::Configurations{
+      .serializer_config = {
+        .pretty_print = true,
+        .indent = 2,
+      },
+    }});
   }
   catch (SetsugenException& ex)
   {

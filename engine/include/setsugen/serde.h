@@ -351,6 +351,23 @@ private:
 class Json
 {
 public:
+  struct Configurations
+  {
+    struct
+    {
+      bool pretty_print = false;
+      int  indent       = 2;
+    } serializer_config;
+
+    struct
+    {} deserializer_config;
+  };
+
+  static const Configurations DEFAULT_CONFIG;
+
+  Json() noexcept;
+  Json(const Configurations& config) noexcept;
+
   void serialize(std::ostream& stream, const SerializedData& data) const;
   void deserialize(std::istream& stream, SerializedData& data) const;
 
@@ -365,14 +382,30 @@ private:
   double  parse_exponental(const std::string& str) const;
   void    parse_bool(std::istream& stream, SerializedData& data) const;
   void    parse_null(std::istream& stream, SerializedData& data) const;
+  void    serialize_recursively(std::ostream& stream, const SerializedData& data, int indent) const;
+  void    indent(std::ostream& stream, int indent) const;
+
+  Configurations m_config;
 };
 
 
 class Yaml
 {
 public:
-  void serialize(std::ostream& stream, const SerializedData& data);
-  void deserialize(std::istream& stream, SerializedData& data);
+  struct Configurations
+  {
+        
+  };
+
+  Yaml() noexcept;
+  Yaml(const Configurations& conf) noexcept;
+
+  void serialize(std::ostream& stream, const SerializedData& data) const;
+  void deserialize(std::istream& stream, SerializedData& data) const;
+
+private:
+
+  Configurations m_config;
 };
 
 

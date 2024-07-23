@@ -7,4 +7,5 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS NAMES openfbx
 )
 
+message("Making openfbx available")
 FetchContent_MakeAvailable(openfbx)

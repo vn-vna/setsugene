@@ -68,7 +68,7 @@ template<typename T>
 concept ScalarType = NumericType<T> || StringType<T> || BooleanType<T> || NullType<T>;
 
 template<typename T>
-concept SerializerFormat = requires(const SerializedData& data, std::istream& stream)
+concept SerializerFormat = requires(const SerializedData& data, std::ostream& stream)
 {
   { T{}.serialize(stream, data) };
 };

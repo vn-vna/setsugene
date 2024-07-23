@@ -85,6 +85,7 @@ target_link_libraries(engine
         PRIVATE glfw
         PRIVATE Vulkan::Vulkan
         PRIVATE OpenFBX
+        PRIVATE libjson
 #        INTERFACE asio
 )
 target_compile_definitions(engine

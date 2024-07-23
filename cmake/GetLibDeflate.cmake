@@ -7,4 +7,5 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS NAMES libdeflate
 )
 
+message("Making libdeflate available")
 FetchContent_MakeAvailable(libdeflate)

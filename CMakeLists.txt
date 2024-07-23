@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.8)
+﻿cmake_minimum_required(VERSION 3.5)
 
 project("setsugene" C CXX)
 
@@ -10,6 +10,8 @@ include("${CMAKE_SOURCE_DIR}/cmake/GetGoogleTest.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetLibDeflate.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetOpenFbx.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetGlfw.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/GetLibYaml.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/GetLibJson.cmake")
 #include("${CMAKE_SOURCE_DIR}/cmake/GetAsio.cmake")
 
 if (MINGW)
