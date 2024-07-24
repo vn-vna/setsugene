@@ -48,6 +48,8 @@ SETSUGENE_DECLARE_EXCEPTION(InvalidFormatException);
 SETSUGENE_DECLARE_EXCEPTION(InvalidSyntaxException);
 SETSUGENE_DECLARE_EXCEPTION(InvalidArgumentException);
 SETSUGENE_DECLARE_EXCEPTION(InvalidOperationException);
+SETSUGENE_DECLARE_EXCEPTION(OutOfBoundsException);
+SETSUGENE_DECLARE_EXCEPTION(OutOfMemoryException);
 SETSUGENE_DECLARE_EXCEPTION(EngineException);
 
 template<typename T>

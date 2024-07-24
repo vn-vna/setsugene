@@ -2,12 +2,10 @@
 
 #include <setsugen/serde.h>
 
+#include <yaml.h>
+
 namespace setsugen
 {
 
-enum class YamlEvent
-{
-
-};
 
 }

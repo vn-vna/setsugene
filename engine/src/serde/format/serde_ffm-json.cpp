@@ -1,467 +1,404 @@
-#include <setsugen/exception.h>
-#include <setsugen/serde.h>
+#include "serde_ffm-json.h"
+#include "json.h"
+#include "setsugen/exception.h"
+#include "setsugen/serde.h"
+#include <cstring>
 
-namespace setsugen
+namespace setsugen::parser
 {
-const Json::Configurations Json::DEFAULT_CONFIG = Configurations{};
-
-Json::Json() noexcept
-  : m_config(DEFAULT_CONFIG)
-{}
-
-Json::Json(const Configurations& configurations) noexcept
-  : m_config(configurations)
-{}
-
-
-void
-Json::serialize(std::ostream& stream, const SerializedData& data) const
+JsonParser::JsonParser(std::istream& stream, SerializedData& data)
+  : m_stream(stream),
+    m_data(data)
 {
-  this->serialize_recursively(stream, data, 0);
+  std::memset(&m_parser, 0, sizeof(m_parser));
+  json_parser_init(&m_parser, nullptr, JsonParser::json_event_callback, static_cast<void*>(this));
+}
+
+JsonParser::~JsonParser()
+{
+  json_parser_free(&m_parser);
 }
 
 void
-Json::serialize_recursively(std::ostream& stream, const SerializedData& data, int indent) const
+JsonParser::parse()
 {
-  switch (data.get_type())
+  constexpr const std::size_t buffer_size = 1024;
+  char                        buffer[buffer_size];
+  m_key     = std::nullopt;
+  m_current = nullptr;
+
+  while (m_stream.good())
   {
-    case SerializedType::Null:
-    {
-      stream << "null";
-    }
-    break;
+    m_stream.read(buffer, sizeof(buffer));
 
-    case SerializedType::Bool:
-    {
-      stream << (data.get_bool().value() ? "true" : "false");
-    }
-    break;
-
-    case SerializedType::Integer:
-    {
-      stream << data.get_integer().value();
-    }
-    break;
-
-    case SerializedType::Float:
-    {
-      stream << data.get_float().value();
-    }
-    break;
-
-    case SerializedType::String:
-    {
-      stream << '"'
-          << data.get_string().value()
-          << '"';
-    }
-    break;
-
-    case SerializedType::Array:
-    {
-      stream << '[';
-
-      int i    = 0;
-      int size = data.get_array().size();
-      for (const auto& value: data.get_array())
-      {
-        if (m_config.serializer_config.pretty_print)
-        {
-          stream << '\n';
-          this->indent(stream, indent + m_config.serializer_config.indent);
-        }
-        this->serialize_recursively(stream, value, indent + m_config.serializer_config.indent);
-        if (i < size - 1)
-        {
-          stream << ',';
-        }
-        i++;
-      }
-
-      if (m_config.serializer_config.pretty_print)
-      {
-        stream << "\n";
-        this->indent(stream, indent);
-      }
-      stream << ']';
-    }
-    break;
-
-    case SerializedType::Object:
-    {
-      stream << '{';
-      int i    = 0;
-      int size = data.get_object().size();
-      for (const auto& [key, value]: data.get_object())
-      {
-        if (m_config.serializer_config.pretty_print)
-        {
-          stream << '\n';
-        }
-        this->indent(stream, indent + m_config.serializer_config.indent);
-        stream << '"' << key << "\": ";
-        this->serialize_recursively(stream, value, indent + m_config.serializer_config.indent);
-        if (i < size - 1)
-        {
-          stream << ',';
-        }
-        i++;
-      }
-
-      if (m_config.serializer_config.pretty_print)
-      {
-        stream << '\n';
-        this->indent(stream, indent);
-      }
-      stream << '}';
-    }
-    break;
-
-    default: throw InvalidSyntaxException("Operation JSON serialization failed: invalid JSON data");
-  }
-}
-
-void
-Json::indent(std::ostream& stream, int indent) const
-{
-  for (int i = 0; i < indent; i++)
-  {
-    stream << ' ';
-  }
-}
-
-
-void
-Json::deserialize(std::istream& stream, SerializedData& data) const
-{
-  this->skip_whitespace(stream);
-  char c = stream.peek();
-  if (c == '{')
-  {
-    this->parse_object(stream, data);
-    return;
-  }
-  if (c == '[')
-  {
-    this->parse_array(stream, data);
-    return;
-  }
-  if (c == '"')
-  {
-    this->parse_string(stream, data);
-    return;
-  }
-  if (c == '-' || std::isdigit(c))
-  {
-    this->parse_number(stream, data);
-    return;
-  }
-  if (c == 't' || c == 'f')
-  {
-    this->parse_bool(stream, data);
-    return;
-  }
-  if (c == 'n')
-  {
-    this->parse_null(stream, data);
-    return;
-  }
-
-  throw InvalidSyntaxException("Operation JSON parsing failed: invalid JSON data");
-}
-
-
-void
-Json::parse_object(std::istream& stream, SerializedData& data) const
-{
-  data      = SerializedData::object({});
-  auto& obj = data.get_object();
-
-  stream.get(); // Skip '{'
-  while (true)
-  {
-    this->skip_whitespace(stream);
-    if (stream.peek() == '}')
-    {
-      stream.get(); // Skip '}'
-      return;
-    }
-
-    if (stream.peek() != '"')
-    {
-      throw InvalidSyntaxException("Invalid JSON object key");
-    }
-
-    SerializedData key;
-    this->parse_string(stream, key);
-
-    this->skip_whitespace(stream);
-
-    if (stream.get() != ':')
-    {
-      throw InvalidSyntaxException("Invalid JSON object key-value pair");
-    }
-
-    this->skip_whitespace(stream);
-
-    SerializedData value;
-    this->deserialize(stream, value);
-
-    obj[key.get_string().value()] = std::move(value);
-
-    this->skip_whitespace(stream);
-
-    if (stream.peek() == ',')
-    {
-      stream.get(); // Skip ','
-
-      this->skip_whitespace(stream);
-
-      if (stream.peek() == '}')
-      {
-        throw InvalidSyntaxException("Trailing ',' (comma) is not allowed in object");
-      }
-
-      continue;
-    }
-  }
-}
-
-
-void
-Json::parse_array(std::istream& stream, SerializedData& data) const
-{
-  data      = SerializedData::array({});
-  auto& arr = data.get_array();
-
-  stream.get(); // Skip '['
-  while (true)
-  {
-    this->skip_whitespace(stream);
-    if (stream.peek() == ']')
-    {
-      stream.get(); // Skip ']'
-      return;
-    }
-
-    SerializedData value;
-    this->deserialize(stream, value);
-    arr.push_back(value);
-    this->skip_whitespace(stream);
-
-    if (stream.peek() == ',')
-    {
-      stream.get(); // Skip ','
-
-      this->skip_whitespace(stream);
-
-      if (stream.peek() == ']')
-      {
-        throw InvalidSyntaxException("Trailing ',' (comma) is not allowed in array");
-      }
-
-      continue;
-    }
-  }
-}
-
-
-void
-Json::parse_string(std::istream& stream, SerializedData& data) const
-{
-  stream.get(); // Skip '"'
-  std::string value;
-  while (stream.peek() != '"')
-  {
-    if (stream.peek() == EOF)
-    {
-      throw InvalidSyntaxException("Invalid JSON string value (non closing double quote)");
-    }
-    value.push_back(stream.get());
-  }
-  stream.get(); // Skip '"'
-  data = SerializedData::string(value);
-}
-
-
-void
-Json::parse_number(std::istream& stream, SerializedData& data) const
-{
-  bool is_float    = false;
-  bool is_exponent = false;
-
-  std::string value;
-
-  while (true)
-  {
-    char c = stream.peek();
-
-    if (std::isspace(c) || c == ',' || c == ']' || c == '}' || c == EOF)
+    if (m_stream.gcount() == 0)
     {
       break;
     }
 
-    if (std::isdigit(c))
+    int ret = json_parser_string(&m_parser, buffer, m_stream.gcount(), nullptr);
+    if (!ret)
     {
-      value.push_back(stream.get());
       continue;
     }
 
-    switch (c)
+    switch (ret)
     {
-      case '-': // Minus sign can only be at the beginning to indicate negative
-        // number
-      {
-        if (!value.empty())
-        {
-          throw InvalidSyntaxException("Invalid JSON number: Minus sign can only be at the beginning");
-        }
-        value.push_back(stream.get());
-        break;
-      }
+      case JSON_ERROR_BAD_CHAR: throw InvalidSyntaxException("Bad character in JSON stream");
 
-      case '.': // Decimal point can only appear once
-      {
-        if (is_float || is_exponent)
-        {
-          throw InvalidSyntaxException("Invalid JSON number: Decimal point can only appear once");
-        }
-        is_float = true;
-        value.push_back(stream.get());
-        continue;
-      }
+      case JSON_ERROR_NESTING_LIMIT: throw InvalidSyntaxException("Nesting limit reached in JSON stream");
 
-      case 'e': // Exponental notation can only appear once
-      case 'E': // But it can be both lower and upper case
-      {
-        if (is_exponent)
-        {
-          throw InvalidSyntaxException("Invalid JSON number: Expontental notation can only appear once");
-        }
-        is_exponent = true;
-        value.push_back(stream.get());
+      case JSON_ERROR_NO_MEMORY: throw OutOfMemoryException("Out of memory while parsing JSON stream");
 
-        // Check if there is a sign after the exponental notation
-        if (stream.peek() == '+' || stream.peek() == '-')
-        {
-          value.push_back(stream.get());
-        }
-        break;
-      }
+      case JSON_ERROR_COMMENT_NOT_ALLOWED: throw InvalidSyntaxException("Comments are not allowed in JSON stream");
 
-      default: throw InvalidSyntaxException("Invalid JSON number: Invalid character {} in number", c);
+      case JSON_ERROR_DATA_LIMIT: throw OutOfMemoryException("Data limit reached in JSON stream");
+
+      default: throw InvalidSyntaxException("Unknown error while parsing JSON stream");
     }
-  }
-
-  if (is_float)
-  {
-    data = SerializedData::floating(this->parse_floating(value));
-  }
-  else if (is_exponent)
-  {
-    data = SerializedData::floating(this->parse_exponental(value));
-  }
-  else
-  {
-    data = SerializedData::integer(this->parse_integer(value));
   }
 }
 
-
-void
-Json::parse_bool(std::istream& stream, SerializedData& data) const
+int
+JsonParser::json_event_callback(void* userdata, int type, const char* data, uint32_t len)
 {
-  if (stream.peek() == 't')
+  auto parser = static_cast<JsonParser*>(userdata);
+
+  switch (type)
   {
-    if (stream.get() == 't' && stream.get() == 'r' && stream.get() == 'u' &&
-        stream.get() == 'e')
+    case JSON_OBJECT_BEGIN:
     {
-      data = SerializedData::boolean(true);
-      return;
+      parser->handle_new_object();
     }
-  }
-  if (stream.peek() == 'f')
-  {
-    if (stream.get() == 'f' && stream.get() == 'a' && stream.get() == 'l' &&
-        stream.get() == 's' && stream.get() == 'e')
+    break;
+    case JSON_ARRAY_BEGIN:
     {
-      data = SerializedData::boolean(false);
-      return;
+      parser->handle_new_array();
     }
+    break;
+    case JSON_OBJECT_END:
+    {
+      parser->handle_end_object();
+    }
+    break;
+    case JSON_ARRAY_END:
+    {
+      parser->handle_end_array();
+    }
+    break;
+    case JSON_KEY:
+    {
+      parser->handle_key(data, len);
+    }
+    break;
+    case JSON_STRING:
+    {
+      parser->handle_new_string(data, len);
+    }
+    break;
+    case JSON_INT:
+    {
+      parser->handle_new_int(data, len);
+    }
+    break;
+    case JSON_FLOAT:
+    {
+      parser->handle_new_float(data, len);
+    }
+    break;
+    case JSON_NULL:
+    {
+      parser->handle_new_null();
+    }
+    break;
+    case JSON_TRUE:
+    {
+      parser->handle_new_bool(true);
+    }
+    break;
+    case JSON_FALSE:
+    {
+      parser->handle_new_bool(false);
+    }
+    break;
+    default:
+    {
+      throw InvalidSyntaxException("Unknown JSON event type");
+    }
+    break;
   }
 
-  throw InvalidSyntaxException("Invalid JSON boolean value");
+  return 0;
 }
 
-
 void
-Json::parse_null(std::istream& stream, SerializedData& data) const
+JsonParser::handle_new_object()
 {
-  if (stream.get() == 'n' && stream.get() == 'u' && stream.get() == 'l' &&
-      stream.get() == 'l')
+  // If current node is the root (no parent)
+  if (m_current == nullptr)
   {
-    data = SerializedData::null();
+    m_data = SerializedData::object({});
+    m_root = {
+      .value = &m_data,
+      .parent = nullptr,
+    };
+    m_current = &m_root;
     return;
   }
 
-  throw InvalidSyntaxException("Invalid JSON null value");
+  // If current node is a child of an object
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::object({});
+
+    // Record the new object as the current node
+    m_current->children.push_back({&obj[key], m_current});
+    m_current = &m_current->children.back();
+    return;
+  }
+
+  // If current node is a child of an array
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->value->get_array();
+    arr.push_back(SerializedData::object({}));
+
+    // Record the new object as the current node
+    m_current->children.push_back({&arr[arr.size() - 1], m_current});
+    m_current = &m_current->children.back();
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected object begin in JSON stream");
 }
-
-
-int64_t
-Json::parse_integer(const std::string& str) const
-{
-  int64_t number;
-  try
-  {
-    number = std::stoll(str);
-  }
-  catch (const std::exception&)
-  {
-    throw InvalidSyntaxException("Invalid JSON integer value");
-  }
-  return number;
-}
-
-
-double
-Json::parse_floating(const std::string& str) const
-{
-  double number;
-  try
-  {
-    number = std::stod(str);
-  }
-  catch (const std::exception&)
-  {
-    throw InvalidSyntaxException("Invalid JSON floating value");
-  }
-  return number;
-}
-
-
-double
-Json::parse_exponental(const std::string& str) const
-{
-  double number;
-  try
-  {
-    number = std::stod(str);
-  }
-  catch (const std::exception&)
-  {
-    throw InvalidSyntaxException("Invalid JSON exponental value");
-  }
-  return number;
-}
-
 
 void
-Json::skip_whitespace(std::istream& stream) const
+JsonParser::handle_end_object()
 {
-  while (std::isspace(stream.peek()))
+  m_current = m_current->parent;
+}
+
+void
+JsonParser::handle_new_array()
+{
+  // If current node is the root (no parent)
+  if (m_current == nullptr)
   {
-    stream.get();
+    m_data = SerializedData::array({});
+    m_root = {
+      .value = &m_data,
+      .parent = nullptr,
+    };
+    m_current = &m_root;
+    return;
   }
+
+  // If current node is a child of an object
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::array({});
+
+    // Record the new array as the current node
+    m_current->children.push_back({&obj[key], m_current});
+    m_current = &m_current->children.back();
+    return;
+  }
+
+  // If current node is a child of an array
+  if (m_current->parent->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->parent->value->get_array();
+    arr.push_back(SerializedData::array({}));
+
+    // Record the new array as the current node
+    m_current->children.push_back({&arr[arr.size() - 1], m_current});
+    m_current = &m_current->children.back();
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected array begin in JSON stream");
+}
+
+void
+JsonParser::handle_end_array()
+{
+  m_current = m_current->parent;
+}
+
+void
+JsonParser::handle_key(const char* data, uint32_t len)
+{
+  m_key = std::string(data, len);
+}
+
+void
+JsonParser::handle_new_string(const char* data, uint32_t len)
+{
+  if (m_current == nullptr)
+  {
+    throw InvalidSyntaxException("Unexpected string in JSON stream");
+  }
+
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::string(std::string(data, len));
+    return;
+  }
+
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->value->get_array();
+    arr.push_back(SerializedData::string(std::string(data, len)));
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected string in JSON stream");
+}
+
+void
+JsonParser::handle_new_int(const char* data, uint32_t len)
+{
+  if (m_current == nullptr)
+  {
+    throw InvalidSyntaxException("Unexpected integer in JSON stream");
+  }
+
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::integer(std::stoi(std::string(data, len)));
+    return;
+  }
+
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->parent->value->get_array();
+    arr.push_back(SerializedData::integer(std::stoi(std::string(data, len))));
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected integer in JSON stream");
+}
+
+void
+JsonParser::handle_new_float(const char* data, uint32_t len)
+{
+  if (m_current == nullptr)
+  {
+    throw InvalidSyntaxException("Unexpected float in JSON stream");
+  }
+
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::floating(std::stof(std::string(data, len)));
+    return;
+  }
+
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->value->get_array();
+    arr.push_back(SerializedData::floating(std::stof(std::string(data, len))));
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected float in JSON stream");
+}
+
+void
+JsonParser::handle_new_bool(bool b)
+{
+  if (m_current == nullptr)
+  {
+    throw InvalidSyntaxException("Unexpected boolean in JSON stream");
+  }
+
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::boolean(b);
+    return;
+  }
+
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->value->get_array();
+    arr.push_back(SerializedData::boolean(b));
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected boolean in JSON stream");
+}
+
+void
+JsonParser::handle_new_null()
+{
+  if (m_current == nullptr)
+  {
+    throw InvalidSyntaxException("Unexpected null in JSON stream");
+  }
+
+  if (m_current->value->get_type() == SerializedType::Object)
+  {
+    auto key = m_key.value();
+    m_key    = std::nullopt;
+
+    auto& obj = m_current->value->get_object();
+    obj[key]  = SerializedData::null();
+    return;
+  }
+
+  if (m_current->value->get_type() == SerializedType::Array)
+  {
+    auto& arr = m_current->value->get_array();
+    arr.push_back(SerializedData::null());
+    return;
+  }
+
+  throw InvalidSyntaxException("Unexpected null in JSON stream");
 }
 } // namespace setsugen
+
+namespace setsugen
+{
+
+Json::Json() noexcept
+  : m_config{}
+{}
+
+Json::Json(const Configurations& config) noexcept
+  : m_config{config}
+{}
+
+void
+Json::serialize(std::ostream& stream, const SerializedData& data) const
+{}
+
+void
+Json::deserialize(std::istream& stream, SerializedData& data) const
+{
+  parser::JsonParser parser(stream, data);
+  parser.parse();
+}
+}

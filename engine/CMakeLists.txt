@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 find_package(OpenFBX REQUIRED)
 find_package(glfw REQUIRED)
-#find_package(asio REQUIRED)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
+find_package(libyaml REQUIRED)
 
 set(ENGINE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(ENGINE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -85,7 +85,8 @@ target_link_libraries(engine
         PRIVATE glfw
         PRIVATE Vulkan::Vulkan
         PRIVATE OpenFBX
-        PRIVATE libjson
+        PRIVATE yaml
+        PRIVATE json
 #        INTERFACE asio
 )
 target_compile_definitions(engine

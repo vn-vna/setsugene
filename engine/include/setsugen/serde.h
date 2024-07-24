@@ -372,19 +372,6 @@ public:
   void deserialize(std::istream& stream, SerializedData& data) const;
 
 private:
-  void    skip_whitespace(std::istream& stream) const;
-  void    parse_object(std::istream& stream, SerializedData& data) const;
-  void    parse_array(std::istream& stream, SerializedData& data) const;
-  void    parse_string(std::istream& stream, SerializedData& data) const;
-  void    parse_number(std::istream& stream, SerializedData& data) const;
-  int64_t parse_integer(const std::string& str) const;
-  double  parse_floating(const std::string& str) const;
-  double  parse_exponental(const std::string& str) const;
-  void    parse_bool(std::istream& stream, SerializedData& data) const;
-  void    parse_null(std::istream& stream, SerializedData& data) const;
-  void    serialize_recursively(std::ostream& stream, const SerializedData& data, int indent) const;
-  void    indent(std::ostream& stream, int indent) const;
-
   Configurations m_config;
 };
 

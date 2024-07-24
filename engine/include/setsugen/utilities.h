@@ -1,7 +1,4 @@
-#include <atomic>
-#include <memory>
 #include <setsugen/pch.h>
-#include <type_traits>
 
 namespace setsugen
 {
