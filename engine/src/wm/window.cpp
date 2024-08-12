@@ -4,7 +4,6 @@
 #include <setsugen/application.h>
 #include <setsugen/exception.h>
 #include <setsugen/mesh.h>
-#include <setsugen/preprocessor.h>
 
 // Dpenedency headers
 #include <GLFW/glfw3.h>
