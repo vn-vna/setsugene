@@ -2,7 +2,6 @@
 
 #include <setsugen/format.h>
 #include <setsugen/pch.h>
-#include <setsugen/macros.h>
 
 #define SETSUGENE_DECLARE_EXCEPTION(ExName)                                                                            \
   class ExName : virtual public SetsugenException                                                                      \

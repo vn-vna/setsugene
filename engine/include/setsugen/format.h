@@ -3,7 +3,6 @@
 #include <setsugen/pch.h>
 #include <setsugen/types.h>
 
-
 namespace setsugen
 {
 struct FormatContext;

@@ -18,13 +18,14 @@ constexpr auto window_wait_event_timeout = 0.1;
 
 namespace setsugen
 {
-Window::Window(const std::string& title, int width, int height)
+Window::
+Window(const std::string& title, int width, int height)
     : m_handler{nullptr}, m_event_mode{WindowEventMode::Polling}, m_window_ready_condition{}, m_window_ready_mutex{}
 {
   auto app = Application::current_app();
   m_logger = app->create_logger("setsugen::Window");
 
-  m_main_loop = [=, this]
+  m_main_loop = [title, width, height, this]
   {
     try
     {
@@ -150,23 +151,23 @@ Window::window_thread_func(const char* title, int width, int height)
     m_logger->trace("Window created successfully");
 
     renderer = RendererBuilder::create()
-                        ->with_render_target(create_render_target())
-                        ->with_vertex_shader("test.vert")
-                        ->with_fragment_shader("test.frag")
-                        ->with_topology(Topology::TriangleList)
-                        ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
-                        ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
-                        ->add_color_blend({false, ColorFlag{true, true, true, true}})
-                        ->set_vertex_buffer_layouts({{VertexElement::Position, VertexElement::Normal}})
-                        ->set_uniform_buffer_layouts({{
-                                                          UniformStage::Vertex,
-                                                          {UniformElement::View, UniformElement::Projection},
-                                                      },
-                                                      {
-                                                          UniformStage::Vertex,
-                                                          {UniformElement::Model},
-                                                      }})
-                        ->build();
+                   ->with_render_target(create_render_target())
+                   ->with_vertex_shader("test.vert")
+                   ->with_fragment_shader("test.frag")
+                   ->with_topology(Topology::TriangleList)
+                   ->add_viewport({0.0f, 0.0f, 800.0f, 600.0f, 0.0f, 1.0f})
+                   ->add_scissor({0.0f, 0.0f, 800.0f, 600.0f})
+                   ->add_color_blend({false, ColorFlag{true, true, true, true}})
+                   ->set_vertex_buffer_layouts({{VertexElement::Position, VertexElement::Normal}})
+                   ->set_uniform_buffer_layouts({{
+                                                     UniformStage::Vertex,
+                                                     {UniformElement::View, UniformElement::Projection},
+                                                 },
+                                                 {
+                                                     UniformStage::Vertex,
+                                                     {UniformElement::Model},
+                                                 }})
+                   ->build();
 
     m_renderer = renderer.get();
 
@@ -202,9 +203,9 @@ Window::window_thread_func(const char* title, int width, int height)
       crr_scene->update();
     }
 
-    auto end_time = std::chrono::high_resolution_clock::now();
+    auto end_time     = std::chrono::high_resolution_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - begin_time).count();
-    auto sleep_time = 16 - elapsed_time;
+    auto sleep_time   = 16 - elapsed_time;
 
     if (sleep_time > 0)
     {

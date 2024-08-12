@@ -1,7 +1,7 @@
 #pragma once
 
-#include <setsugen/pch.h>
 #include <setsugen/format.h>
+#include <setsugen/pch.h>
 
 namespace setsugen
 {
@@ -41,7 +41,7 @@ public:
     LogLevel    min_level;
   };
 
-  LogAppender(const std::string& name, const std::string& format = DEFAULT_FORMAT);
+           LogAppender(const std::string& name, const std::string& format = DEFAULT_FORMAT);
   virtual ~LogAppender() = default;
 
   const AppenderSettings& get_settings() const;
@@ -51,7 +51,7 @@ public:
   void set_enabled(bool enabled);
 
   virtual void append(const LogData& log_data) = 0;
-  virtual void flush() = 0;
+  virtual void flush()                         = 0;
 
   static std::shared_ptr<LogAppender> create_console_appender(const std::string& name,
                                                               const std::string& format = DEFAULT_FORMAT);
@@ -161,7 +161,7 @@ private:
 class LoggerFactory
 {
 public:
-  LoggerFactory();
+   LoggerFactory();
   ~LoggerFactory();
 
 public:
@@ -177,7 +177,7 @@ private:
 class ConsoleLogAppender : virtual public LogAppender
 {
 public:
-  ConsoleLogAppender(const std::string& name, const std::string& format = LogAppender::DEFAULT_FORMAT);
+   ConsoleLogAppender(const std::string& name, const std::string& format = LogAppender::DEFAULT_FORMAT);
   ~ConsoleLogAppender() override;
 
 public:
@@ -195,18 +195,12 @@ public:
   {
     switch (value)
     {
-      case LogLevel::Trace: context.result << "TRACE";
-        break;
-      case LogLevel::Debug: context.result << "DEBUG";
-        break;
-      case LogLevel::Info: context.result << "INFO";
-        break;
-      case LogLevel::Warn: context.result << "WARN";
-        break;
-      case LogLevel::Error: context.result << "ERROR";
-        break;
-      case LogLevel::Fatal: context.result << "FATAL";
-        break;
+      case LogLevel::Trace: context.result << "TRACE"; break;
+      case LogLevel::Debug: context.result << "DEBUG"; break;
+      case LogLevel::Info: context.result << "INFO"; break;
+      case LogLevel::Warn: context.result << "WARN"; break;
+      case LogLevel::Error: context.result << "ERROR"; break;
+      case LogLevel::Fatal: context.result << "FATAL"; break;
     }
   }
 };

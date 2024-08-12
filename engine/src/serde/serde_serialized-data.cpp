@@ -4,22 +4,26 @@
 
 namespace setsugen
 {
-SerializedData::SerializedData() noexcept
+SerializedData::
+SerializedData() noexcept
 {
   m_actual = DataStorage<SerializedType::Null>();
 }
 
 
-SerializedData::SerializedData(const SerializedData& other) noexcept
-  : m_actual(other.m_actual)
+SerializedData::
+SerializedData(const SerializedData& other) noexcept
+    : m_actual(other.m_actual)
 {}
 
 
-SerializedData::SerializedData(SerializedData&& other) noexcept
-  : m_actual(std::move(other.m_actual))
+SerializedData::
+SerializedData(SerializedData&& other) noexcept
+    : m_actual(std::move(other.m_actual))
 {}
 
-SerializedData::SerializedData(std::initializer_list<SerializedData> value, SerializedType type)
+SerializedData::
+SerializedData(std::initializer_list<SerializedData> value, SerializedType type)
 {
   switch (type)
   {
@@ -196,8 +200,7 @@ SerializedData::size() const
 
     default:
     {
-      throw InvalidOperationException("Cannot get size of non-iterable type: {}",
-                                      this->get_type());
+      throw InvalidOperationException("Cannot get size of non-iterable type: {}", this->get_type());
     }
   }
 }
@@ -347,26 +350,22 @@ SerializedData::hash() const
   {
     case SerializedType::Integer:
     {
-      return std::hash<int64_t>{}(
-        std::get<DataStorage<SerializedType::Integer>>(m_actual).value());
+      return std::hash<int64_t>{}(std::get<DataStorage<SerializedType::Integer>>(m_actual).value());
     }
 
     case SerializedType::Float:
     {
-      return std::hash<double>{}(
-        std::get<DataStorage<SerializedType::Float>>(m_actual).value());
+      return std::hash<double>{}(std::get<DataStorage<SerializedType::Float>>(m_actual).value());
     }
 
     case SerializedType::String:
     {
-      return std::hash<std::string>{}(
-        std::get<DataStorage<SerializedType::String>>(m_actual).value());
+      return std::hash<std::string>{}(std::get<DataStorage<SerializedType::String>>(m_actual).value());
     }
 
     case SerializedType::Bool:
     {
-      return std::hash<bool>{}(
-        std::get<DataStorage<SerializedType::Bool>>(m_actual).value());
+      return std::hash<bool>{}(std::get<DataStorage<SerializedType::Bool>>(m_actual).value());
     }
 
     case SerializedType::Array:
@@ -582,7 +581,8 @@ operator<<(std::ostream& os, const SerializedData& data)
 
       for (const auto& [k, v]: obj)
       {
-        os << "\"" << k << "\"" << ": " << v;
+        os << "\"" << k << "\""
+           << ": " << v;
         if (idx < size - 1)
         {
           os << ",";
@@ -661,13 +661,11 @@ SerializedData::object(std::initializer_list<SerializedData> value)
 
 
 bool
-SerializedData::check_object_initializer(
-  const std::initializer_list<SerializedData>& list) const
+SerializedData::check_object_initializer(const std::initializer_list<SerializedData>& list) const
 {
   for (const auto& data: list)
   {
-    if (data.get_type() == SerializedType::Array && data.size() == 2 &&
-        data[0].get_type() == SerializedType::String)
+    if (data.get_type() == SerializedType::Array && data.size() == 2 && data[0].get_type() == SerializedType::String)
     {
       continue;
     }
@@ -757,10 +755,16 @@ SerializedData::try_compare_null(const SerializedData& other) const
   return false;
 }
 
-void
-Stringify<SerializedType>::stringify(const FormatContext&  context,
-                                     const SerializedType& value)
+} // namespace setsugen
+
+namespace setsugen
 {
+
+
+void
+Stringify<SerializedType>::stringify(const FormatContext& context, const SerializedType& value)
+{
+  context.result << "SerializedType [[ Type = ";
   switch (value)
   {
     case SerializedType::Integer:
@@ -811,5 +815,69 @@ Stringify<SerializedType>::stringify(const FormatContext&  context,
       break;
     }
   }
+
+  context.result << " ]]";
+}
+} // namespace setsugen
+
+namespace setsugen
+{
+
+
+void
+Stringify<SerializedData>::stringify(const FormatContext& context, const SerializedData& value)
+{
+  context.result << "[[ SerializedData: type = ";
+  switch (value.get_type())
+  {
+    case SerializedType::Integer:
+    {
+      context.result << "Integer";
+      break;
+    }
+
+    case SerializedType::Float:
+    {
+      context.result << "Float";
+      break;
+    }
+
+    case SerializedType::String:
+    {
+      context.result << "String";
+      break;
+    }
+
+    case SerializedType::Bool:
+    {
+      context.result << "Bool";
+      break;
+    }
+
+    case SerializedType::Array:
+    {
+      context.result << "Array";
+      break;
+    }
+
+    case SerializedType::Object:
+    {
+      context.result << "Object";
+      break;
+    }
+
+    case SerializedType::Null:
+    {
+      context.result << "Null";
+      break;
+    }
+
+    default:
+    {
+      context.result << "Unknown";
+      break;
+    }
+  }
+  context.result << ", value = " << value << " ]]";
 }
 } // namespace setsugen

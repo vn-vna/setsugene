@@ -8,24 +8,18 @@
 
 namespace setsugen
 {
-MeshData::MeshData(const std::string& file_path)
-  : m_file_path{file_path}
+MeshData::
+MeshData(const std::string& file_path)
+    : m_file_path{file_path}
 {}
 
 void
 MeshData::load()
 {
-  auto load_flags =
-      ofbx::LoadFlags::IGNORE_BLEND_SHAPES |
-      ofbx::LoadFlags::IGNORE_CAMERAS |
-      ofbx::LoadFlags::IGNORE_LIGHTS |
-      ofbx::LoadFlags::IGNORE_SKIN |
-      ofbx::LoadFlags::IGNORE_BONES |
-      ofbx::LoadFlags::IGNORE_PIVOTS |
-      ofbx::LoadFlags::IGNORE_POSES |
-      ofbx::LoadFlags::IGNORE_VIDEOS |
-      ofbx::LoadFlags::IGNORE_LIMBS |
-      ofbx::LoadFlags::IGNORE_ANIMATIONS;
+  auto load_flags = ofbx::LoadFlags::IGNORE_BLEND_SHAPES | ofbx::LoadFlags::IGNORE_CAMERAS |
+                    ofbx::LoadFlags::IGNORE_LIGHTS | ofbx::LoadFlags::IGNORE_SKIN | ofbx::LoadFlags::IGNORE_BONES |
+                    ofbx::LoadFlags::IGNORE_PIVOTS | ofbx::LoadFlags::IGNORE_POSES | ofbx::LoadFlags::IGNORE_VIDEOS |
+                    ofbx::LoadFlags::IGNORE_LIMBS | ofbx::LoadFlags::IGNORE_ANIMATIONS;
 
   auto abs_path = Application::get_assets_path() + m_file_path;
   auto ifs      = std::ifstream(abs_path.c_str(), std::ios::binary | std::ios::ate);
@@ -49,27 +43,22 @@ MeshData::load()
 
   for (int mesh_index = 0; mesh_index < scene->getMeshCount(); ++mesh_index)
   {
-    auto* mesh = scene->getMesh(mesh_index);
+    auto* mesh    = scene->getMesh(mesh_index);
     auto& geodata = mesh->getGeometryData();
-    auto pos = geodata.getPositions();
-    auto norm = geodata.getNormals();
+    auto  pos     = geodata.getPositions();
+    auto  norm    = geodata.getNormals();
 
-
-    // TODO: Replace ASSIMP with OpenFBX
+    // TODO: NEED TO TRIANGULATE MESHES
     for (int i = 0; i < pos.count; ++i)
     {
-      auto& [x, y, z] = pos.values[i];
-      m_positions->emplace_back(x, y, z);
+      auto [px, py, pz] = pos.get(i);
+      m_positions->emplace_back(px, py, pz);
+
+      auto [nx, ny, nz] = norm.get(i);
+      m_normals->emplace_back(nx, ny, nz);
+
+      m_indices->push_back(indices_offset++);
     }
-
-    for (int i = 0; i < norm.count; ++i)
-    {
-      auto& [x, y, z] = norm.values[i];
-      m_normals->emplace_back(x, y, z);
-    }
-
-    // Weird Indices Behavior of OpenFBX
-
   }
 
   scene->destroy();
