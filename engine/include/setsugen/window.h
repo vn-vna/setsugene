@@ -33,7 +33,7 @@ enum class WindowEventMode
 class WindowCommandQueue
 {
 public:
-  WindowCommandQueue();
+   WindowCommandQueue();
   ~WindowCommandQueue();
 
 public:
@@ -53,7 +53,7 @@ class Window
 public:
   using Handler = void*;
 
-  Window(const std::string& title, int width, int height);
+   Window(const std::string& title, int width, int height);
   ~Window();
 
   static std::unique_ptr<Window> create(const std::string& title, int width, int height);

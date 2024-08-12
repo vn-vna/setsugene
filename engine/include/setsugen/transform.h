@@ -11,7 +11,7 @@ class Transform : public Component
 {
 public:
   Transform(Entity* entity, const Vec3F& position = Vec3F{}, const Vec3F& rotation = Vec3F{},
-            const Vec3F& scale = Vec3F{1, 1, 1});
+            const Vec3F& scale = Vec3F{1.0f, 1.0f, 1.0f});
 
   ~Transform() override = default;
 

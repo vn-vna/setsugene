@@ -757,7 +757,6 @@ SerializedData::try_compare_null(const SerializedData& other) const
   return false;
 }
 
-
 void
 Stringify<SerializedType>::stringify(const FormatContext&  context,
                                      const SerializedType& value)

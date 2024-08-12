@@ -1,20 +1,10 @@
 #pragma once
 
 #include <setsugen/pch.h>
-
-// Setsugen headers
 #include <setsugen/format.h>
-
-// C++ standard headers
-#include <list>
-#include <map>
-#include <string>
-#include <tuple>
-#include <unordered_map>
 
 namespace setsugen
 {
-
 enum class LogLevel;
 struct LogData;
 class LogAppender;
@@ -51,22 +41,18 @@ public:
     LogLevel    min_level;
   };
 
-public:
   LogAppender(const std::string& name, const std::string& format = DEFAULT_FORMAT);
   virtual ~LogAppender() = default;
 
-public:
   const AppenderSettings& get_settings() const;
 
   void set_level(LogLevel level);
   void set_format(const std::string& format);
   void set_enabled(bool enabled);
 
-public:
   virtual void append(const LogData& log_data) = 0;
-  virtual void flush()                         = 0;
+  virtual void flush() = 0;
 
-public:
   static std::shared_ptr<LogAppender> create_console_appender(const std::string& name,
                                                               const std::string& format = DEFAULT_FORMAT);
 
@@ -81,6 +67,7 @@ class LogAppenderMapping
 public:
   using AppenderList        = std::list<std::shared_ptr<LogAppender>>;
   using AppenderLookupTable = std::unordered_map<std::string, AppenderList::iterator>;
+  using AppenderListIter    = AppenderList::iterator;
   friend class Logger;
   friend class LoggerFactory;
 
@@ -90,19 +77,11 @@ private:
 public:
   ~LogAppenderMapping();
 
-public:
   void add_appender(const std::shared_ptr<LogAppender>& appender);
   void remove_appender(const std::string& name);
 
-  inline auto begin()
-  {
-    return this->m_appender_order.begin();
-  }
-
-  inline auto end()
-  {
-    return this->m_appender_order.end();
-  }
+  AppenderListIter begin();
+  AppenderListIter end();
 
 private:
   AppenderList        m_appender_order;
@@ -216,14 +195,19 @@ public:
   {
     switch (value)
     {
-      case LogLevel::Trace: context.result << "TRACE"; break;
-      case LogLevel::Debug: context.result << "DEBUG"; break;
-      case LogLevel::Info: context.result << "INFO"; break;
-      case LogLevel::Warn: context.result << "WARN"; break;
-      case LogLevel::Error: context.result << "ERROR"; break;
-      case LogLevel::Fatal: context.result << "FATAL"; break;
+      case LogLevel::Trace: context.result << "TRACE";
+        break;
+      case LogLevel::Debug: context.result << "DEBUG";
+        break;
+      case LogLevel::Info: context.result << "INFO";
+        break;
+      case LogLevel::Warn: context.result << "WARN";
+        break;
+      case LogLevel::Error: context.result << "ERROR";
+        break;
+      case LogLevel::Fatal: context.result << "FATAL";
+        break;
     }
   }
 };
-
 } // namespace setsugen

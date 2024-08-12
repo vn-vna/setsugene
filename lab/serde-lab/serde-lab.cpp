@@ -28,45 +28,45 @@ main(int, char**)
     data = 3.14f;
     std::cout << "Data is: " << data << std::endl;
 
-    data  = SerializedData{{1}, 2, 3, 4, "Hell Nooooo", false};
+    data = SerializedData{ {1}, 2, 3, 4, "Hell Nooooo", false };
     data2 = std::move(data);
     std::cout << "Data is: " << data << std::endl;
 
     std::cout << "Data2 is: " << data2 << std::endl;
 
-    data = SerializedData({{"OK", "Cool"}, {"K", "V"}}, SerializedType::Array);
+    data = SerializedData({ {"OK", "Cool"}, {"K", "V"} }, SerializedType::Array);
     std::cout << "Data is: " << data << std::endl;
 
     std::string json = R"(
-  {
-    "firstName": "John",
-    "lastName": "Doe",
-    "age": 30,
-    "isStudent": false,
-    "address": {
-      "streetAddress": "123 Main St",
-      "city": "Anytown",
-      "state": "CA",
-      "postalCode": "98765"
-    },
-    "phoneNumbers": [
-      {
-        "type": "home",
-        "number": "555-1234"
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "age": 30,
+      "isStudent": false,
+      "address": {
+        "streetAddress": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "postalCode": "98765"
       },
-      {
-        "type": "work",
-        "number": "555-5678"
-      }
-    ],
-    "children": [],
-    "spouse": null
-  }
-  )";
+      "phoneNumbers": [
+        {
+          "type": "home",
+          "number": "555-1234"
+        },
+        {
+          "type": "work",
+          "number": "555-5678"
+        }
+      ],
+      "children": [],
+      "spouse": null
+    }
+    )";
 
-    std::stringstream ss{json};
+    std::stringstream ss{ json };
 
-    data.deserialize<Json>(ss);
+    data.parse<Json>(ss);
     std::cout << Formatter::format("Data is a {}: {}", data.get_type(), data);
 
     SerializedData obj = {
@@ -97,12 +97,22 @@ main(int, char**)
 
     std::cout << "\n\n\n";
 
-    obj.serialize(std::cout, Json{Json::Configurations{
-      .serializer_config = {
-        .pretty_print = true,
-        .indent = 2,
-      },
-    }});
+    auto start = std::chrono::system_clock::now();
+
+    for (int i = 0; i < 100000; ++i)
+    {
+      std::stringstream ss;
+      obj.dumps(ss, Json{ Json::Configurations{
+          .serializer_config = {
+          .pretty_print = true,
+          .indent = 2,
+        },
+      } });
+    }
+
+    auto end = std::chrono::system_clock::now();
+
+    std::cout << Formatter::format("Serialized {} times took {}ms", 100000, std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
   }
   catch (SetsugenException& ex)
   {

@@ -35,7 +35,7 @@ TEST(JsonSerde, Deserializer)
 {
   SerializedData data;
   std::stringstream ss{sample_json};
-  data.deserialize<Json>(ss);
+  data.parse<Json>(ss);
 
   EXPECT_EQ(1, 1);
 }

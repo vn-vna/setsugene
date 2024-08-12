@@ -58,3 +58,7 @@ __pycache__/
 
 build/
 cmake-build*/
+
+gen/out/*
+
+venv/*

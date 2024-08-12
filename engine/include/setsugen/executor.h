@@ -117,7 +117,7 @@ class FixedThreadPoolExecutor : public Executor<FixedThreadPoolExecutor>
 {
 public:
   explicit FixedThreadPoolExecutor(size_t num_threads = 0);
-  ~FixedThreadPoolExecutor() override;
+  ~        FixedThreadPoolExecutor() override;
 
   void start() override;
   void stop() override;
@@ -141,7 +141,7 @@ private:
 class SingleThreadExecutor : public Executor<SingleThreadExecutor>
 {
 public:
-  SingleThreadExecutor();
+   SingleThreadExecutor();
   ~SingleThreadExecutor() override;
 
   void start() override;
@@ -164,7 +164,7 @@ private:
 class CachedThreadPoolExecutor : public Executor<CachedThreadPoolExecutor>
 {
 public:
-  CachedThreadPoolExecutor();
+   CachedThreadPoolExecutor();
   ~CachedThreadPoolExecutor();
 
 private:

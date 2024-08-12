@@ -8,7 +8,7 @@
 
 namespace setsugen
 {
-MeshData::MeshData(const std::string &file_path)
+MeshData::MeshData(const std::string& file_path)
   : m_file_path{file_path}
 {}
 
@@ -38,17 +38,37 @@ MeshData::load()
   const std::vector<uint8_t> data(std::istreambuf_iterator<char>(ifs), {});
 
   // Load the file
-  auto *scene = ofbx::load(data.data(), data.size(), static_cast<ofbx::u16>(load_flags));
+  auto* scene = ofbx::load(data.data(), data.size(), static_cast<ofbx::u16>(load_flags));
 
   // Load vertices and normals
   m_positions = std::make_unique<VerticiesArray>();
   m_normals   = std::make_unique<NormalsArray>();
   m_indices   = std::make_unique<IndicesArray>();
 
+  int indices_offset = 0;
+
   for (int mesh_index = 0; mesh_index < scene->getMeshCount(); ++mesh_index)
   {
-    auto *mesh = scene->getMesh(mesh_index);
+    auto* mesh = scene->getMesh(mesh_index);
+    auto& geodata = mesh->getGeometryData();
+    auto pos = geodata.getPositions();
+    auto norm = geodata.getNormals();
 
+
+    // TODO: Replace ASSIMP with OpenFBX
+    for (int i = 0; i < pos.count; ++i)
+    {
+      auto& [x, y, z] = pos.values[i];
+      m_positions->emplace_back(x, y, z);
+    }
+
+    for (int i = 0; i < norm.count; ++i)
+    {
+      auto& [x, y, z] = norm.values[i];
+      m_normals->emplace_back(x, y, z);
+    }
+
+    // Weird Indices Behavior of OpenFBX
 
   }
 
@@ -63,19 +83,19 @@ MeshData::unload()
   m_indices.reset();
 }
 
-const MeshData::VerticiesArray *
+const MeshData::VerticiesArray*
 MeshData::get_positions() const
 {
   return m_positions.get();
 }
 
-const MeshData::NormalsArray *
+const MeshData::NormalsArray*
 MeshData::get_normals() const
 {
   return m_normals.get();
 }
 
-const MeshData::IndicesArray *
+const MeshData::IndicesArray*
 MeshData::get_indices() const
 {
   return m_indices.get();

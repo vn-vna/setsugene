@@ -1,0 +1,21 @@
+#include <setsugen/math.h>
+
+#define GENERATE_DEFINITION_FOR_VECTOR(type, size, usage) \
+    template class setsugen::Vec<type, size, usage>;
+
+#define GENERATE_DEFINITION_FOR_VECTOR_SIZE(type, size) \
+    GENERATE_DEFINITION_FOR_VECTOR(type, size, setsugen::VectorUsage::Math) \
+    GENERATE_DEFINITION_FOR_VECTOR(type, size, setsugen::VectorUsage::Color) \
+    GENERATE_DEFINITION_FOR_VECTOR(type, size, setsugen::VectorUsage::Size)
+
+#define GENERATE_DEFINITION_FOR_VECTOR_TYPE(type) \
+    GENERATE_DEFINITION_FOR_VECTOR_SIZE(type, 2) \
+    GENERATE_DEFINITION_FOR_VECTOR_SIZE(type, 3) \
+    GENERATE_DEFINITION_FOR_VECTOR_SIZE(type, 4)
+
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(int)
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(unsigned int)
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(long long)
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(unsigned long long)
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(float)
+GENERATE_DEFINITION_FOR_VECTOR_TYPE(double)

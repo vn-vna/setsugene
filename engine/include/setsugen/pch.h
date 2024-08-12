@@ -24,32 +24,12 @@
 #error "Unsupported platform"
 #endif
 
-// If we are on Windows, we need to include Windows.h before doing anything else.
-#if defined(SETSUGENE_WINDOWS)
-
-// Remove evil macro defined by Windows
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif // NOMINMAX
-
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
-// Remove conflicting macros
-#ifdef near
-#undef near
-#endif // near
-
-#ifdef far
-#undef far
-#endif // far
-
-#endif // SETSUGENE_WINDOWS
-
+#include <algorithm>
 #include <any>
 #include <array>
 #include <atomic>
 #include <condition_variable>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <deque>
@@ -75,7 +55,10 @@
 #include <string_view>
 #include <thread>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>
 #include <vector>
+#include <source_location>
+

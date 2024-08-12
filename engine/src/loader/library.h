@@ -2,6 +2,10 @@
 
 #include <setsugen/thislib.h>
 
+#ifdef SETSUGENE_WINDOWS
+#include <Windows.h>
+#endif
+
 setsugen::ThisLibrary* thislib = nullptr;
 
 extern "C"

@@ -380,25 +380,3 @@ JsonParser::handle_new_null()
 }
 } // namespace setsugen
 
-namespace setsugen
-{
-
-Json::Json() noexcept
-  : m_config{}
-{}
-
-Json::Json(const Configurations& config) noexcept
-  : m_config{config}
-{}
-
-void
-Json::serialize(std::ostream& stream, const SerializedData& data) const
-{}
-
-void
-Json::deserialize(std::istream& stream, SerializedData& data) const
-{
-  parser::JsonParser parser(stream, data);
-  parser.parse();
-}
-}

@@ -20,7 +20,7 @@ class KeyInput
 class InputManager
 {
 public:
-  InputManager();
+   InputManager();
   ~InputManager();
 };
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <setsugen/exception.h>
 #include <setsugen/serde.h>
 
@@ -8,7 +10,6 @@ extern "C"
 
 namespace setsugen::parser
 {
-
 struct JsonNode
 {
   SerializedData*       value;
@@ -41,9 +42,31 @@ private:
   std::istream&   m_stream;
   SerializedData& m_data;
   json_parser     m_parser;
-  JsonNode        m_root;
-  JsonNode*       m_current;
+
+  JsonNode                   m_root;
+  JsonNode*                  m_current;
   std::optional<std::string> m_key;
 };
+}
 
+namespace setsugen::emitter
+{
+class JsonEmitter
+{
+public:
+  JsonEmitter(std::ostream& stream, const SerializedData& data, const Json::Configurations& conf) noexcept;
+  ~JsonEmitter() noexcept;
+
+  void emit();
+  void emit(const SerializedData& data);
+
+  static int json_event_callback(void* userdata, const char* s, uint32_t length);
+
+private:
+  std::ostream&               m_stream;
+  const SerializedData&       m_data;
+  json_printer                m_printer;
+  std::string                 m_indent_str;
+  const Json::Configurations& m_config;
+};
 }

@@ -25,4 +25,16 @@ LogAppenderMapping::remove_appender(const std::string& name)
   }
 }
 
+LogAppenderMapping::AppenderListIter
+LogAppenderMapping::begin()
+{
+  return this->m_appender_order.begin();
+}
+
+LogAppenderMapping::AppenderListIter
+LogAppenderMapping::end()
+{
+  return this->m_appender_order.end();
+}
+
 } // namespace setsugen

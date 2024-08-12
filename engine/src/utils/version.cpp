@@ -9,12 +9,12 @@
 
 namespace setsugen
 {
-
-Version::Version() : Version(1, 0, 0)
+Version::Version()
+  : Version(1, 0, 0)
 {}
 
 Version::Version(unsigned int major, unsigned int minor, unsigned int patch)
-    : m_version((major << 22U) | (minor << 12U) | patch)
+  : m_version((major << 22U) | (minor << 12U) | patch)
 {}
 
 Version::~Version() = default;
@@ -43,8 +43,9 @@ Version::get_patch() const
   return (m_version & VERSION_PATCH_MASK);
 }
 
-void
-Version::stringify(const FormatContext& context) const
-{}
-
+template<>
+class Stringify<Version>
+{
+public:
+};
 } // namespace setsugen

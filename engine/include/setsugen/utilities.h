@@ -1,8 +1,9 @@
+#pragma once
+
 #include <setsugen/pch.h>
 
 namespace setsugen
 {
-
 template<typename... Ts>
 struct TupleHash : std::function<size_t(const std::tuple<Ts...>&)>
 {
@@ -40,28 +41,36 @@ public:
   using SmartPointerType = std::unique_ptr<T>;
   using TracerType       = std::conditional_t<Atomicly, std::atomic<bool>, bool>;
 
-  ValueTracer() : m_current{nullptr}, m_changed{true}
+  ValueTracer()
+    : m_current{nullptr},
+      m_changed{true}
   {}
 
   /**
    * @brief Construct a new Value Tracer object
    * @param value The value to trace
    */
-  ValueTracer(const T& value) : m_current{new T{value}}, m_changed{true}
+  ValueTracer(const T& value)
+    : m_current{new T{value}},
+      m_changed{true}
   {}
 
   /**
    * @brief Copy constructor
    * @param other The other ValueTracer object to copy
    */
-  ValueTracer(const ValueTracer& other) : m_current{new T{*other.m_current}}, m_changed{other.m_changed.load()}
+  ValueTracer(const ValueTracer& other)
+    : m_current{new T{*other.m_current}},
+      m_changed{other.m_changed.load()}
   {}
 
   /**
    * @brief Move constructor
    * @param other The other ValueTracer object to move
    */
-  ValueTracer(ValueTracer&& other) noexcept : m_current{other.m_current}, m_changed{other.m_changed.load()}
+  ValueTracer(ValueTracer&& other) noexcept
+    : m_current{other.m_current},
+      m_changed{other.m_changed.load()}
   {
     other.m_current = nullptr;
   }
@@ -146,4 +155,41 @@ private:
   TracerType       m_changed;
 };
 
+template<typename T>
+class Lazy final
+{
+public:
+  explicit Lazy(std::function<T()> initializer)
+    : m_data(std::nullopt),
+      m_initializer(std::move(initializer))
+  {}
+
+  T* get()
+  {
+    if (m_data.has_value())
+    {
+      return &m_data.value();
+    }
+
+    // Double lock
+    std::lock_guard lock(m_mutex);
+    if (m_data.has_value())
+    {
+      return &m_data.value();
+    }
+
+    m_data = {m_initializer()};
+    return &m_data.value();
+  }
+
+  T* operator->()
+  {
+    return get();
+  }
+
+private:
+  std::optional<T>   m_data;
+  std::function<T()> m_initializer;
+  std::mutex mutable m_mutex;
+};
 } // namespace setsugen

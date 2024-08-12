@@ -16,7 +16,7 @@ public:
   using ComponentManager = std::unordered_map<size_t, std::unique_ptr<Component>>;
   using ChildrenMap      = std::unordered_map<size_t, Entity*>;
 
-  Entity(const std::string& name, Scene* scene = nullptr);
+           Entity(const std::string& name, Scene* scene = nullptr);
   virtual ~Entity();
 
   const std::string& get_name() const;

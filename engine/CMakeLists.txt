@@ -2,6 +2,7 @@ project(setsugen-engine)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(Doxygen REQUIRED)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 find_package(OpenFBX REQUIRED)
 find_package(glfw REQUIRED)
@@ -87,11 +88,21 @@ target_link_libraries(engine
         PRIVATE OpenFBX
         PRIVATE yaml
         PRIVATE json
-#        INTERFACE asio
 )
+
+if (MSVC)
+    SET_TARGET_PROPERTIES(engine PROPERTIES LINK_FLAGS "/PROFILE")
+endif ()
+
 target_compile_definitions(engine
         PRIVATE SETSUGEN_BUILD_LIBRARY
 )
+
+if (DOXYGEN_FOUND)
+    doxygen_add_docs(engine-docs
+            ${ENGINE_INCLUDE_DIR}
+            ALL)
+endif ()
 
 add_dependencies(engine engine-shaders user-assets)
 

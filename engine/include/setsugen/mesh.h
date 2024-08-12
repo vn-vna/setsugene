@@ -14,7 +14,7 @@ public:
   using VerticiesArray = std::vector<Vec3F>;
   using NormalsArray   = std::vector<Vec3F>;
 
-  MeshData(const std::string& file_path);
+   MeshData(const std::string& file_path);
   ~MeshData() = default;
 
   void load();
@@ -36,7 +36,7 @@ private:
 class Mesh : public Component
 {
 public:
-  Mesh(Entity* entity, const std::string& file_path);
+   Mesh(Entity* entity, const std::string& file_path);
   ~Mesh() override;
 
   MeshData*   get_meshdata() const;

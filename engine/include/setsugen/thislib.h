@@ -14,9 +14,9 @@ public:
 
 public:
   ThisLibrary(void* handle);
+  ThisLibrary(const ThisLibrary&) = delete;
+  ThisLibrary(ThisLibrary&&)      = delete;
 
-  ThisLibrary(const ThisLibrary&)            = delete;
-  ThisLibrary(ThisLibrary&&)                 = delete;
   ThisLibrary& operator=(const ThisLibrary&) = delete;
   ThisLibrary& operator=(ThisLibrary&&)      = delete;
 

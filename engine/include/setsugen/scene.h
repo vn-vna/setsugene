@@ -136,7 +136,7 @@ class SceneManager final
 public:
   using SceneMapping = std::unordered_map<std::string, std::unique_ptr<Scene>>;
 
-  SceneManager();
+   SceneManager();
   ~SceneManager();
 
   Scene* create_scene(const std::string& name);

@@ -219,7 +219,7 @@ public:
 class RendererBuilder
 {
 public:
-  RendererBuilder()  = default;
+   RendererBuilder() = default;
   ~RendererBuilder() = default;
 
   static std::unique_ptr<RendererBuilder> create();
@@ -254,8 +254,8 @@ class Renderer
 public:
   virtual ~Renderer() = default;
 
-  virtual void render() = 0;
-  virtual void cleanup()            = 0;
+  virtual void render()  = 0;
+  virtual void cleanup() = 0;
 };
 
 } // namespace setsugen

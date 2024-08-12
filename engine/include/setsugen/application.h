@@ -51,7 +51,7 @@ class ApplicationBuilder
 public:
   using LoggerConfigCallback = std::function<void(ApplicationBuilder&, LoggerFactory&)>;
 
-  ApplicationBuilder();
+   ApplicationBuilder();
   ~ApplicationBuilder() = default;
 
   ApplicationBuilder* set_name(const std::string& name);
@@ -73,10 +73,10 @@ private:
 class Application
 {
 public:
-  Application();
+           Application();
   virtual ~Application();
 
-  virtual Application* run() = 0;
+  virtual Application* run()  = 0;
   virtual Application* join() = 0;
 
   virtual std::shared_ptr<Logger> create_logger(const std::string& name) const = 0;

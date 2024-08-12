@@ -25,8 +25,6 @@ public:
   unsigned int get_minor() const;
   unsigned int get_patch() const;
 
-  void stringify(const FormatContext& context) const;
-
 private:
   unsigned int m_version;
 };

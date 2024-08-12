@@ -14,7 +14,7 @@ class Duration final
 {
 public:
   explicit Duration(unsigned long long duration = 0);
-  ~Duration() noexcept;
+  ~        Duration() noexcept;
 
   unsigned long long get_day() const;
   unsigned long long get_hour() const;

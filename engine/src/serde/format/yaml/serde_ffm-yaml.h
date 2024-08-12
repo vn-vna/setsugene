@@ -5,7 +5,4 @@
 #include <yaml.h>
 
 namespace setsugen
-{
-
-
-}
+{}

@@ -3,6 +3,11 @@
 
 namespace setsugen
 {
+ArgDescription::~ArgDescription() noexcept
+{
+  m_deleter(m_data);
+}
+
 FormatArgsStore::FormatArgsStore() : m_args{}
 {}
 
