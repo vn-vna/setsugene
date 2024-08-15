@@ -14,8 +14,6 @@
 #include <setsugen/utilities.h>
 #include <setsugen/window.h>
 
-#include <vulkan/vulkan_core.h>
-
 #include <memory>
 #include <unordered_map>
 

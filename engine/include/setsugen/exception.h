@@ -11,8 +11,8 @@
     explicit ExName(const std::string& message, Args&&... args)                                                        \
         : SetsugenException(message, std::forward<Args>(args)...)                                                      \
     {}                                                                                                                 \
-    ~           ExName() override = default;                                                                           \
-    const char* exception_name() const                                                                                 \
+    ~ExName() override = default;                                                                                      \
+    const char* exception_type() const override                                                                        \
     {                                                                                                                  \
       return #ExName;                                                                                                  \
     }                                                                                                                  \

@@ -3,6 +3,8 @@
 #include "../../application/application_basic-app.h"
 #include "gfx_renderer.h"
 
+#include <Windows.h>
+
 namespace setsugen
 {
 GfxWindowRenderTarget::GfxWindowRenderTarget(Window* window)

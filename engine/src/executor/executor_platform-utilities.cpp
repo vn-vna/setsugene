@@ -1,5 +1,9 @@
 #include "executor_platform-utilities.h"
 
+#ifdef SETSUGENE_WINDOWS
+#include <Windows.h>
+#endif
+
 namespace setsugen
 {
 

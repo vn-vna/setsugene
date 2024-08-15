@@ -61,4 +61,4 @@ cmake-build*/
 
 gen/out/*
 
-venv/*
+venv/
