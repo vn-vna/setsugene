@@ -16,6 +16,9 @@ class Reflection;
 
 class ReflectionField;
 
+template<typename T, typename B>
+concept DeliveredFrom = std::is_base_of_v<B, T>;
+
 template<typename T>
 concept FundamentalType = std::is_fundamental_v<T>;
 
@@ -63,33 +66,31 @@ concept StringType = std::is_same_v<std::string, std::decay_t<T>> || std::is_sam
 
 template<typename T>
 concept Formattable = requires(const FormatContext& context, const std::remove_cvref_t<T>& value) {
-  {
-    Stringify<std::remove_cvref_t<T>>::stringify(context, value)
-  };
+  { Stringify<std::remove_cvref_t<T>>::stringify(context, value) };
 };
 
 template<typename T>
 concept ScalarType = NumericType<T> || StringType<T> || BooleanType<T> || NullType<T>;
 
 template<typename T>
+concept IterableType = requires(T& value) {
+  { value.begin() } -> std::same_as<typename T::iterator>;
+  { value.end() } -> std::same_as<typename T::iterator>;
+};
+
+template<typename T>
 concept SerializerFormat = requires(const SerializedData& data, std::ostream& stream) {
-  {
-    T{}.serialize(stream, data)
-  };
+  { T{}.serialize(stream, data) };
 };
 
 template<typename T>
 concept DeserializerFormat = requires(SerializedData& data, std::istream& stream) {
-  {
-    T{}.deserialize(stream, data)
-  };
+  { T{}.deserialize(stream, data) };
 };
 
 template<typename T>
 concept Serializable = requires(SerializedData& data, T& value) {
-  {
-    Reflection<T>{}.register_fields()
-  } -> std::same_as<std::vector<ReflectionField>>;
+  { Reflection<T>{}.register_fields() } -> std::same_as<std::vector<ReflectionField>>;
 };
 
 template<typename T>
@@ -100,4 +101,20 @@ struct AutoParam
 {
   using ParamType = T;
 };
+
+template<typename... Ts>
+struct TypeSet
+{
+  static constexpr size_t size = sizeof...(Ts);
+
+  template<typename T>
+  static constexpr bool contains = (std::is_same_v<T, Ts> || ...);
+};
+
+template<typename T>
+struct PhantomTyope
+{
+  using Type = T;
+};
+
 } // namespace setsugen

@@ -432,7 +432,7 @@ GfxVulkanRenderer::create_uniform_buffers(Scene* scene)
     {
       m_mesh_drawinfo[mesh] = {};
       auto& drawinfo        = m_mesh_drawinfo[mesh];
-      drawinfo.descriptor_pool = GfxDescriptorPool::create(m_framebuffers.size(), m_framebuffers.size());
+      drawinfo.descriptor_pool = GfxDescriptorPool::create(m_framebuffers.size() * 2, m_framebuffers.size() * 2);
       auto descriptor_pool     = drawinfo.descriptor_pool.get();
 
       auto model_matrix     = transform->get_model_matrix();

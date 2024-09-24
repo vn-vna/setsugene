@@ -22,8 +22,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include("${CMAKE_SOURCE_DIR}/cmake/GetGoogleTest.cmake")
-include("${CMAKE_SOURCE_DIR}/cmake/GetLibDeflate.cmake")
-include("${CMAKE_SOURCE_DIR}/cmake/GetOpenFbx.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetGlfw.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetLibYaml.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetLibJson.cmake")

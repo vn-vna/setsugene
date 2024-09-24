@@ -1,10 +1,15 @@
+#include <ranges>
 #include <setsugen/format.h>
 
 #include <setsugen/exception.h>
+#include <string>
+#include <string_view>
+#include <tuple>
 
 namespace setsugen
 {
-Formatter::Formatter(const std::string& fmt_template) : m_fmt_template(fmt_template)
+Formatter::Formatter(const std::string& fmt_template)
+    : m_fmt_template(fmt_template)
 {
   parse_template();
 }
@@ -25,7 +30,8 @@ Formatter::format(const FormatArgsStore& args) const
       break;
       case TokenType::Placeholder:
       {
-        emplace_placeholder(result, args, std::get<FormatPlaceholder>(token.details));
+        emplace_placeholder(result, args,
+                            std::get<FormatPlaceholder>(token.details));
       }
       break;
     }
@@ -103,7 +109,8 @@ Formatter::parse_template()
 }
 
 void
-parse_index(const std::string& index, size_t& auto_index, FormatPlaceholder& placeholder)
+parse_index(const std::string& index, size_t& auto_index,
+            FormatPlaceholder& placeholder)
 {
   if (index.empty())
   {
@@ -124,7 +131,8 @@ parse_index(const std::string& index, size_t& auto_index, FormatPlaceholder& pla
 }
 
 FormatPlaceholder
-Formatter::parse_placeholder(StringIter start, StringIter end, size_t& auto_index)
+Formatter::parse_placeholder(StringIter start, StringIter end,
+                             size_t& auto_index)
 {
   FormatPlaceholder placeholder{};
 
@@ -156,7 +164,8 @@ Formatter::parse_placeholder(StringIter start, StringIter end, size_t& auto_inde
 }
 
 void
-Formatter::emplace_placeholder(std::stringstream& ss, const FormatArgsStore& args,
+Formatter::emplace_placeholder(std::stringstream&       ss,
+                               const FormatArgsStore&   args,
                                const FormatPlaceholder& placeholder) const
 {
   const auto& desc = args.get(placeholder.index);
@@ -168,38 +177,31 @@ Formatter::parse_specs(std::string_view format)
 {
   std::unordered_map<char, std::string_view> specs;
 
-  auto iter        = format.begin();
-  auto end         = format.end();
-  auto check_point = iter;
+  auto spec_view = //
+      std::views::all(format) | std::views::split(',') |
+      std::views::transform(
+          [](auto&& sv)
+          { return std::views::all(sv) | std::views::split('='); }) |
+      std::views::filter(
+          [](auto kv)
+          {
+            return std::ranges::distance(kv) == 2 &&
+                   std::ranges::distance((*kv.begin()).begin(),
+                                         (*kv.begin()).end()) > 0;
+          }) |
+      std::views::transform(
+          [](auto&& kv)
+          {
+            auto p = kv.begin();
+            auto k = std::string_view((*p).begin(), (*p).end());
+            ++p;
+            auto v = std::string_view((*p).begin(), (*p).end());
+            return std::make_tuple(k[0], v);
+          });
 
-  while (iter != end)
+  for (auto&& [k, v]: spec_view)
   {
-    if (*iter == ',')
-    {
-      if (auto next = check_point + 1; next != end && *next == '=')
-      {
-        specs[*check_point] = std::string_view{check_point + 2, iter};
-        check_point         = iter + 1;
-      }
-      else
-      {
-        throw InvalidFormatException("Invalid format specs");
-      }
-    }
-
-    ++iter;
-  }
-
-  if (check_point != iter)
-  {
-    if (const auto next = check_point + 1; next != end && *next == '=')
-    {
-      specs[*check_point] = std::string_view{check_point + 2, iter};
-    }
-    else
-    {
-      throw InvalidFormatException("Invalid format specs");
-    }
+    specs[k] = v;
   }
 
   return specs;

@@ -5,7 +5,8 @@ namespace setsugen
 {
 std::atomic<Application*> Application::s_current_app = {};
 
-Application::Application()
+Application::
+Application()
 {
   if (s_current_app)
   {
@@ -15,7 +16,8 @@ Application::Application()
   s_current_app = this;
 }
 
-Application::~Application()
+Application::~
+Application()
 {
   s_current_app = nullptr;
 }
@@ -32,18 +34,18 @@ Application::current_app()
 #include <Windows.h>
 #endif
 
-#ifdef SETSUGENE_WINDOWS
-
 namespace setsugen
 {
 
 std::string
 Application::get_root_path()
 {
+#ifdef SETSUGENE_WINDOWS
   char buffer[MAX_PATH];
   GetModuleFileNameA(nullptr, buffer, MAX_PATH);
   std::string path = buffer;
   return path.substr(0, path.find_last_of("\\/"));
+#endif
 }
 
 std::string
@@ -53,4 +55,3 @@ Application::get_assets_path()
 }
 
 } // namespace setsugen
-#endif

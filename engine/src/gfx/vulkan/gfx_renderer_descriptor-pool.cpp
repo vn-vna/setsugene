@@ -1,14 +1,15 @@
 #include "gfx_renderer.h"
 
+#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan.h>
 
 namespace setsugen
 {
 
-GfxDescriptorPool::GfxDescriptorPool(size_t pool_size, size_t max_sets)
+GfxDescriptorPool::
+GfxDescriptorPool(size_t pool_size, size_t max_sets)
     : m_vulkan_app{GfxApplication::get_current()},
-      m_logical_device{GfxApplication::get_current()->get_logical_device()},
-      m_descriptor_pool{nullptr}
+      m_logical_device{GfxApplication::get_current()->get_logical_device()}, m_descriptor_pool{nullptr}
 {
   VkDescriptorPoolSize pool_size_desc{};
   pool_size_desc.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -27,7 +28,8 @@ GfxDescriptorPool::GfxDescriptorPool(size_t pool_size, size_t max_sets)
   }
 }
 
-GfxDescriptorPool::~GfxDescriptorPool()
+GfxDescriptorPool::~
+GfxDescriptorPool()
 {
   vkDestroyDescriptorPool(m_vulkan_app->get_logical_device(), m_descriptor_pool, nullptr);
 }
@@ -50,10 +52,10 @@ GfxDescriptorPool::allocate_descriptor_set(VkDescriptorSetLayout layout)
   return std::make_unique<GfxDescriptorSet>(this, layout);
 }
 
-GfxDescriptorSet::GfxDescriptorSet(GfxDescriptorPool* pool, VkDescriptorSetLayout layout)
+GfxDescriptorSet::
+GfxDescriptorSet(GfxDescriptorPool* pool, VkDescriptorSetLayout layout)
     : m_vulkan_app{GfxApplication::get_current()},
-      m_logical_device{GfxApplication::get_current()->get_logical_device()},
-      m_descriptor_set{nullptr}
+      m_logical_device{GfxApplication::get_current()->get_logical_device()}, m_descriptor_set{nullptr}
 {
   VkDescriptorSetAllocateInfo alloc_info{};
   alloc_info.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -61,14 +63,15 @@ GfxDescriptorSet::GfxDescriptorSet(GfxDescriptorPool* pool, VkDescriptorSetLayou
   alloc_info.descriptorSetCount = 1;
   alloc_info.pSetLayouts        = &layout;
 
-  auto descriptor_set_result = vkAllocateDescriptorSets(m_logical_device, &alloc_info, &m_descriptor_set);
-  if (descriptor_set_result != VK_SUCCESS)
+  if (auto descriptor_set_result = vkAllocateDescriptorSets(m_logical_device, &alloc_info, &m_descriptor_set);
+      descriptor_set_result != VK_SUCCESS)
   {
-    throw EngineException("Failed to allocate descriptor set");
+    throw EngineException("Failed to allocate descriptor set due to error: {}", string_VkResult(descriptor_set_result));
   }
 }
 
-GfxDescriptorSet::~GfxDescriptorSet()
+GfxDescriptorSet::~
+GfxDescriptorSet()
 {}
 
 VkDescriptorSet

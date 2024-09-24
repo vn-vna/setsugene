@@ -3,94 +3,59 @@
 #include <setsugen/pch.h>
 
 #include <setsugen/context.h>
+#include <setsugen/refl.h>
 #include <setsugen/version.h>
 
 namespace setsugen
 {
 
-template<typename Ctx, typename Plugin>
-class PluginManager;
+class ApplicationContext;
 
-template<typename Mng>
-class PluginBase;
-
-class ApplicationPluginManager;
-class ApplicationPlugin;
-
-struct PluginManagerConfiguration
+enum class PluginType : uint64_t
 {
-  std::string plugin_folder      = "plugins";
-  std::size_t max_active_plugins = 1024;
+  None        = 0,
+  Application = 1 << 0,
+  Renderer    = 1 << 1,
+  Shader      = 1 << 2,
+  Input       = 1 << 3,
+  Audio       = 1 << 4,
+  Physics     = 1 << 5,
+  Scripting   = 1 << 6,
+  Networking  = 1 << 7,
+  Asset       = 1 << 8,
 };
 
 struct PluginConfiguration
 {
-  std::string plugin_name;
+  std::string name;
+  std::string identity;
+  std::string entry_point;
 };
 
-template<typename Ctx, typename Plugin>
+
 class PluginManager
 {
 public:
-  using ContextType = Ctx;
-  using PluginType  = Plugin;
-
-  PluginManager(const PluginManagerConfiguration& configuration, ContextType* context) noexcept;
-
-  virtual ~PluginManager() noexcept;
-
-  ContextType* get_context() const;
-
-protected:
-  PluginManagerConfiguration m_configuration;
-  ContextType*               m_context;
-  std::vector<PluginType>    m_plugins;
-  PluginType**               m_active_plugin;
-
-  friend PluginType;
+  PluginManager();
+  ~PluginManager();
 };
 
-template<typename Mng>
-class PluginBase
+class Plugin
 {
 public:
-  using ManagerType = Mng;
-  using ContextType = typename Mng::ContextType;
+  using PluginTypeFlags = uint64_t;
+  using PluginPriority  = uint64_t;
 
-  PluginBase(Mng* manager) noexcept;
+  virtual ~Plugin();
 
-  virtual ~PluginBase() noexcept;
-
-  virtual std::string get_name()     = 0;
-  virtual int         get_priority() = 0;
-  virtual Version     get_version()  = 0;
-
-  virtual void on_load();
-  virtual void on_enable();
-  virtual void on_disable();
-  virtual void on_unload();
+  PluginTypeFlags type() const;
+  PluginPriority  priority() const;
 
 protected:
-  ManagerType* m_manager;
+  Plugin(PluginTypeFlags type, PluginPriority priority);
+
+  PluginPriority  m_priority;
+  PluginTypeFlags m_type;
 };
-
-
-enum class ApplicationPluginAssignment : std::size_t
-{
-  Unassingnable = 0,
-  ApplicationPlugin
-};
-
-class ApplicationPluginManager : PluginManager<ApplicationContext, ApplicationPlugin>
-{
-public:
-};
-
-
-class ApplicationPlugin : PluginBase<ApplicationPluginManager>
-{};
 
 } // namespace setsugen
-
-#include "./__impl__/plug/plug_plugin-base.inl"
-#include "./__impl__/plug/plug_plugin-manager.inl"

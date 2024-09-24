@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./vector_decl.inl"
+
 namespace setsugen
 {
 #define DECLARE_VECTORTYPE_ALIAS(prefix, usage, typesym, type, dimsize) \

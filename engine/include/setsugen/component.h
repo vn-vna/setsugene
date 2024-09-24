@@ -10,7 +10,7 @@ class Entity;
 class Component
 {
 public:
-           Component(Entity* entity);
+  Component(Entity* entity);
   virtual ~Component() = default;
 
   Entity*       get_entity();

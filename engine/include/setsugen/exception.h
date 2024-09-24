@@ -9,13 +9,9 @@
   public:                                                                                                              \
     template<typename... Args>                                                                                         \
     explicit ExName(const std::string& message, Args&&... args)                                                        \
-        : SetsugenException(message, std::forward<Args>(args)...)                                                      \
+        : SetsugenException(#ExName, message, std::forward<Args>(args)...)                                             \
     {}                                                                                                                 \
     ~ExName() override = default;                                                                                      \
-    const char* exception_type() const override                                                                        \
-    {                                                                                                                  \
-      return #ExName;                                                                                                  \
-    }                                                                                                                  \
   }
 
 namespace setsugen
@@ -27,18 +23,19 @@ class SetsugenException : public std::runtime_error
 {
 public:
   template<typename... Args>
-  explicit SetsugenException(const std::string& message, Args&&... args)
-      : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...))
+  explicit SetsugenException(const std::string& type, const std::string& message, Args&&... args)
+      : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...)), m_type{type}
   {}
-
 
   ~SetsugenException() override = default;
 
-
-  virtual const char* exception_type() const
+  const char* exception_type() const
   {
-    return "SetsugenException";
+    return m_type.c_str();
   }
+
+protected:
+  std::string m_type;
 };
 
 SETSUGENE_DECLARE_EXCEPTION(NotImplementedException);
@@ -51,6 +48,7 @@ SETSUGENE_DECLARE_EXCEPTION(InvalidOperationException);
 SETSUGENE_DECLARE_EXCEPTION(OutOfBoundsException);
 SETSUGENE_DECLARE_EXCEPTION(OutOfMemoryException);
 SETSUGENE_DECLARE_EXCEPTION(EngineException);
+SETSUGENE_DECLARE_EXCEPTION(PluginException);
 
 template<typename T>
 concept ExceptionType = std::is_base_of_v<SetsugenException, T>;

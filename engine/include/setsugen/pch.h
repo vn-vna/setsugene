@@ -48,6 +48,7 @@
 #include <numbers>
 #include <optional>
 #include <queue>
+#include <ranges>
 #include <set>
 #include <sstream>
 #include <stack>
@@ -61,4 +62,3 @@
 #include <variant>
 #include <vector>
 #include <source_location>
-

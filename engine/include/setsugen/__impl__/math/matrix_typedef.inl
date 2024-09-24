@@ -1,5 +1,7 @@
 #pragma once
 
+#include "./matrix_decl.inl"
+
 namespace setsugen
 {
 #define DECLARE_MATRIX_ALIAS(typesym, type, col, row) \

@@ -5,7 +5,7 @@
 // Setsugen headers
 #include <setsugen/application.h>
 #include <setsugen/camera.h>
-#include <setsugen/clock.h>
+#include <setsugen/chrono.h>
 #include <setsugen/component.h>
 #include <setsugen/entity.h>
 #include <setsugen/exception.h>

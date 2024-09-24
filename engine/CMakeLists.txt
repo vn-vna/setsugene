@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(Doxygen REQUIRED)
 find_package(Vulkan REQUIRED COMPONENTS glslc)
-find_package(OpenFBX REQUIRED)
 find_package(glfw REQUIRED)
 find_program(glslc_executable NAMES glslc HINTS Vulkan::glslc)
 find_package(libyaml REQUIRED)

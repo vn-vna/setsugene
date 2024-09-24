@@ -1,70 +1,63 @@
-#include <setsugen/engine.h>
-#include <setsugen/scripting.h>
+#include <iostream>
+#include <ranges>
+#include <string>
+#include <string_view>
 
-class MoveBehavior : public setsugen::Behavior
-{
-public:
-  MoveBehavior(setsugen::Entity* entity) : setsugen::Behavior{entity}
-  {}
+#include <setsugen/chrono.h>
+#include <setsugen/conf.h>
+#include <setsugen/format.h>
+#include <setsugen/serde.h>
 
-  void update() override
-  {
-    auto transform = get_entity()->get_component<setsugen::Transform>();
-    if (transform)
-    {
-      auto rotation = transform->get_rotation();
-      transform->set_rotation({rotation.x() + 0.01f, rotation.y(), rotation.z()});
-    }
-  }
-
-  const char* get_type() override
-  {
-    return "MoveBehavior";
-  }
-};
+using setsugen::ConfigurationLoader;
+using setsugen::Date;
+using setsugen::FileConfigurationSource;
+using setsugen::Formatter;
+using setsugen::TimeZoneOffset;
 
 int
 main()
 {
-  using namespace setsugen;
-  auto application = ApplicationBuilder::create()->build();
-  auto logger      = application->create_logger("main");
+  try
+  {
+    std::string str = "w=10,f=sdkfjklsdfg,h=20";
 
-  application->run();
+    auto begin_time = std::chrono::high_resolution_clock::now();
 
-  logger->info("Application started");
+    for (int i = 0; i < 10'000'000; ++i)
+    {
+      auto spec_view =
+          std::views::all(str) | std::views::split(',') |
+          std::views::transform(
+              [](auto&& rng)
+              {
+                return rng | std::views::split('=') |
+                       std::views::transform(
+                           [](auto&& view) {
+                             return std::string_view(view.begin(), view.end());
+                           });
+              }) |
+          std::views::transform(
+              [](auto&& kv)
+              {
+                auto p = kv.begin();
+                auto k = std::string_view((*p).begin(), (*p).end());
+                ++p;
+                auto v = std::string_view((*p).begin(), (*p).end());
+                return std::make_tuple(k, v);
+              });
+    }
 
-  logger->info("Creating scene");
-  auto scene_manager = application->get_scene_manager();
+    auto end_time = std::chrono::high_resolution_clock::now();
 
-  auto scene = scene_manager->create_scene("MAIN");
-
-  auto entity        = scene->create_entity("Root");
-  auto entity_camera = scene->create_entity("Camera");
-  auto dummy         = scene->create_entity("Dummy");
-
-  auto mesh      = entity->add_component<Mesh>("/user/mesh/untitled.fbx");
-  auto transform = entity->add_component<Transform>();
-  transform->set_position({3.0f, 0.0f, 0.0f});
-
-  auto dummy_mesh      = dummy->add_component<Mesh>("/user/mesh/untitled.fbx");
-  auto dummy_behavior  = dummy->add_component<MoveBehavior>();
-  auto dummy_transform = dummy->add_component<Transform>();
-  dummy_transform->set_position({1.0f, 1.5f, 0.0f});
-
-  const auto camera = entity_camera->add_component<PerspectiveCamera>();
-  camera->set_position({0.0f, 2.0f, -5.0f});
-  camera->set_center({0.0f, 0.0f, 0.0f});
-
-  auto fbsize = application->get_window()->get_framebuffer_size();
-  camera->set_aspect_ratio((float) fbsize.width() / (float) fbsize.height());
-
-  scene->set_main_camera(camera);
-
-  scene_manager->set_current_scene(scene);
-
-  logger->info("Scene created");
-
-  logger->info("Hold on to your butts!");
-  application->join();
+    std::cout << "Time: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     end_time - begin_time)
+                     .count()
+              << "ms" << std::endl;
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << "Error: " << e.what() << std::endl;
+    return 1;
+  }
 }

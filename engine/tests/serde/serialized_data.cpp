@@ -46,6 +46,22 @@ TEST(SerializedData, ManualCreation_Array)
   EXPECT_EQ(arr.get_array()[3].get_bool().value(), true);
 }
 
+TEST(SerializedData, ConvertFromVector_Array)
+{
+  SerializedData arr(std::vector<int>{1, 2, 3, 4});
+
+  EXPECT_EQ(arr.get_type(), SerializedType::Array);
+  EXPECT_EQ(arr.get_array().size(), 4);
+  EXPECT_EQ(arr.get_array()[0].get_type(), SerializedType::Integer);
+  EXPECT_EQ(arr.get_array()[0].get_integer().value(), 1);
+  EXPECT_EQ(arr.get_array()[1].get_type(), SerializedType::Integer);
+  EXPECT_EQ(arr.get_array()[1].get_integer().value(), 2);
+  EXPECT_EQ(arr.get_array()[2].get_type(), SerializedType::Integer);
+  EXPECT_EQ(arr.get_array()[2].get_integer().value(), 3);
+  EXPECT_EQ(arr.get_array()[3].get_type(), SerializedType::Integer);
+  EXPECT_EQ(arr.get_array()[3].get_integer().value(), 4);
+}
+
 TEST(SerializedData, ManualCreation_Object_Success)
 {
   SerializedData obj = {
@@ -328,7 +344,7 @@ TEST(SerializedData, Complex)
         {"name", "John Jr."},
         {"age", 2},
       },
-    }}, 
+    }},
     {"spouse", nullptr},
   };
 

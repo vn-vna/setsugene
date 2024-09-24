@@ -1,5 +1,7 @@
 #pragma once
 
+#include "format_decl.inl"
+
 namespace setsugen
 {
 template<typename K, Formattable V>

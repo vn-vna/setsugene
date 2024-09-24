@@ -4,8 +4,9 @@ Language: Cpp
 BasedOnStyle: LLVM
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
-AlignOperands: true
+AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
@@ -31,9 +32,10 @@ BraceWrapping:
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
+SpaceBeforeParensOptions:
+  AfterRequiresInClause: false
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 120
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
 IncludeCategories:
   - Regex: '^<.*'
     Priority: 1
@@ -59,4 +61,4 @@ SpacesInParentheses: false
 PointerAlignment: Left
 ReferenceAlignment: Left
 TabWidth: 2
-...
+IndentRequiresClause: false
