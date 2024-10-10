@@ -1,18 +1,22 @@
 #include "library.h"
 
 using setsugen::ThisLibrary;
+using setsugen::String;
+using setsugen::Int32;
+using setsugen::Bool;
+using setsugen::Void;
 
-bool
+Bool
 on_load()
 {
   thislib = new ThisLibrary(GetModuleHandle(NULL));
   return true;
 }
 
-bool
+Bool
 on_unload()
 {
-  bool success = true;
+  Bool success = true;
   for (auto& callback: thislib->get_unload_events())
   {
     try
@@ -46,18 +50,18 @@ DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 namespace setsugen
 {
-ThisLibrary::ThisLibrary(void* handle) : m_handle(handle)
+ThisLibrary::ThisLibrary(Void* handle) : m_handle(handle)
 {}
 
-std::string
+String
 ThisLibrary::get_path() const
 {
   char path[MAX_PATH];
   GetModuleFileNameA((HMODULE) m_handle, path, MAX_PATH);
-  return std::string(path);
+  return String(path);
 }
 
-void*
+Void*
 ThisLibrary::get_handle() const
 {
   return m_handle;
@@ -69,13 +73,13 @@ ThisLibrary::get_unload_events() const
   return m_on_unload;
 }
 
-void
+Void
 ThisLibrary::on_unload(const UnloadEventCallback& callback)
 {
   m_on_unload.push_front(callback);
 }
 
-std::tuple<int, int, int>
+std::tuple<Int32, Int32, Int32>
 ThisLibrary::get_version()
 {
   return std::make_tuple(SETSUGENE_VERSION_MAJOR, SETSUGENE_VERSION_MINOR, SETSUGENE_VERSION_PATCH);

@@ -29,7 +29,7 @@ template<ComponentType C>
 class Stringify<C>
 {
 public:
-  static void stringify(const FormatContext& context, const C& value)
+  static Void stringify(const FormatContext& context, const C& value)
   {
     context.result << "[[Component: type = " << value.get_type()
                    << "] owned by [Entity: name = " << value.get_entity()->get_name() << "]]";

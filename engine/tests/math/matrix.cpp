@@ -5,9 +5,9 @@
 TEST(Matrix, Creation)
 {
   Mat4F m1;
-  for (int row = 0; row < 4; ++row)
+  for (Int32 row = 0; row < 4; ++row)
   {
-    for (int col = 0; col < 4; ++col)
+    for (Int32 col = 0; col < 4; ++col)
     {
       EXPECT_EQ(m1.get(row, col), 0.0);
     }
@@ -15,9 +15,9 @@ TEST(Matrix, Creation)
 
   Mat4F m2 = Mat4F::identity();
 
-  for (int row = 0; row < 4; ++row)
+  for (Int32 row = 0; row < 4; ++row)
   {
-    for (int col = 0; col < 4; ++col)
+    for (Int32 col = 0; col < 4; ++col)
     {
       if (row == col)
       {
@@ -38,9 +38,9 @@ TEST(Matrix, Addition)
   Mat4F m2 = Mat4F::identity();
   Mat4F m3 = m1 + m2;
 
-  for (int row = 0; row < 4; ++row)
+  for (Int32 row = 0; row < 4; ++row)
   {
-    for (int col = 0; col < 4; ++col)
+    for (Int32 col = 0; col < 4; ++col)
     {
       if (row == col)
       {
@@ -70,9 +70,9 @@ TEST(Matrix, Addition)
 
   Mat4F m6 = m4 + m5;
 
-  for (int row = 0; row < 4; ++row)
+  for (Int32 row = 0; row < 4; ++row)
   {
-    for (int col = 0; col < 4; ++col)
+    for (Int32 col = 0; col < 4; ++col)
     {
       EXPECT_EQ(m6.get(row, col), 17.0);
     }

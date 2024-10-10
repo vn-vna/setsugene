@@ -3,27 +3,42 @@
 namespace setsugen
 {
 
-LoggerFactory::LoggerFactory() : m_settings{}
+LoggerFactory::
+LoggerFactory()
+    : m_settings{}
 {}
 
 LoggerFactory::~LoggerFactory() = default;
 
-std::shared_ptr<Logger>
-LoggerFactory::get(const std::string& tag)
+Owner<Logger>
+LoggerFactory::get(const String& tag) const
 {
-  return std::shared_ptr<Logger>(new Logger(m_settings, tag));
+  return Owner<Logger>(new Logger{m_settings, tag});
 }
 
-void
-LoggerFactory::add_appender(const std::shared_ptr<LogAppender>& appender)
+Void
+LoggerFactory::add_appender(const Shared<LogAppender>& appender)
 {
   m_settings.appender_mapping.add_appender(appender);
 }
 
-void
-LoggerFactory::remove_appender(const std::string& name)
+Void
+LoggerFactory::remove_appender(const String& name)
 {
   m_settings.appender_mapping.remove_appender(name);
+}
+
+LoggerFactory&
+LoggerFactory::default_factory()
+{
+  static Owner<LoggerFactory> factory = []()
+  {
+    auto f = std::make_unique<LoggerFactory>();
+    f->add_appender(LogAppender::create_console_appender("console"));
+    return f;
+  }();
+
+  return *factory;
 }
 
 } // namespace setsugen

@@ -7,7 +7,7 @@
 namespace setsugen
 {
 
-void
+Void
 terminate_thread(std::thread& thread)
 {
   auto handle = thread.native_handle();

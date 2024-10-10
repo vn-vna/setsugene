@@ -4,6 +4,7 @@ TEST_MAIN()
 
 using namespace setsugen;
 
-TEST(ChronoDate, DefaultConstructor)
+TEST(ChronoDate, CurrentDate)
 {
+  auto date = Date::now();
 }

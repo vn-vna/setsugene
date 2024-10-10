@@ -14,8 +14,8 @@ public:
   Yaml() noexcept;
   Yaml(const Configurations& conf) noexcept;
 
-  void serialize(std::ostream& stream, const SerializedData& data) const;
-  void deserialize(std::istream& stream, SerializedData& data) const;
+  Void serialize(OutputStream& stream, const SerializedData& data) const;
+  Void deserialize(InputStream& stream, SerializedData& data) const;
 
 private:
   Configurations m_config;

@@ -23,7 +23,7 @@ SerializedData(SerializedData&& other) noexcept
 {}
 
 SerializedData::
-SerializedData(std::initializer_list<SerializedData> value, SerializedType type)
+SerializedData(Initializer<SerializedData> value, SerializedType type)
 {
   switch (type)
   {
@@ -56,7 +56,7 @@ SerializedData(std::initializer_list<SerializedData> value, SerializedType type)
       }
     }
 
-    default: throw InvalidArgumentException("Invalid type for initializer list: {}", type);
+    default: throw InvalidArgumentException("Invalid type for initializer list: {}", {type});
   }
 }
 
@@ -73,7 +73,7 @@ SerializedData::operator=(std::nullptr_t value) noexcept
 
 template<>
 SerializedData&
-SerializedData::operator=(bool value) noexcept
+SerializedData::operator=(Bool value) noexcept
 {
   m_actual = DataStorage(value);
   return *this;
@@ -138,7 +138,7 @@ SerializedData::operator=(uint8_t value) noexcept
 
 template<>
 SerializedData&
-SerializedData::operator=(double value) noexcept
+SerializedData::operator=(Float64 value) noexcept
 {
   m_actual = DataStorage(value);
   return *this;
@@ -146,14 +146,14 @@ SerializedData::operator=(double value) noexcept
 
 template<>
 SerializedData&
-SerializedData::operator=(float value) noexcept
+SerializedData::operator=(Float32 value) noexcept
 {
-  return *this = static_cast<double>(value);
+  return *this = static_cast<Float64>(value);
 }
 
 template<>
 SerializedData&
-SerializedData::operator=(std::string value) noexcept
+SerializedData::operator=(String value) noexcept
 {
   m_actual = DataStorage(std::move(value));
   return *this;
@@ -200,13 +200,13 @@ SerializedData::size() const
 
     default:
     {
-      throw InvalidOperationException("Cannot get size of non-iterable type: {}", this->get_type());
+      throw InvalidOperationException("Cannot get size of non-iterable type: {}", {this->get_type()});
     }
   }
 }
 
 
-SerializedData::operator bool() const noexcept
+SerializedData::operator Bool() const noexcept
 {
   return m_actual.index() != 0;
 }
@@ -230,9 +230,9 @@ SerializedData::operator=(SerializedData&& other) noexcept
 
 
 SerializedData&
-SerializedData::operator=(std::initializer_list<SerializedData> list)
+SerializedData::operator=(Initializer<SerializedData> list)
 {
-  bool is_object = check_object_initializer(list);
+  Bool is_object = check_object_initializer(list);
 
   if (is_object)
   {
@@ -276,7 +276,7 @@ SerializedData::get_bool() const
 {
   if (this->get_type() != SerializedType::Bool)
   {
-    throw InvalidOperationException("Cannot get bool from non-bool");
+    throw InvalidOperationException("Cannot get Bool from non-Bool");
   }
 
   return std::get<DataStorage<SerializedType::Bool>>(m_actual);
@@ -300,7 +300,7 @@ SerializedData::get_float() const
 {
   if (this->get_type() != SerializedType::Float)
   {
-    throw InvalidOperationException("Cannot get float from non-float");
+    throw InvalidOperationException("Cannot get Float32 from non-Float32");
   }
 
   return std::get<DataStorage<SerializedType::Float>>(m_actual);
@@ -355,17 +355,17 @@ SerializedData::hash() const
 
     case SerializedType::Float:
     {
-      return std::hash<double>{}(std::get<DataStorage<SerializedType::Float>>(m_actual).value());
+      return std::hash<Float64>{}(std::get<DataStorage<SerializedType::Float>>(m_actual).value());
     }
 
     case SerializedType::String:
     {
-      return std::hash<std::string>{}(std::get<DataStorage<SerializedType::String>>(m_actual).value());
+      return std::hash<String>{}(std::get<DataStorage<SerializedType::String>>(m_actual).value());
     }
 
     case SerializedType::Bool:
     {
-      return std::hash<bool>{}(std::get<DataStorage<SerializedType::Bool>>(m_actual).value());
+      return std::hash<Bool>{}(std::get<DataStorage<SerializedType::Bool>>(m_actual).value());
     }
 
     case SerializedType::Array:
@@ -396,7 +396,7 @@ SerializedData::get_bool()
 {
   if (this->get_type() != SerializedType::Bool)
   {
-    throw InvalidOperationException("Cannot get bool from non-bool");
+    throw InvalidOperationException("Cannot get Bool from non-Bool");
   }
 
   return std::get<DataStorage<SerializedType::Bool>>(m_actual);
@@ -420,7 +420,7 @@ SerializedData::get_float()
 {
   if (this->get_type() != SerializedType::Float)
   {
-    throw InvalidOperationException("Cannot get float from non-float");
+    throw InvalidOperationException("Cannot get Float32 from non-Float32");
   }
 
   return std::get<DataStorage<SerializedType::Float>>(m_actual);
@@ -438,10 +438,10 @@ SerializedData::get_string()
   return std::get<DataStorage<SerializedType::String>>(m_actual);
 }
 
-bool
+Bool
 SerializedData::operator<(const SerializedData& other) const
 {
-  std::variant<int64_t, double> p1, p2;
+  std::variant<int64_t, Float64> p1, p2;
 
   switch (this->get_type())
   {
@@ -490,46 +490,46 @@ SerializedData::operator<(const SerializedData& other) const
 
   if (p1.index() == 1 && p2.index() == 1)
   {
-    return std::get<double>(p1) < std::get<double>(p2);
+    return std::get<Float64>(p1) < std::get<Float64>(p2);
   }
 
   if (p1.index() == 0 && p2.index() == 1)
   {
-    return static_cast<double>(std::get<int64_t>(p1)) < std::get<double>(p2);
+    return static_cast<Float64>(std::get<int64_t>(p1)) < std::get<Float64>(p2);
   }
 
   if (p1.index() == 1 && p2.index() == 0)
   {
-    return std::get<double>(p1) < static_cast<double>(std::get<int64_t>(p2));
+    return std::get<Float64>(p1) < static_cast<Float64>(std::get<int64_t>(p2));
   }
 
   return false;
 }
 
 
-bool
+Bool
 SerializedData::operator>(const SerializedData& other) const
 {
   return other < *this;
 }
 
 
-bool
+Bool
 SerializedData::operator<=(const SerializedData& other) const
 {
   return !(*this > other);
 }
 
 
-bool
+Bool
 SerializedData::operator>=(const SerializedData& other) const
 {
   return !(*this < other);
 }
 
 
-std::ostream&
-operator<<(std::ostream& os, const SerializedData& data)
+OutputStream&
+operator<<(OutputStream& os, const SerializedData& data)
 {
   switch (data.get_type())
   {
@@ -619,21 +619,21 @@ SerializedData::integer(int64_t value)
 
 
 SerializedData
-SerializedData::floating(double value)
+SerializedData::floating(Float64 value)
 {
   return SerializedData(DataStorage(value));
 }
 
 
 SerializedData
-SerializedData::string(const std::string& value)
+SerializedData::string(const String& value)
 {
   return SerializedData(DataStorage(value));
 }
 
 
 SerializedData
-SerializedData::boolean(bool value)
+SerializedData::boolean(Bool value)
 {
   return SerializedData(DataStorage(value));
 }
@@ -647,21 +647,21 @@ SerializedData::null()
 
 
 SerializedData
-SerializedData::array(std::initializer_list<SerializedData> list)
+SerializedData::array(Initializer<SerializedData> list)
 {
   return SerializedData(DataStorage<SerializedType::Array>(list));
 }
 
 
 SerializedData
-SerializedData::object(std::initializer_list<SerializedData> value)
+SerializedData::object(Initializer<SerializedData> value)
 {
   return SerializedData(DataStorage<SerializedType::Object>(value));
 }
 
 
-bool
-SerializedData::check_object_initializer(const std::initializer_list<SerializedData>& list) const
+Bool
+SerializedData::check_object_initializer(const Initializer<SerializedData>& list) const
 {
   for (const auto& data: list)
   {
@@ -676,7 +676,7 @@ SerializedData::check_object_initializer(const std::initializer_list<SerializedD
   return true;
 }
 
-bool
+Bool
 SerializedData::try_compare_object(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::Object || other.get_type() == SerializedType::Object)
@@ -686,7 +686,7 @@ SerializedData::try_compare_object(const SerializedData& other) const
   return false;
 }
 
-bool
+Bool
 SerializedData::try_compare_array(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::Array || other.get_type() == SerializedType::Array)
@@ -696,7 +696,7 @@ SerializedData::try_compare_array(const SerializedData& other) const
   return false;
 }
 
-bool
+Bool
 SerializedData::try_compare_number(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::Integer && other.get_type() == SerializedType::Integer)
@@ -722,7 +722,7 @@ SerializedData::try_compare_number(const SerializedData& other) const
   return false;
 }
 
-bool
+Bool
 SerializedData::try_compare_boolean(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::Bool && other.get_type() == SerializedType::Bool)
@@ -733,7 +733,7 @@ SerializedData::try_compare_boolean(const SerializedData& other) const
   return false;
 }
 
-bool
+Bool
 SerializedData::try_compare_string(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::String && other.get_type() == SerializedType::String)
@@ -744,7 +744,7 @@ SerializedData::try_compare_string(const SerializedData& other) const
   return false;
 }
 
-bool
+Bool
 SerializedData::try_compare_null(const SerializedData& other) const
 {
   if (this->get_type() == SerializedType::Null && other.get_type() == SerializedType::Null)
@@ -761,7 +761,7 @@ namespace setsugen
 {
 
 
-void
+Void
 Stringify<SerializedType>::stringify(const FormatContext& context, const SerializedType& value)
 {
   context.result << "SerializedType [[ Type = ";
@@ -824,7 +824,7 @@ namespace setsugen
 {
 
 
-void
+Void
 Stringify<SerializedData>::stringify(const FormatContext& context, const SerializedData& value)
 {
   context.result << "[[ SerializedData: type = ";

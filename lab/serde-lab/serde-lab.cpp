@@ -24,34 +24,34 @@ main(int, char**)
 {
   using namespace setsugen;
   LoggerFactory logger_factory{};
-  logger_factory.add_appender(std::make_shared<ConsoleLogAppender>("console", "{level} {message}"));
+  logger_factory.add_appender(
+      std::make_shared<ConsoleLogAppender>("console", "[{level:w=6}] {tag:w=40} ->> {message}"));
   auto logger = logger_factory.get("console");
 
   try
   {
     SerializedData data, data2;
-    std::cout << data;
+    logger->info("Data is: {}", {data});
 
     data = false;
-    std::cout << "Data is: " << data << std::endl;
+    logger->info("Data is: {}", {data});
 
     data = 150;
-    std::cout << "Data is: " << data << std::endl;
+    logger->info("Data is: {}", {data});
 
     data = "OK";
-    std::cout << "Data is: " << data << std::endl;
+    logger->info("Data is: {}", {data});
 
     data = 3.14f;
-    std::cout << "Data is: " << data << std::endl;
+    logger->info("Data is: {}", {data});
 
     data  = SerializedData{{1}, 2, 3, 4, "Hell Nooooo", false};
     data2 = std::move(data);
-    std::cout << "Data is: " << data << std::endl;
-
-    std::cout << "Data2 is: " << data2 << std::endl;
+    logger->info("Data is: {}", {data});
+    logger->info("Data2 is: {}", {data2});
 
     data = SerializedData({{"OK", "Cool"}, {"K", "V"}}, SerializedType::Array);
-    std::cout << "Data is: " << data << std::endl;
+    logger->info("Data is: {}", {data});
 
     std::string json = R"(
     {
@@ -83,7 +83,7 @@ main(int, char**)
     std::stringstream ss{json};
 
     data.parse<Json>(ss);
-    std::cout << Formatter::format("Data is a {}: {}", data.get_type(), data);
+    std::cout << Formatter::format("Data is a {}: {}", {data.get_type(), data});
 
     SerializedData obj = {
         {"firstName", "John"},
@@ -115,29 +115,34 @@ main(int, char**)
 
     std::cout << "\n\n\n";
 
+    constexpr const int N = 1'000;
+
     auto start = std::chrono::system_clock::now();
 
+    auto serder = Json{{
+        .serializer_config =
+            {
+                .pretty_print = true,
+                .indent       = 2,
+            },
+    }};
+
     // Benchmark
-    for (int i = 0; i < 100000; ++i)
+    for (int i = 0; i < N; ++i)
     {
       std::stringstream ss;
-      obj.dumps(ss, Json{Json::Configurations{
-                        .serializer_config =
-                            {
-                                .pretty_print = true,
-                                .indent       = 2,
-                            },
-                    }});
+
+      obj.dumps(ss, serder);
     }
 
     auto end = std::chrono::system_clock::now();
 
-    std::cout << Formatter::format("Serialized {} times took {}ms", 100000,
-                                   std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    logger->info("Serialized {} times took {}ms",
+                {N, std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()});
   }
   catch (SetsugenException& ex)
   {
-    logger->error("An exception occured while trying to deserialize data: {}", ex);
+    logger->error("An exception occured while trying to deserialize data: {}", {ex});
   }
 
   try
@@ -164,10 +169,10 @@ main(int, char**)
 
     data.serialize(f2);
 
-    logger->info("Serialized data: {}", data);
+    logger->info("Serialized data: {}", {data});
   }
   catch (SetsugenException& ex)
   {
-    logger->error("An exception occured while trying to deserialize data: {}", ex);
+    logger->error("An exception occured while trying to deserialize data: {}", {ex});
   }
 }

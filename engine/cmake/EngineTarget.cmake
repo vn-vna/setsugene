@@ -24,9 +24,9 @@ target_precompile_headers(engine
 )
 target_link_libraries(engine
         PRIVATE glfw
-        PRIVATE Vulkan::Vulkan
         PRIVATE yaml
         PRIVATE json
+        PRIVATE volk
 )
 
 if(MSVC)

@@ -6,7 +6,7 @@
 namespace setsugen
 {
 
-class ECSState : public StateMachine
+class ECSState : public StateMachine<ECSContext>
 {
 public:
   class Initialize;
@@ -35,35 +35,35 @@ public:
   ECSState();
 };
 
-#define DECLARE_STATE_CLASS(StateName)                                                                                 \
-  class ECSState::StateName : public State                                                                             \
-  {                                                                                                                    \
-  public:                                                                                                              \
-    explicit StateName(StateMachine& state_machine);                                                                   \
-    void update() override;                                                                                            \
-  }
+class ECSState::Initialize : public StateBase<ECSState>
+{
+public:
+  Initialize(StateMachine& state_machine);
 
-DECLARE_STATE_CLASS(Initialize);
-DECLARE_STATE_CLASS(Start);
-DECLARE_STATE_CLASS(Ready);
-DECLARE_STATE_CLASS(WaitRenderer);
-DECLARE_STATE_CLASS(UpdateBegin);
-DECLARE_STATE_CLASS(HandleInput);
-DECLARE_STATE_CLASS(SceneUpdate);
-DECLARE_STATE_CLASS(ValidateScene);
-DECLARE_STATE_CLASS(DestroyScene);
-DECLARE_STATE_CLASS(CreateScene);
-DECLARE_STATE_CLASS(UpdateScene);
-DECLARE_STATE_CLASS(UpdatePhysics);
-DECLARE_STATE_CLASS(UpdateAnimation);
-DECLARE_STATE_CLASS(UpdateAudio);
-DECLARE_STATE_CLASS(UpdateScript);
-DECLARE_STATE_CLASS(UpdateUI);
-DECLARE_STATE_CLASS(UpdateFinish);
-DECLARE_STATE_CLASS(SignalHandle);
-DECLARE_STATE_CLASS(Stop);
-DECLARE_STATE_CLASS(Destroy);
+  Void enter() override;
+  Void update() override;
+  Void exit() override;
+};
 
-#undef DECLARE_STATE_CLASS
+class ECSState::Start : public StateBase<ECSState>
+{
+public:
+  Start(StateMachine& state_machine);
+
+  Void enter() override;
+  Void update() override;
+  Void exit() override;
+};
+
+class ECSState::Ready : public StateBase<ECSState>
+{
+public:
+  Ready(StateMachine& state_machine);
+
+  Void enter() override;
+  Void update() override;
+  Void exit() override;
+};
+
 
 } // namespace setsugen

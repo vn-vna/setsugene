@@ -32,7 +32,7 @@ public:
       >;
 
   SerializedData() noexcept;
-  SerializedData(std::initializer_list<SerializedData> value, SerializedType type = SerializedType::Auto);
+  SerializedData(Initializer<SerializedData> value, SerializedType type = SerializedType::Auto);
   SerializedData(const SerializedData& other) noexcept;
   SerializedData(SerializedData&& other) noexcept;
 
@@ -52,7 +52,7 @@ public:
   template<ScalarType T>
   SerializedData& operator=(T value) noexcept(ScalarType<T>);
 
-  SerializedData& operator=(std::initializer_list<SerializedData> value);
+  SerializedData& operator=(Initializer<SerializedData> value);
   SerializedData& operator=(const SerializedData& other) noexcept;
   SerializedData& operator=(SerializedData&& other) noexcept;
 
@@ -75,18 +75,18 @@ public:
   const DataStorage<SerializedType::Array>&   get_array() const;
   const DataStorage<SerializedType::Object>&  get_object() const;
 
-  operator bool() const noexcept;
+  operator Bool() const noexcept;
 
   template<typename T>
-  bool operator==(T&& other) const;
+  Bool operator==(T&& other) const;
 
   template<typename T>
-  bool operator!=(T&& other) const;
+  Bool operator!=(T&& other) const;
 
-  bool operator<(const SerializedData& other) const;
-  bool operator>(const SerializedData& other) const;
-  bool operator<=(const SerializedData& other) const;
-  bool operator>=(const SerializedData& other) const;
+  Bool operator<(const SerializedData& other) const;
+  Bool operator>(const SerializedData& other) const;
+  Bool operator<=(const SerializedData& other) const;
+  Bool operator>=(const SerializedData& other) const;
 
   template<typename T>
   constexpr SerializedData& operator[](T&& key);
@@ -95,36 +95,36 @@ public:
   constexpr const SerializedData& operator[](T&& key) const;
 
   static SerializedData null();
-  static SerializedData boolean(bool value);
+  static SerializedData boolean(Bool value);
   static SerializedData integer(int64_t value);
-  static SerializedData floating(double value);
-  static SerializedData string(const std::string& value);
-  static SerializedData array(std::initializer_list<SerializedData> value);
-  static SerializedData object(std::initializer_list<SerializedData> value);
+  static SerializedData floating(Float64 value);
+  static SerializedData string(const String& value);
+  static SerializedData array(Initializer<SerializedData> value);
+  static SerializedData object(Initializer<SerializedData> value);
 
   template<ScalarType T>
   explicit operator T() const;
 
   template<SerializerFormat T>
-  void dumps(std::ostream& stream, const T& serializer = T{}) const;
+  Void dumps(OutputStream& stream, const T& serializer = T{}) const;
 
   template<DeserializerFormat T>
-  void parse(std::istream& stream, const T& deserializer = T{});
+  Void parse(InputStream& stream, const T& deserializer = T{});
 
   template<Serializable T>
-  void serialize(T& value);
+  Void serialize(T& value);
 
   template<Serializable T>
-  void deserialize(T& value);
+  Void deserialize(T& value);
 
 private:
-  bool check_object_initializer(const std::initializer_list<SerializedData>& list) const;
-  bool try_compare_object(const SerializedData& other) const;
-  bool try_compare_array(const SerializedData& other) const;
-  bool try_compare_number(const SerializedData& other) const;
-  bool try_compare_boolean(const SerializedData& other) const;
-  bool try_compare_string(const SerializedData& other) const;
-  bool try_compare_null(const SerializedData& other) const;
+  Bool check_object_initializer(const Initializer<SerializedData>& list) const;
+  Bool try_compare_object(const SerializedData& other) const;
+  Bool try_compare_array(const SerializedData& other) const;
+  Bool try_compare_number(const SerializedData& other) const;
+  Bool try_compare_boolean(const SerializedData& other) const;
+  Bool try_compare_string(const SerializedData& other) const;
+  Bool try_compare_null(const SerializedData& other) const;
 
   SerializedVariant m_actual;
 };

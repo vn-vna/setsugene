@@ -8,22 +8,27 @@ namespace setsugen
 class Configuration
 {
 public:
-  ~Configuration();
   Configuration();
 
-  std::string get_string(const std::string& key) const;
-  int         get_int(const std::string& key) const;
-  long long   get_long(const std::string& key) const;
-  float       get_float(const std::string& key) const;
-  double      get_double(const std::string& key) const;
+  ~Configuration();
+
+  Configuration get_child(const String& key) const;
+
+  String  get_string(const String& key, Optional<String>) const;
+  Int32   get_int(const String& key, Optional<Int32>) const;
+  Int64   get_long(const String& key, Optional<Int64>) const;
+  Float32 get_float(const String& key, Optional<Float32>) const;
+  Float64 get_double(const String& key, Optional<Float64>) const;
 
 private:
-  SerializedData* dive(const std::string& key) const;
-  SerializedData* dive_insert(const std::string& key) const;
-  void            merge(const SerializedData& other);
-  void            change_value(const std::string& key, const SerializedData& value);
+  Configuration(const SerializedData& data);
 
-  bool m_env_patch;
+  SerializedData* dive(const String& key) const;
+  SerializedData* dive_insert(const String& key) const;
+  Void            merge(const SerializedData& other);
+  Void            change_value(const String& key, const SerializedData& value);
+
+  Bool m_env_patch;
   SerializedData mutable m_data;
 
   friend class ConfigurationLoader;
@@ -37,31 +42,31 @@ public:
   template<typename Source, typename... Args>
   ConfigurationLoader& add_source(Args... args);
 
-  ConfigurationLoader& set_default(std::string key, SerializedData value);
-  ConfigurationLoader& set_override(std::string key, SerializedData value);
+  ConfigurationLoader& set_default(String key, SerializedData value);
+  ConfigurationLoader& set_override(String key, SerializedData value);
   ConfigurationLoader& enable_env_patch();
 
   Configuration load();
 
 private:
-  std::vector<std::pair<std::string, SerializedData>> m_defaults;
-  std::vector<std::pair<std::string, SerializedData>> m_overrides;
-  std::vector<std::unique_ptr<ConfigurationSource>>   m_sources;
+  DArray<std::pair<String, SerializedData>> m_defaults;
+  DArray<std::pair<String, SerializedData>> m_overrides;
+  DArray<Owner<ConfigurationSource>>        m_sources;
 };
 
 class ConfigurationSource
 {
 public:
-  ConfigurationSource(bool required);
+  ConfigurationSource(Bool required);
 
   virtual ~ConfigurationSource() = default;
 
   virtual SerializedData load() = 0;
 
-  bool is_required();
+  Bool is_required();
 
 protected:
-  bool m_required;
+  Bool m_required;
 };
 
 class FileConfigurationSource : public ConfigurationSource
@@ -75,19 +80,19 @@ public:
     Yaml,
   };
 
-  FileConfigurationSource(const std::string& path, Format format = Format::Auto, bool required = true);
+  FileConfigurationSource(const String& path, Format format = Format::Auto, Bool required = true);
 
   SerializedData load() override;
 
 private:
-  std::string m_path;
-  Format      m_format;
+  String m_path;
+  Format m_format;
 };
 
 class SerializedConfigurationSource : public ConfigurationSource
 {
 public:
-  explicit SerializedConfigurationSource(const SerializedData& data, bool required = true);
+  explicit SerializedConfigurationSource(const SerializedData& data, Bool required = true);
 
   SerializedData load() override;
 
@@ -98,7 +103,7 @@ private:
 class CliArgsConfigurationSource : public ConfigurationSource
 {
 public:
-  CliArgsConfigurationSource(int argc, char** argv);
+  CliArgsConfigurationSource(Int32 argc, char** argv);
 };
 
 class EnvConfigurationSource : public ConfigurationSource

@@ -9,15 +9,15 @@ template<>
 class DataStorage<SerializedType::Array>
 {
 public:
-  using Iter   = std::vector<SerializedData>::iterator;
-  using CIter  = std::vector<SerializedData>::const_iterator;
-  using RIter  = std::vector<SerializedData>::reverse_iterator;
-  using CRIter = std::vector<SerializedData>::const_reverse_iterator;
+  using Iter   = DArray<SerializedData>::iterator;
+  using CIter  = DArray<SerializedData>::const_iterator;
+  using RIter  = DArray<SerializedData>::reverse_iterator;
+  using CRIter = DArray<SerializedData>::const_reverse_iterator;
 
   DataStorage() noexcept;
   DataStorage(const DataStorage& other) noexcept;
   DataStorage(DataStorage&& other) noexcept;
-  DataStorage(std::initializer_list<SerializedData> list);
+  DataStorage(Initializer<SerializedData> list);
 
   template<IterableType T>
     requires ScalarType<typename T::value_type>
@@ -38,9 +38,9 @@ public:
   DataStorage& swap(DataStorage& other) noexcept;
   DataStorage& shrink_to_fit();
 
-  DataStorage& sort(std::function<int(const SerializedData&, const SerializedData&)> pred);
+  DataStorage& sort(std::function<Int32(const SerializedData&, const SerializedData&)> pred);
 
-  bool   empty() const;
+  Bool   empty() const;
   size_t size() const;
   Iter   begin();
   Iter   end();
@@ -54,10 +54,10 @@ public:
   SerializedData&       operator[](size_t index);
   const SerializedData& operator[](size_t index) const;
 
-  explicit operator bool() const noexcept;
+  explicit operator Bool() const noexcept;
 
 private:
-  std::vector<SerializedData> m_arrays;
+  DArray<SerializedData> m_arrays;
 };
 
 

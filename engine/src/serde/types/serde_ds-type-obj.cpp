@@ -12,7 +12,7 @@ ObjectStorage::DataStorage(const ObjectStorage &other) = default;
 ObjectStorage::DataStorage(ObjectStorage &&other) noexcept = default;
 
 
-ObjectStorage::DataStorage(std::initializer_list<SerializedData> list)
+ObjectStorage::DataStorage(Initializer<SerializedData> list)
 {
   for (const auto &data: list)
   {
@@ -42,7 +42,7 @@ ObjectStorage &ObjectStorage::operator=(const ObjectStorage &other) = default;
 ObjectStorage &ObjectStorage::operator=(ObjectStorage &&other) noexcept = default;
 
 
-SerializedData &ObjectStorage::operator[](const std::string &key)
+SerializedData &ObjectStorage::operator[](const String &key)
 {
   return m_map[key];
 }
@@ -76,9 +76,16 @@ ObjectStorage::end() const
 }
 
 
-const SerializedData &ObjectStorage::operator[](const std::string &key) const
+const SerializedData&
+ObjectStorage::operator[](const String& key) const
 {
   return m_map.at(key);
+}
+
+Bool
+DataStorage<SerializedType::Object>::has_key(const String& key) const
+{
+  return m_map.find(key) != m_map.end();
 }
 
 

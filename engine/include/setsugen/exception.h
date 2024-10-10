@@ -7,24 +7,23 @@
   class ExName : virtual public SetsugenException                                                                      \
   {                                                                                                                    \
   public:                                                                                                              \
-    template<typename... Args>                                                                                         \
-    explicit ExName(const std::string& message, Args&&... args)                                                        \
-        : SetsugenException(#ExName, message, std::forward<Args>(args)...)                                             \
+    explicit ExName(const String& message, Initializer<ArgDescription> args = {})                       \
+        : SetsugenException(#ExName, message, args)                                                                    \
     {}                                                                                                                 \
     ~ExName() override = default;                                                                                      \
   }
 
 namespace setsugen
 {
-struct FormatContext;
 
+struct FormatContext;
 
 class SetsugenException : public std::runtime_error
 {
 public:
-  template<typename... Args>
-  explicit SetsugenException(const std::string& type, const std::string& message, Args&&... args)
-      : std::runtime_error(Formatter::format(message, std::forward<Args>(args)...)), m_type{type}
+  explicit SetsugenException(const String& type, const String& message,
+                             Initializer<ArgDescription> args = {})
+      : std::runtime_error(Formatter::format(message, args)), m_type{type}
   {}
 
   ~SetsugenException() override = default;
@@ -35,7 +34,7 @@ public:
   }
 
 protected:
-  std::string m_type;
+  String m_type;
 };
 
 SETSUGENE_DECLARE_EXCEPTION(NotImplementedException);
@@ -53,12 +52,11 @@ SETSUGENE_DECLARE_EXCEPTION(PluginException);
 template<typename T>
 concept ExceptionType = std::is_base_of_v<SetsugenException, T>;
 
-
 template<ExceptionType Ex>
 class Stringify<Ex>
 {
 public:
-  static void stringify(const FormatContext& context, const Ex& value)
+  static Void stringify(const FormatContext& context, const Ex& value)
   {
     context.result << "[[ Exception: type = " << value.exception_type() << ", message = " << value.what() << " ]]";
   }

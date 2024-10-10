@@ -2,7 +2,7 @@
 
 namespace setsugen
 {
-const std::string&
+const String&
 ReflectionField::get_name() const
 {
   return m_name;

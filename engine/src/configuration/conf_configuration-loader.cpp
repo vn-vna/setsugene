@@ -9,14 +9,14 @@ ConfigurationLoader()
 {}
 
 ConfigurationLoader&
-ConfigurationLoader::set_default(std::string key, SerializedData value)
+ConfigurationLoader::set_default(String key, SerializedData value)
 {
   m_defaults.emplace_back(std::move(key), std::move(value));
   return *this;
 }
 
 ConfigurationLoader&
-ConfigurationLoader::set_override(std::string key, SerializedData value)
+ConfigurationLoader::set_override(String key, SerializedData value)
 {
   m_overrides.emplace_back(std::move(key), std::move(value));
   return *this;
@@ -28,7 +28,7 @@ ConfigurationLoader::load()
   Configuration config{};
   for (const auto& [key, value]: m_defaults)
   {
-    *config.dive(key) = value;
+    *config.dive_insert(key) = value;
   }
 
   for (const auto& source: m_sources)
@@ -42,7 +42,7 @@ ConfigurationLoader::load()
     {
       if (source->is_required())
       {
-        throw ConfigurationException("Required configuration source failed: {}", e.what());
+        throw ConfigurationException("Required configuration source failed: {}", {e.what()});
       }
     }
   }

@@ -18,10 +18,10 @@ public:
   DataStorage& operator=(const DataStorage& other);
   DataStorage& operator=(DataStorage&& other);
 
-  bool operator==(const DataStorage& other) const;
-  bool operator!=(const DataStorage& other) const;
+  Bool operator==(const DataStorage& other) const;
+  Bool operator!=(const DataStorage& other) const;
 
-  operator bool() const noexcept;
+  operator Bool() const noexcept;
 };
 
 }

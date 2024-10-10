@@ -10,6 +10,6 @@ setsugen::ThisLibrary* thislib = nullptr;
 
 extern "C"
 {
-  bool on_load();
-  bool on_unload();
+  setsugen::Bool on_load();
+  setsugen::Bool on_unload();
 }

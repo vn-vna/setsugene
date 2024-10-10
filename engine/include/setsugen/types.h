@@ -44,13 +44,13 @@ template<typename T>
 concept NullType = std::is_same_v<T, std::nullptr_t>;
 
 template<typename T>
-concept BooleanType = std::is_same_v<T, bool>;
+concept BooleanType = std::is_same_v<T, Bool>;
 
 template<typename T, typename E>
-concept InitializerType = std::is_same_v<T, std::initializer_list<E>>;
+concept InitializerType = std::is_same_v<T, Initializer<E>>;
 
 template<typename T>
-concept FloatingPointType = std::is_same_v<T, float> || std::is_same_v<T, double>;
+concept FloatingPointType = std::is_same_v<T, Float32> || std::is_same_v<T, Float64>;
 
 template<typename T>
 concept IntegralType = std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> ||
@@ -61,7 +61,7 @@ template<typename T>
 concept NumericType = FloatingPointType<T> || IntegralType<T>;
 
 template<typename T>
-concept StringType = std::is_same_v<std::string, std::decay_t<T>> || std::is_same_v<const char*, std::decay_t<T>> ||
+concept StringType = std::is_same_v<String, std::decay_t<T>> || std::is_same_v<const char*, std::decay_t<T>> ||
                      std::is_same_v<char*, std::decay_t<T>> || std::is_same_v<std::string_view, T>;
 
 template<typename T>
@@ -73,24 +73,27 @@ template<typename T>
 concept ScalarType = NumericType<T> || StringType<T> || BooleanType<T> || NullType<T>;
 
 template<typename T>
+concept Arithmetic = NumericType<T> || BooleanType<T>;
+
+template<typename T>
 concept IterableType = requires(T& value) {
   { value.begin() } -> std::same_as<typename T::iterator>;
   { value.end() } -> std::same_as<typename T::iterator>;
 };
 
 template<typename T>
-concept SerializerFormat = requires(const SerializedData& data, std::ostream& stream) {
+concept SerializerFormat = requires(const SerializedData& data, OutputStream& stream) {
   { T{}.serialize(stream, data) };
 };
 
 template<typename T>
-concept DeserializerFormat = requires(SerializedData& data, std::istream& stream) {
+concept DeserializerFormat = requires(SerializedData& data, InputStream& stream) {
   { T{}.deserialize(stream, data) };
 };
 
 template<typename T>
 concept Serializable = requires(SerializedData& data, T& value) {
-  { Reflection<T>{}.register_fields() } -> std::same_as<std::vector<ReflectionField>>;
+  { Reflection<T>{}.register_fields() } -> std::same_as<DArray<ReflectionField>>;
 };
 
 template<typename T>
@@ -108,7 +111,7 @@ struct TypeSet
   static constexpr size_t size = sizeof...(Ts);
 
   template<typename T>
-  static constexpr bool contains = (std::is_same_v<T, Ts> || ...);
+  static constexpr Bool contains = (std::is_same_v<T, Ts> || ...);
 };
 
 template<typename T>

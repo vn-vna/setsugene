@@ -21,10 +21,10 @@ GregorianCalendar::to_date(const TimePoint& timepoint) const
   auto days = data / 86400000000; // 86400000000 microseconds in a day
 
   // Calculate weekday since the epoch
-  int weekday = (days + 4) % 7; // 4 is the weekday of the epoch
+  Int32 weekday = (days + 4) % 7; // 4 is the weekday of the epoch
 
   // Calculate the number of years since the epoch
-  int year = 1970;
+  Int32 year = 1970;
 
   while (true)
   {
@@ -55,7 +55,7 @@ GregorianCalendar::to_date(const TimePoint& timepoint) const
   }
 
   // Calculate the number of months since the epoch
-  int month = 1;
+  Int32 month = 1;
 
   while (true)
   {
@@ -94,24 +94,24 @@ GregorianCalendar::to_date(const TimePoint& timepoint) const
     month++;
   }
 
-  int day = (int) (days + 1);
+  Int32 day = (Int32) (days + 1);
 
   // Calculate the time of the day
   auto time = data % 86400000000; // microseconds in a day
 
-  int hour = (int) (time / 3600000000); // microseconds in an hour
+  auto hour = (Int32) (time / 3600000000); // microseconds in an hour
   time %= 3600000000;
 
-  int minute = (int) (time / 60000000); // microseconds in a minute
+  auto minute = (Int32) (time / 60000000); // microseconds in a minute
   time %= 60000000;
 
-  int second = (int) (time / 1000000); // microseconds in a second
+  auto second = (Int32) (time / 1000000); // microseconds in a second
   time %= 1000000;
 
-  int millisecond = (int) (time / 1000); // microseconds in a millisecond
+  auto millisecond = (Int32) (time / 1000); // microseconds in a millisecond
   time %= 1000;
 
-  int microsecond = (int) time;
+  auto microsecond = (Int32) time;
 
   return {year, month, day, weekday, hour, minute, second, millisecond, microsecond};
 }

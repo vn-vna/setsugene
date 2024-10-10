@@ -7,7 +7,7 @@
   {                                                                                                                    \
   public:                                                                                                              \
     using target = clazz;                                                                                              \
-    static std::vector<ReflectionField> register_fields()                                                              \
+    static DArray<ReflectionField> register_fields()                                                              \
     {                                                                                                                  \
       return {MACRO_EXPAND(FOR_EACH(REFLECTION_FIELD, __VA_ARGS__))};                                                  \
     }                                                                                                                  \

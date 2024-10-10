@@ -9,26 +9,26 @@ template<>
 class DataStorage<SerializedType::Float>
 {
 public:
-  DataStorage(double value);
+  DataStorage(Float64 value);
   DataStorage(const DataStorage& other);
   DataStorage(DataStorage&& other) noexcept;
 
-  DataStorage& operator=(double value);
+  DataStorage& operator=(Float64 value);
   DataStorage& operator=(const DataStorage& other);
   DataStorage& operator=(DataStorage&& other);
 
-  bool operator==(const DataStorage& other) const;
-  bool operator!=(const DataStorage& other) const;
-  bool operator<(const DataStorage& other) const;
-  bool operator>(const DataStorage& other) const;
-  bool operator<=(const DataStorage& other) const;
-  bool operator>=(const DataStorage& other) const;
+  Bool operator==(const DataStorage& other) const;
+  Bool operator!=(const DataStorage& other) const;
+  Bool operator<(const DataStorage& other) const;
+  Bool operator>(const DataStorage& other) const;
+  Bool operator<=(const DataStorage& other) const;
+  Bool operator>=(const DataStorage& other) const;
 
-  double value() const noexcept;
-  operator bool() const noexcept;
+  Float64 value() const noexcept;
+  operator Bool() const noexcept;
 
 private:
-  double m_value;
+  Float64 m_value;
 };
 
 

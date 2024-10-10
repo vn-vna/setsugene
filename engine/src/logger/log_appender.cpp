@@ -3,7 +3,7 @@
 namespace setsugen
 {
 
-LogAppender::LogAppender(const std::string& name, const std::string& format)
+LogAppender::LogAppender(const String& name, const String& format)
     : m_settings{true, name, Formatter(format), LogLevel::Debug}
 {}
 
@@ -13,20 +13,20 @@ LogAppender::get_settings() const
   return this->m_settings;
 }
 
-void
+Void
 LogAppender::set_level(LogLevel level)
 {
   this->m_settings.min_level = level;
 }
 
-void
-LogAppender::set_format(const std::string& format)
+Void
+LogAppender::set_format(const String& format)
 {
   this->m_settings.formatter = Formatter(format);
 }
 
-void
-LogAppender::set_enabled(bool enabled)
+Void
+LogAppender::set_enabled(Bool enabled)
 {
   this->m_settings.enabled = enabled;
 }

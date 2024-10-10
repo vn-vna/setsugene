@@ -4,11 +4,11 @@ namespace setsugen
 {
 
 ConfigurationSource::
-ConfigurationSource(bool required)
+ConfigurationSource(Bool required)
     : m_required(required)
 {}
 
-bool
+Bool
 ConfigurationSource::is_required()
 {
   return m_required;

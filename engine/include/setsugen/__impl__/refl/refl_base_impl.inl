@@ -6,10 +6,10 @@ namespace setsugen
 {
 
 template<typename ReflectionClass>
-std::vector<ReflectionField>&
+DArray<ReflectionField>&
 ReflectionBase<ReflectionClass>::get_fields() const
 {
-  static auto fields = Lazy<std::vector<ReflectionField>>{[] { return ReflectionClass::register_fields(); }};
+  static auto fields = Lazy<DArray<ReflectionField>>{[] { return ReflectionClass::register_fields(); }};
 
   return *fields.get();
 }

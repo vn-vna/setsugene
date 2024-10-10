@@ -19,9 +19,9 @@ public:
   const Vec3F& get_rotation() const;
   const Vec3F& get_scale() const;
 
-  void set_position(const Vec3F& position);
-  void set_rotation(const Vec3F& rotation);
-  void set_scale(const Vec3F& scale);
+  Void set_position(const Vec3F& position);
+  Void set_rotation(const Vec3F& rotation);
+  Void set_scale(const Vec3F& scale);
 
   Mat4x4F get_model_matrix() const;
 

@@ -8,8 +8,8 @@ using namespace setsugen;
 
 struct Person
 {
-  std::string name;
-  int         age;
+  String name;
+  Int32         age;
 };
 
 DECLARE_REFLECTION(Person, name, age);
@@ -33,7 +33,7 @@ struct Family
 {
   Person father;
   Person mother;
-  std::vector<Person> children;
+  DArray<Person> children;
 };
 
 DECLARE_REFLECTION(Family, father, mother, children);

@@ -4,7 +4,7 @@ namespace setsugen
 {
 
 SerializedConfigurationSource::
-SerializedConfigurationSource(const SerializedData& data, bool required)
+SerializedConfigurationSource(const SerializedData& data, Bool required)
     : ConfigurationSource(required)
 {
   m_data = data;

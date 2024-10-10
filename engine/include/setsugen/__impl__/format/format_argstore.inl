@@ -1,57 +1,28 @@
 #pragma once
 
-#include "format_decl.inl"
+#include "format_argdesc.inl"
+#include "format_fwd.inl"
 
 namespace setsugen
 {
-template<typename K, Formattable V>
-void
-FormatArgsStore::set(K index, V&& value)
+
+class FormatArgsStore final
 {
-  using ErasedType = std::remove_cvref_t<V>;
-  auto arg_fn      = std::make_unique<ArgDescription>(
-    [] (std::stringstream &ss, const void *data, const FormatPlaceholder &placeholder)
-    {
-      std::stringstream temp;
+public:
+  FormatArgsStore();
+  FormatArgsStore(Initializer<ArgDescription> args);
+  ~FormatArgsStore();
 
-      if (placeholder.specs.contains('w'))
-      {
-        temp << std::setw(get_int_spec(placeholder.specs.at('w')));
-      }
+  Void add(const ArgDescription& arg);
 
-      if (placeholder.specs.contains('p'))
-      {
-        temp << std::setprecision(get_int_spec(placeholder.specs.at('p')));
-      }
+  const ArgDescription& get(const FormatIndex& index) const;
 
-      Stringify<ErasedType>::stringify({temp, placeholder}, *reinterpret_cast<const ErasedType*>(data));
-      ss << temp.str();
-    },
-    std::forward<V>(value));
-  FormatIndex findex = create_index(index);
-  m_args[findex]     = std::move(arg_fn);
-}
+private:
+  template<typename T>
+  static FormatIndex create_index(T&& index);
+  inline static Int32  get_int_spec(const std::string_view& view);
 
-template<typename T>
-FormatIndex
-FormatArgsStore::create_index(T&& index)
-{
-  if constexpr (StringType<std::remove_cvref_t<T>>)
-  {
-    return std::string(index);
-  } else
-  {
-    return std::forward<T>(index);
-  }
-}
+  UnorderedMap<FormatIndex, ArgDescription> m_args;
+};
 
-inline int
-FormatArgsStore::get_int_spec(const std::string_view& view)
-{
-  char buffer[128];
-  auto size = view.end() - view.begin();
-  std::memcpy(buffer, view.data(), size);
-  buffer[size] = '\0';
-  return std::stoi(buffer);
-}
-}
+} // namespace setsugen

@@ -48,7 +48,7 @@ TEST(SerializedData, ManualCreation_Array)
 
 TEST(SerializedData, ConvertFromVector_Array)
 {
-  SerializedData arr(std::vector<int>{1, 2, 3, 4});
+  SerializedData arr(DArray<Int32>{1, 2, 3, 4});
 
   EXPECT_EQ(arr.get_type(), SerializedType::Array);
   EXPECT_EQ(arr.get_array().size(), 4);
@@ -65,30 +65,30 @@ TEST(SerializedData, ConvertFromVector_Array)
 TEST(SerializedData, ManualCreation_Object_Success)
 {
   SerializedData obj = {
-    {"int", 100},
-    {"float", 3.14},
+    {"Int32", 100},
+    {"Float32", 3.14},
     {"str", "Hello, World!"},
-    {"bool", false},
+    {"Bool", false},
   };
   EXPECT_EQ(obj.get_type(), SerializedType::Object);
   EXPECT_EQ(obj.get_object().size(), 4);
-  EXPECT_EQ(obj["int"].get_type(), SerializedType::Integer);
-  EXPECT_EQ(obj["int"].get_integer().value(), 100);
-  EXPECT_EQ(obj["float"].get_type(), SerializedType::Float);
-  EXPECT_EQ(obj["float"].get_float().value(), 3.14);
+  EXPECT_EQ(obj["Int32"].get_type(), SerializedType::Integer);
+  EXPECT_EQ(obj["Int32"].get_integer().value(), 100);
+  EXPECT_EQ(obj["Float32"].get_type(), SerializedType::Float);
+  EXPECT_EQ(obj["Float32"].get_float().value(), 3.14);
   EXPECT_EQ(obj["str"].get_type(), SerializedType::String);
   EXPECT_EQ(obj["str"].get_string().value(), "Hello, World!");
-  EXPECT_EQ(obj["bool"].get_type(), SerializedType::Bool);
-  EXPECT_EQ(obj["bool"].get_bool().value(), false);
+  EXPECT_EQ(obj["Bool"].get_type(), SerializedType::Bool);
+  EXPECT_EQ(obj["Bool"].get_bool().value(), false);
 }
 
 TEST(SerializedData, ManualCreation_Object_Except)
 {
   EXPECT_THROW(SerializedData::object({
-                 {"int", 100, "hololo"},
-                 {"float", 3.14},
+                 {"Int32", 100, "hololo"},
+                 {"Float32", 3.14},
                  {"str", "Hello, World!"},
-                 {"bool", false},
+                 {"Bool", false},
                  }), SetsugenException);
 }
 
@@ -138,31 +138,31 @@ TEST(SerializedData, TypeDeduction_Array)
 TEST(SerializedData, TypeDeduction_Object_Success)
 {
   SerializedData obj = {
-    {"int", 100},
-    {"float", 3.14},
+    {"Int32", 100},
+    {"Float32", 3.14},
     {"str", "Hello, World!"},
-    {"bool", false},
+    {"Bool", false},
   };
 
   EXPECT_EQ(obj.get_type(), SerializedType::Object);
   EXPECT_EQ(obj.get_object().size(), 4);
-  EXPECT_EQ(obj["int"].get_type(), SerializedType::Integer);
-  EXPECT_EQ(obj["int"].get_integer().value(), 100);
-  EXPECT_EQ(obj["float"].get_type(), SerializedType::Float);
-  EXPECT_EQ(obj["float"].get_float().value(), 3.14);
+  EXPECT_EQ(obj["Int32"].get_type(), SerializedType::Integer);
+  EXPECT_EQ(obj["Int32"].get_integer().value(), 100);
+  EXPECT_EQ(obj["Float32"].get_type(), SerializedType::Float);
+  EXPECT_EQ(obj["Float32"].get_float().value(), 3.14);
   EXPECT_EQ(obj["str"].get_type(), SerializedType::String);
   EXPECT_EQ(obj["str"].get_string().value(), "Hello, World!");
-  EXPECT_EQ(obj["bool"].get_type(), SerializedType::Bool);
-  EXPECT_EQ(obj["bool"].get_bool().value(), false);
+  EXPECT_EQ(obj["Bool"].get_type(), SerializedType::Bool);
+  EXPECT_EQ(obj["Bool"].get_bool().value(), false);
 }
 
 TEST(SerializedData, TypeDeduction_Object_Failed)
 {
   SerializedData obj = {
-    {"int", 100, "hololo"},
-    {"float", 3.14},
+    {"Int32", 100, "hololo"},
+    {"Float32", 3.14},
     {"str", "Hello, World!"},
-    {"bool", false},
+    {"Bool", false},
   };
   EXPECT_EQ(obj.get_type(), SerializedType::Array);
 }
@@ -256,31 +256,31 @@ TEST(SerializedData, Modification_Array)
 TEST(SerializedData, Modification_Object)
 {
   SerializedData obj = {
-    {"int", 100},
-    {"float", 3.14},
+    {"Int32", 100},
+    {"Float32", 3.14},
     {"str", "Hello, World!"},
-    {"bool", false},
+    {"Bool", false},
   };
 
   obj = {
-    {"int", 200},
-    {"float", 6.28},
+    {"Int32", 200},
+    {"Float32", 6.28},
     {"str", "Hello, Universe!"},
-    {"bool", true},
+    {"Bool", true},
   };
 
   EXPECT_EQ(obj.get_object().size(), 4);
-  EXPECT_EQ(obj["int"].get_integer().value(), 200);
-  EXPECT_EQ(obj["float"].get_float().value(), 6.28);
+  EXPECT_EQ(obj["Int32"].get_integer().value(), 200);
+  EXPECT_EQ(obj["Float32"].get_float().value(), 6.28);
   EXPECT_EQ(obj["str"].get_string().value(), "Hello, Universe!");
-  EXPECT_EQ(obj["bool"].get_bool().value(), true);
+  EXPECT_EQ(obj["Bool"].get_bool().value(), true);
 
-  obj["int"] = 300;
-  obj["float"] = 9.42;
+  obj["Int32"] = 300;
+  obj["Float32"] = 9.42;
 
   EXPECT_EQ(obj.get_object().size(), 4);
-  EXPECT_EQ(obj["int"].get_integer().value(), 300);
-  EXPECT_EQ(obj["float"].get_float().value(), 9.42);
+  EXPECT_EQ(obj["Int32"].get_integer().value(), 300);
+  EXPECT_EQ(obj["Float32"].get_float().value(), 9.42);
 }
 
 TEST(SerializedData, Nested_ArrayInArray)
@@ -297,10 +297,10 @@ TEST(SerializedData, Nested_ArrayInArray)
 TEST(SerializedData, Nested_ArrayInObject)
 {
   SerializedData obj = {
-    {"int", 100},
-    {"float", 3.14},
+    {"Int32", 100},
+    {"Float32", 3.14},
     {"str", "Hello, World!"},
-    {"bool", false},
+    {"Bool", false},
     {"arr", {1, 3.14, "Hello, World!", true}},
   };
 

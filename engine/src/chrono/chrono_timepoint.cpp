@@ -5,21 +5,26 @@
 namespace setsugen
 {
 
-inline uint64_t
+inline UInt64
 __now_std()
 {
   return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch())
       .count();
 }
-
 TimePoint::TimePoint() : m_data(__now_std())
 {}
 
-TimePoint::TimePoint(uint64_t timepoint) : m_data(timepoint)
+TimePoint::TimePoint(UInt64 timepoint) : m_data(timepoint)
 {}
 
 TimePoint::~TimePoint() noexcept
 {}
+
+UInt64
+TimePoint::data() const
+{
+  return m_data;
+}
 
 TimePoint
 TimePoint::operator+(const Duration& dur) const

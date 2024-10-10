@@ -7,7 +7,6 @@
 namespace setsugen
 {
 
-
 class Duration;
 class TimePoint;
 class GregorianCalendar;

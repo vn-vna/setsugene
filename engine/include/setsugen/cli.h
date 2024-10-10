@@ -1,66 +1,18 @@
 #pragma once
 
-#include <setsugen/pch.h>
+// IWYU pragma: begin_exports
 
-#include <setsugen/format.h>
-#include <setsugen/serde.h>
+// #include "./__impl__/cli/cli_fwd.inl"
 
-namespace setsugen
-{
+// #include "./__impl__/cli/cli_command-desc.inl"
+// #include "./__impl__/cli/cli_command-desc_argdesc.inl"
+// #include "./__impl__/cli/cli_command-desc_builder.inl"
+// #include "./__impl__/cli/cli_command-desc_flagdesc.inl"
 
-class CliCommand;
-class CommandArgument;
-class ExecutionData;
+// #include "./__impl__/cli/cli_exec-context.inl"
+// #include "./__impl__/cli/cli_exec-context_argument.inl"
+// #include "./__impl__/cli/cli_exec-context_flag.inl"
 
-using CommandCallback = std::function<void(ExecutionData&)>;
+// #include "./__impl__/cli/cli_command-parser.inl"
 
-class ExecutionData
-{
-public:
-  friend class CliCommand;
-
-  ExecutionData();
-
-  SerializedData& get_argument(const std::string& name);
-
-private:
-  std::unordered_map<std::string, SerializedData> m_arguments;
-};
-
-class CommandArgument
-{
-public:
-  friend class CliCommand;
-
-  CommandArgument(const std::string& name, const std::string& description, SerializedType type = SerializedType::String,
-                  const SerializedData& default_value = SerializedData::null());
-
-private:
-  std::string    m_name;
-  std::string    m_description;
-  SerializedType m_type;
-  SerializedData m_default_value;
-  SerializedData m_value;
-};
-
-class CliCommand
-{
-public:
-  CliCommand(const std::string& name, const std::string& description, CommandCallback callback = nullptr);
-  ~CliCommand();
-
-  void add_argument(const std::string& name, const std::string& description,
-                    SerializedType        type          = SerializedType::String,
-                    const SerializedData& default_value = SerializedData::null());
-
-  void parse(int argc, char** argv);
-
-private:
-  CommandCallback              m_callback;
-  std::string                  m_name;
-  std::string                  m_description;
-  std::vector<CommandArgument> m_arguments;
-  std::vector<CliCommand>      m_subcommands;
-};
-
-} // namespace setsugen
+// IWYU pragma: end_exports

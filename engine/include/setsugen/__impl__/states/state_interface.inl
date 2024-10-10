@@ -5,12 +5,19 @@
 namespace setsugen
 {
 
-class State
+template<typename Context>
+class StateBase
 {
 public:
-  State(StateMachine& state_machine);
+  using StateMachine = StateMachine<Context>;
 
-  virtual void update() = 0;
+  StateBase(StateMachine& state_machine);
+
+  virtual Void enter() = 0;
+  virtual Void update() = 0;
+  virtual Void exit() = 0;
+
+  StateMachine& state_machine();
 
 protected:
   StateMachine& m_state_machine;

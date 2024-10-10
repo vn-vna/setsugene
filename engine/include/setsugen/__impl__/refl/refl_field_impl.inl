@@ -9,19 +9,19 @@ namespace setsugen
 #pragma region ReflectionField__Implementation
 
 template<typename Fn>
-ReflectionField::ReflectionField(const std::string& name, Fn accessor) : ReflectionField(name, std::function(accessor))
+ReflectionField::ReflectionField(const String& name, Fn accessor) : ReflectionField(name, std::function(accessor))
 {}
 
 template<ClassType T, ScalarType TF>
-ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)> accessor) : m_name(name)
+ReflectionField::ReflectionField(const String& name, std::function<TF&(T&)> accessor) : m_name(name)
 {
-  m_getter = [accessor](SerializedData& data, void* target)
+  m_getter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     data      = ref;
   };
 
-  m_setter = [accessor](SerializedData& data, void* target)
+  m_setter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     if constexpr (StringType<TF>)
@@ -48,23 +48,23 @@ ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)>
 }
 
 template<ClassType T, Serializable TF>
-ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)> accessor) : m_name(name)
+ReflectionField::ReflectionField(const String& name, std::function<TF&(T&)> accessor) : m_name(name)
 {
-  m_getter = [accessor](SerializedData& data, void* target) { data.serialize(accessor(*static_cast<T*>(target))); };
-  m_setter = [accessor](SerializedData& data, void* target) { data.deserialize(accessor(*static_cast<T*>(target))); };
+  m_getter = [accessor](SerializedData& data, Void* target) { data.serialize(accessor(*static_cast<T*>(target))); };
+  m_setter = [accessor](SerializedData& data, Void* target) { data.deserialize(accessor(*static_cast<T*>(target))); };
 }
 
 template<ClassType T, IterableType TF>
 requires ScalarType<typename TF::value_type>
-ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)> accessor) : m_name(name)
+ReflectionField::ReflectionField(const String& name, std::function<TF&(T&)> accessor) : m_name(name)
 {
-  m_getter = [accessor](SerializedData& data, void* target)
+  m_getter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     data      = ref;
   };
 
-  m_setter = [accessor](SerializedData& data, void* target)
+  m_setter = [accessor](SerializedData& data, Void* target)
   {
     using ValueType = typename TF::value_type;
 
@@ -102,9 +102,9 @@ ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)>
 
 template<ClassType T, IterableType TF>
 requires Serializable<typename TF::value_type>
-ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)> accessor) : m_name(name)
+ReflectionField::ReflectionField(const String& name, std::function<TF&(T&)> accessor) : m_name(name)
 {
-  m_getter = [accessor](SerializedData& data, void* target)
+  m_getter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     auto tmp = SerializedData::array({});
@@ -118,7 +118,7 @@ ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)>
     data = tmp;
   };
 
-  m_setter = [accessor](SerializedData& data, void* target)
+  m_setter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     ref.resize(data.get_array().size());
@@ -132,15 +132,15 @@ ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)>
 
 template<ClassType T, IterableType TF>
 requires IterableType<typename TF::value_type>
-ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)> accessor) : m_name(name)
+ReflectionField::ReflectionField(const String& name, std::function<TF&(T&)> accessor) : m_name(name)
 {
-  m_getter = [accessor](SerializedData& data, void* target)
+  m_getter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     data      = ref;
   };
 
-  m_setter = [accessor](SerializedData& data, void* target)
+  m_setter = [accessor](SerializedData& data, Void* target)
   {
     auto& ref = accessor(*static_cast<T*>(target));
     data.deserialize(ref);
@@ -148,14 +148,14 @@ ReflectionField::ReflectionField(const std::string& name, std::function<TF&(T&)>
 }
 
 template<typename T>
-void
+Void
 ReflectionField::get_value(SerializedData& data, T& target) const
 {
   m_getter(data, &target);
 }
 
 template<typename T>
-void
+Void
 ReflectionField::set_value(SerializedData& data, T& target) const
 {
   m_setter(data, &target);

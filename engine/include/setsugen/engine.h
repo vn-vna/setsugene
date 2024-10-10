@@ -13,9 +13,7 @@
 #include <setsugen/format.h>
 #include <setsugen/logger.h>
 #include <setsugen/math.h>
-#include <setsugen/mesh.h>
 #include <setsugen/scene.h>
 #include <setsugen/thislib.h>
 #include <setsugen/transform.h>
 #include <setsugen/utilities.h>
-#include <setsugen/window.h>

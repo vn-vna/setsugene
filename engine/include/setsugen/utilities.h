@@ -34,12 +34,12 @@ struct TupleHash : std::function<size_t(const std::tuple<Ts...>&)>
  * @tparam T The type of the variable to trace
  * @tparam Atomicly A boolean value that indicate if the value of the variable should be traced atomically
  */
-template<typename T, bool Atomicly = true>
+template<typename T, Bool Atomicly = true>
 struct ValueTracer
 {
 public:
-  using SmartPointerType = std::unique_ptr<T>;
-  using TracerType       = std::conditional_t<Atomicly, std::atomic<bool>, bool>;
+  using SmartPointerType = Owner<T>;
+  using TracerType       = std::conditional_t<Atomicly, std::atomic<Bool>, Bool>;
 
   ValueTracer()
     : m_current{nullptr},
@@ -115,7 +115,7 @@ public:
    * @brief Set the value to trace, then set the changed flag to true if the value has changed
    * @param value The value to trace
    */
-  void set(const T& value)
+  Void set(const T& value)
   {
     if (!m_current)
     {
@@ -143,9 +143,9 @@ public:
    * @return true If the value of the variable has changed
    * @return false If the value of the variable has not changed
    */
-  bool has_changed()
+  Bool has_changed()
   {
-    bool changed = m_changed;
+    Bool changed = m_changed;
     m_changed    = false;
     return m_changed;
   }

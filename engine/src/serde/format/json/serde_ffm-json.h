@@ -14,38 +14,38 @@ struct JsonNode
 {
   SerializedData*       value;
   JsonNode*             parent = nullptr;
-  std::vector<JsonNode> children;
+  DArray<JsonNode> children;
 };
 
 class JsonParser
 {
 public:
-  JsonParser(std::istream& stream, SerializedData& data);
+  JsonParser(InputStream& stream, SerializedData& data);
   ~JsonParser();
 
-  void parse();
+  Void parse();
 
-  static int json_event_callback(void* userdata, int type, const char* data, uint32_t len);
+  static Int32 json_event_callback(Void* userdata, Int32 type, const char* data, uint32_t len);
 
 private:
-  void handle_new_object();
-  void handle_end_object();
-  void handle_new_array();
-  void handle_end_array();
-  void handle_key(const char* data, uint32_t len);
-  void handle_new_string(const char* data, uint32_t len);
-  void handle_new_int(const char* data, uint32_t len);
-  void handle_new_float(const char* data, uint32_t len);
-  void handle_new_bool(bool b);
-  void handle_new_null();
+  Void handle_new_object();
+  Void handle_end_object();
+  Void handle_new_array();
+  Void handle_end_array();
+  Void handle_key(const char* data, uint32_t len);
+  Void handle_new_string(const char* data, uint32_t len);
+  Void handle_new_int(const char* data, uint32_t len);
+  Void handle_new_float(const char* data, uint32_t len);
+  Void handle_new_bool(Bool b);
+  Void handle_new_null();
 
-  std::istream&   m_stream;
+  InputStream&   m_stream;
   SerializedData& m_data;
   json_parser     m_parser;
 
   JsonNode                   m_root;
   JsonNode*                  m_current;
-  std::optional<std::string> m_key;
+  std::optional<String> m_key;
 };
 }
 
@@ -54,19 +54,19 @@ namespace setsugen::emitter
 class JsonEmitter
 {
 public:
-  JsonEmitter(std::ostream& stream, const SerializedData& data, const Json::Configurations& conf) noexcept;
+  JsonEmitter(OutputStream& stream, const SerializedData& data, const Json::Configurations& conf) noexcept;
   ~JsonEmitter() noexcept;
 
-  void emit();
-  void emit(const SerializedData& data);
+  Void emit();
+  Void emit(const SerializedData& data);
 
-  static int json_event_callback(void* userdata, const char* s, uint32_t length);
+  static Int32 json_event_callback(Void* userdata, const char* s, uint32_t length);
 
 private:
-  std::ostream&               m_stream;
+  OutputStream&               m_stream;
   const SerializedData&       m_data;
   json_printer                m_printer;
-  std::string                 m_indent_str;
+  String                 m_indent_str;
   const Json::Configurations& m_config;
 };
 }

@@ -2,10 +2,6 @@
 
 #include <setsugen/pch.h>
 
-#include <future>
-#include <memory>
-#include <thread>
-#include <type_traits>
 #include "setsugen/exception.h"
 
 namespace setsugen
@@ -26,19 +22,19 @@ template<class ExecutorTarget>
 class Executor
 {
 public:
-  using ExecutorTask = std::function<void(bool)>;
+  using ExecutorTask = Fn<Void(Bool)>;
 
   virtual ~Executor() = default;
 
   template<typename F, typename... Args>
-    requires std::is_invocable_v<F, Args...>
+    requires CallableType<F>
   auto submit(F&& func, Args&&... args)
   {
     using ReturnType = std::invoke_result_t<F, Args...>;
 
     std::function<ReturnType()> binder = std::bind(std::forward<F>(func), std::forward<Args>(args)...);
 
-    auto ptask = std::make_shared<std::packaged_task<ReturnType(bool)>>(
+    auto ptask = std::make_shared<std::packaged_task<ReturnType(Bool)>>(
         [binder](auto stopped)
         {
           if (stopped)
@@ -51,13 +47,13 @@ public:
 
     auto future = ptask->get_future();
 
-    enqueue([ptask](bool stopped) { (*ptask)(stopped); });
+    enqueue([ptask](Bool stopped) { (*ptask)(stopped); });
 
     return future;
   }
 
   template<typename... Args>
-  static std::unique_ptr<ExecutorTarget> create(Args&&... args)
+  static Owner<ExecutorTarget> create(Args&&... args)
   {
     return std::make_unique<ExecutorTarget>(std::forward<Args>(args)...);
   }
@@ -67,7 +63,7 @@ public:
    * This method can be called anywhere in the code. It will start the executor and execute the tasks in the queue.
    * If the executor is already started, this method will do nothing.
    */
-  virtual void start() = 0;
+  virtual Void start() = 0;
 
   /**
    * @brief Stop the executor.
@@ -76,7 +72,7 @@ public:
    * If there are tasks in the queue, executor will throw an exception to their futures.
    * If the executor is already stopped, this method will do nothing.
    */
-  virtual void stop() = 0;
+  virtual Void stop() = 0;
 
   /**
    * @brief Force stop the executor.
@@ -85,31 +81,31 @@ public:
    * If there are tasks in the queue, executor will throw an exception to their futures.
    * If the executor is already stopped, this method will do nothing.
    */
-  virtual void force_stop() = 0;
+  virtual Void force_stop() = 0;
 
   /**
    * @brief Join the executor.
    * This method can be called anywhere in the code. It will wait until all tasks are completed then stop.
    * If the executor is already stopped, this method will do nothing.
    */
-  virtual void join() = 0;
+  virtual Void join() = 0;
 
   /**
    * @brief Check if the executor is stopped.
    * This method can be called anywhere in the code. It will return true if the executor is stopped.
    * Otherwise, it will return false.
    */
-  virtual bool is_stopped() const = 0;
+  virtual Bool is_stopped() const = 0;
 
   /**
    * @brief Check if the queue is empty.
    * This method can be called anywhere in the code. It will return true if the queue is empty.
    * Otherwise, it will return false.
    */
-  virtual bool is_queue_empty() const = 0;
+  virtual Bool is_queue_empty() const = 0;
 
 protected:
-  virtual void         enqueue(ExecutorTask&& task) = 0;
+  virtual Void         enqueue(ExecutorTask&& task) = 0;
   virtual ExecutorTask dequeue()                    = 0;
 };
 
@@ -117,60 +113,60 @@ class FixedThreadPoolExecutor : public Executor<FixedThreadPoolExecutor>
 {
 public:
   explicit FixedThreadPoolExecutor(size_t num_threads = 0);
-  ~        FixedThreadPoolExecutor() override;
+  ~FixedThreadPoolExecutor() override;
 
-  void start() override;
-  void stop() override;
-  void force_stop() override;
-  void join() override;
-  bool is_stopped() const override;
-  bool is_queue_empty() const override;
+  Void start() override;
+  Void stop() override;
+  Void force_stop() override;
+  Void join() override;
+  Bool is_stopped() const override;
+  Bool is_queue_empty() const override;
 
 protected:
-  void         enqueue(ExecutorTask&& task) override;
+  Void         enqueue(ExecutorTask&& task) override;
   ExecutorTask dequeue() override;
 
 private:
-  std::vector<std::unique_ptr<std::thread>> m_threads;
-  std::queue<ExecutorTask>                  m_tasks;
-  mutable std::mutex                        m_queue_mutex;
-  std::atomic<bool>                         m_stopped;
-  int                                       m_num_threads;
+  DArray<Owner<Thread>> m_threads;
+  Queue<ExecutorTask>   m_tasks;
+  mutable Mutex         m_queue_mutex;
+  Atomic<Bool>          m_stopped;
+  Int32                 m_num_threads;
 };
 
 class SingleThreadExecutor : public Executor<SingleThreadExecutor>
 {
 public:
-   SingleThreadExecutor();
+  SingleThreadExecutor();
   ~SingleThreadExecutor() override;
 
-  void start() override;
-  void stop() override;
-  void force_stop() override;
-  void join() override;
-  bool is_stopped() const override;
-  bool is_queue_empty() const override;
+  Void start() override;
+  Void stop() override;
+  Void force_stop() override;
+  Void join() override;
+  Bool is_stopped() const override;
+  Bool is_queue_empty() const override;
 
 protected:
-  void         enqueue(ExecutorTask&& task) override;
+  Void         enqueue(ExecutorTask&& task) override;
   ExecutorTask dequeue() override;
 
 private:
-  std::unique_ptr<std::thread> m_thread;
-  std::queue<ExecutorTask>     m_tasks;
-  bool                         m_stopped;
+  Owner<Thread>       m_thread;
+  Queue<ExecutorTask> m_tasks;
+  Bool                m_stopped;
 };
 
 class CachedThreadPoolExecutor : public Executor<CachedThreadPoolExecutor>
 {
 public:
-   CachedThreadPoolExecutor();
+  CachedThreadPoolExecutor();
   ~CachedThreadPoolExecutor();
 
 private:
-  std::vector<std::unique_ptr<std::thread>> m_threads;
-  std::queue<ExecutorTask>                  m_tasks;
-  std::mutex                                m_queue_mutex;
+  DArray<Owner<Thread>> m_threads;
+  Queue<ExecutorTask>   m_tasks;
+  Mutex                 m_queue_mutex;
 };
 
 } // namespace setsugen

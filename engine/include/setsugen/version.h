@@ -14,18 +14,20 @@ class Version
 {
 public:
   Version();
-  Version(unsigned int major, unsigned int minor, unsigned int patch);
+  Version(UInt32 version);
+  Version(UInt32 major, UInt32 minor, UInt32 patch);
+
   ~Version();
 
-public:
-  static Version create_version(unsigned int major, unsigned int minor, unsigned int patch);
+  UInt32 get_major() const;
+  UInt32 get_minor() const;
+  UInt32 get_patch() const;
+  UInt32 data() const;
 
-public:
-  unsigned int get_major() const;
-  unsigned int get_minor() const;
-  unsigned int get_patch() const;
+  static Version create_version(UInt32 major, UInt32 minor, UInt32 patch);
+  static Version from_string(const String& version);
 
 private:
-  unsigned int m_version;
+  UInt32 m_version;
 };
 } // namespace setsugen

@@ -9,9 +9,9 @@ class TimePoint final
 {
 public:
   TimePoint();
-  TimePoint(uint64_t timepoint);
+  TimePoint(UInt64 timepoint);
 
-  inline uint64_t data() const;
+  UInt64 data() const;
 
   ~TimePoint() noexcept;
 
@@ -22,9 +22,11 @@ public:
 
   Date to_date() const;
 
+  static TimePoint now();
+
 private:
   unsigned long long m_data;
-  std::string        m_format;
+  String        m_format;
 };
 
 } // namespace setsugen

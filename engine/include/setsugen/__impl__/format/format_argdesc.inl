@@ -1,36 +1,39 @@
 #pragma once
 
-#include "format_decl.inl"
+#include "format_fwd.inl"
 
 namespace setsugen
 {
 
-template<typename T>
-ArgDescription::ArgDescription(const FmtCall& callback, T&& value): m_fmt_call{callback}
+class ArgDescription
 {
-  using ErasedType = std::remove_cvref_t<T>;
-  if constexpr (std::is_lvalue_reference_v<T>)
-  {
-    m_data    = reinterpret_cast<void*>(const_cast<ErasedType*>(&value));
-    m_deleter = [](void*)
-        {};
-  }
-  else
-  {
-    m_data    = new ErasedType{std::forward<T>(value)};
-    m_deleter = [](void* data)
-    {
-      delete reinterpret_cast<ErasedType*>(data);
-    };
-  }
-}
+public:
+  friend class FormatArgsStore;
 
-constexpr void
-ArgDescription::operator()(std::stringstream& ss, const FormatPlaceholder& placeholder) const
-{
-  std::invoke(m_fmt_call, ss, m_data, placeholder);
-}
+  using FormatCallback = std::function<Void(StringStream&, const Void*, const FormatPlaceholder&)>;
+  using Deleter        = std::function<Void(Void*)>;
 
+  template<typename T>
+  ArgDescription(const T& value);
 
+  template<typename T>
+  ArgDescription(const FormatIndex& index, const T& value);
 
-}
+  ArgDescription(const ArgDescription& other);
+
+  ArgDescription(ArgDescription&& other) noexcept;
+
+  ~ArgDescription() noexcept;
+
+  constexpr Void operator()(StringStream& ss, const FormatPlaceholder& placeholder) const;
+
+private:
+  template<typename T>
+  constexpr auto get_callback() const;
+
+  const Void* m_data;
+  FormatIndex mutable m_index;
+  FormatCallback m_callback;
+};
+
+} // namespace setsugen

@@ -61,4 +61,4 @@ SpacesInParentheses: false
 PointerAlignment: Left
 ReferenceAlignment: Left
 TabWidth: 2
-IndentRequiresClause: false
+IndentRequiresClause: true

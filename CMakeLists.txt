@@ -25,6 +25,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/GetGoogleTest.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetGlfw.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetLibYaml.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/GetLibJson.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/GetVolk.cmake")
 #include("${CMAKE_SOURCE_DIR}/cmake/GetAsio.cmake")
 
 enable_testing()

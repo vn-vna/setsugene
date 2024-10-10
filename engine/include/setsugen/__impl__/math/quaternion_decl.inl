@@ -99,12 +99,12 @@ public:
     return Quaternion(-x(), -y(), -z(), -w());
   }
 
-  bool operator==(const Quaternion& other) const
+  Bool operator==(const Quaternion& other) const
   {
     return x() == other.x() && y() == other.y() && z() == other.z() && w() == other.w();
   }
 
-  bool operator!=(const Quaternion& other) const
+  Bool operator!=(const Quaternion& other) const
   {
     return !(*this == other);
   }
@@ -155,7 +155,7 @@ public:
   }
 
 private:
-  std::array<T, 4> m_data;
+  Array<T, 4> m_data;
 };
 
 } // namespace setsugen

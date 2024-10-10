@@ -19,14 +19,14 @@ public:
   DataStorage& operator=(const DataStorage& other);
   DataStorage& operator=(DataStorage&& other) noexcept;
 
-  bool operator==(const DataStorage& other) const;
-  bool operator!=(const DataStorage& other) const;
-  bool operator<(const DataStorage& other) const;
-  bool operator>(const DataStorage& other) const;
-  bool operator<=(const DataStorage& other) const;
-  bool operator>=(const DataStorage& other) const;
+  Bool operator==(const DataStorage& other) const;
+  Bool operator!=(const DataStorage& other) const;
+  Bool operator<(const DataStorage& other) const;
+  Bool operator>(const DataStorage& other) const;
+  Bool operator<=(const DataStorage& other) const;
+  Bool operator>=(const DataStorage& other) const;
 
-  explicit operator bool() const noexcept;
+  explicit operator Bool() const noexcept;
 
 private:
   int64_t m_value;

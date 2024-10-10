@@ -8,11 +8,13 @@ constexpr const char* months[] = { //
     "July",    "August",   "September", "October", "November", "December"};
 
 constexpr const char* weekdays[] = { //
-    "Sunday",   "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday"};
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
-int
-__get_day_in_month(int month, int year)
+namespace setsugen
+{
+
+Int32
+__get_day_in_month(Int32 month, Int32 year)
 {
   if (month == 2)
   {
@@ -39,8 +41,8 @@ __get_day_in_month(int month, int year)
   return 31;
 }
 
-bool
-__check_stream(std::istream& stream, const char* str, int max_len = 100)
+Bool
+__check_stream(InputStream& stream, const char* str, Int32 max_len = 100)
 {
   auto fallback_pos = stream.tellg();
   for (size_t i = 0; i < std::strlen(str) && i < max_len; i++)
@@ -56,10 +58,10 @@ __check_stream(std::istream& stream, const char* str, int max_len = 100)
   return true;
 }
 
-int
-__get_short_month_from_stream(std::istream& stream)
+Int32
+__get_short_month_from_stream(InputStream& stream)
 {
-  for (int i = 0; i < 12; i++)
+  for (Int32 i = 0; i < 12; i++)
   {
     if (__check_stream(stream, months[i], 3))
     {
@@ -70,10 +72,10 @@ __get_short_month_from_stream(std::istream& stream)
   throw setsugen::InvalidFormatException("Invalid short month format");
 }
 
-int
-__get_long_month_from_stream(std::istream& stream)
+Int32
+__get_long_month_from_stream(InputStream& stream)
 {
-  for (int i = 0; i < 12; i++)
+  for (Int32 i = 0; i < 12; i++)
   {
     if (__check_stream(stream, months[i]))
     {
@@ -84,10 +86,10 @@ __get_long_month_from_stream(std::istream& stream)
   throw setsugen::InvalidFormatException("Invalid long month format");
 }
 
-int
-__get_short_weekday_from_stream(std::istream& stream)
+Int32
+__get_short_weekday_from_stream(InputStream& stream)
 {
-  for (int i = 0; i < 7; i++)
+  for (Int32 i = 0; i < 7; i++)
   {
     if (__check_stream(stream, weekdays[i], 3))
     {
@@ -98,10 +100,10 @@ __get_short_weekday_from_stream(std::istream& stream)
   throw setsugen::InvalidFormatException("Invalid short weekday format");
 }
 
-int
-__get_long_weekday_from_stream(std::istream& stream)
+Int32
+__get_long_weekday_from_stream(InputStream& stream)
 {
-  for (int i = 0; i < 7; i++)
+  for (Int32 i = 0; i < 7; i++)
   {
     if (__check_stream(stream, weekdays[i]))
     {
@@ -112,13 +114,13 @@ __get_long_weekday_from_stream(std::istream& stream)
   throw setsugen::InvalidFormatException("Invalid long weekday format");
 }
 
-int
-__get_number_from_stream(std::istream& stream, int count, int max = 100)
+Int32
+__get_number_from_stream(InputStream& stream, Int32 count, Int32 max = 100)
 {
-  std::vector<char> buffer;
+  DArray<char> buffer;
   if (-1 == count) // Variadic
   {
-    for (int i = 0; i < max; i++)
+    for (Int32 i = 0; i < max; i++)
     {
       if (std::isdigit(stream.peek()))
       {
@@ -132,7 +134,7 @@ __get_number_from_stream(std::istream& stream, int count, int max = 100)
   }
   else
   {
-    for (int i = 0; i < count; i++)
+    for (Int32 i = 0; i < count; i++)
     {
       if (std::isdigit(stream.peek()))
       {
@@ -153,15 +155,14 @@ __get_number_from_stream(std::istream& stream, int count, int max = 100)
   }
   catch (const std::exception& e)
   {
-    throw setsugen::InvalidFormatException("Invalid number format {}",
-                                           buffer.data());
+    throw InvalidFormatException("Invalid number format {}", {buffer.data()});
   }
 }
 
-int
-__get_timezone_in_minute(std::istream& stream)
+Int32
+__get_timezone_in_minute(InputStream& stream)
 {
-  int sign = 1;
+  Int32 sign = 1;
   if (stream.peek() == '-')
   {
     sign = -1;
@@ -179,10 +180,10 @@ __get_timezone_in_minute(std::istream& stream)
   return sign * __get_number_from_stream(stream, 4);
 }
 
-int
-__get_timezone_in_hour(std::istream& stream)
+Int32
+__get_timezone_in_hour(InputStream& stream)
 {
-  int sign = 1;
+  Int32 sign = 1;
   if (stream.peek() == '-')
   {
     sign = -1;
@@ -197,11 +198,11 @@ __get_timezone_in_hour(std::istream& stream)
     throw setsugen::InvalidFormatException("Invalid timezone format");
   }
 
-  int hour = __get_number_from_stream(stream, 2);
+  Int32 hour = __get_number_from_stream(stream, 2);
   if (stream.peek() == ':')
   {
     stream.ignore();
-    int minute = __get_number_from_stream(stream, 2);
+    Int32 minute = __get_number_from_stream(stream, 2);
     return sign * (hour * 60 + minute);
   }
   else
@@ -212,19 +213,18 @@ __get_timezone_in_hour(std::istream& stream)
   return sign * hour * 60;
 }
 
+} // namespace setsugen
 
 namespace setsugen
 {
 
-Date::Date(int year, int month, int day, int weekday, int hour, int minute,
-           int second, int millisecond, int microsecond, int tzoffset)
-    : m_year(year), m_month(month), m_day(day), m_weekday(weekday),
-      m_hour(hour), m_minute(minute), m_second(second),
-      m_millisecond(millisecond), m_microsecond(microsecond),
-      m_tzoffset(tzoffset)
+Date::Date(Int32 year, Int32 month, Int32 day, Int32 weekday, Int32 hour, Int32 minute, Int32 second, Int32 millisecond,
+           Int32 microsecond, Int32 tzoffset)
+    : m_year(year), m_month(month), m_day(day), m_weekday(weekday), m_hour(hour), m_minute(minute), m_second(second),
+      m_millisecond(millisecond), m_microsecond(microsecond), m_tzoffset(tzoffset)
 {}
 
-void
+Void
 Date::parse_next_token(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the ampersand sign
@@ -312,12 +312,12 @@ Date::parse_next_token(ParserContext& ctx)
 
     default:
     {
-      throw InvalidFormatException("Unknown format specifier '{}'", c);
+      throw InvalidFormatException("Unknown format specifier '{}'", {c});
     }
   }
 }
 
-void
+Void
 Date::parse_year(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 'Y' character
@@ -334,7 +334,7 @@ Date::parse_year(ParserContext& ctx)
   ctx.fms.ignore();
 }
 
-void
+Void
 Date::parse_month(ParserContext& ctx)
 {
   char c = ctx.fms.get();
@@ -370,7 +370,7 @@ Date::parse_month(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_day(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 'd' character
@@ -386,7 +386,7 @@ Date::parse_day(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_weekday(ParserContext& ctx)
 {
   char c = ctx.fms.get();
@@ -409,7 +409,7 @@ Date::parse_weekday(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_hour(ParserContext& ctx)
 {
   char c = ctx.fms.get();
@@ -507,7 +507,7 @@ Date::parse_hour(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_minute(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 'i' character
@@ -522,7 +522,7 @@ Date::parse_minute(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_second(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 's' character
@@ -537,7 +537,7 @@ Date::parse_second(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_millisecond(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 'f' character
@@ -552,7 +552,7 @@ Date::parse_millisecond(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_microsecond(ParserContext& ctx)
 {
   ctx.fms.ignore(); // Ignore the 'u' character
@@ -567,7 +567,7 @@ Date::parse_microsecond(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::parse_tzoffset(ParserContext& ctx)
 {
   char c = ctx.fms.get();
@@ -588,7 +588,7 @@ Date::parse_tzoffset(ParserContext& ctx)
   }
 }
 
-void
+Void
 Date::check_nontoken(ParserContext& ctx)
 {
   char c = (char) ctx.fms.peek();
@@ -603,7 +603,7 @@ Date::check_nontoken(ParserContext& ctx)
   ctx.stream.ignore();
 }
 
-void
+Void
 Date::fix_parsed_values(ParserContext& ctx)
 {
   if (ctx.ampm == 1) // AM
@@ -621,7 +621,7 @@ Date::fix_parsed_values(ParserContext& ctx)
     }
   }
 
-  int max_int = std::numeric_limits<int>::max();
+  Int32 max_int = std::numeric_limits<Int32>::max();
 
   if (m_year < 1970 || m_year > 9999)
   {
@@ -635,8 +635,7 @@ Date::fix_parsed_values(ParserContext& ctx)
 
   if (m_day < 1 || m_day > __get_day_in_month(m_month, m_year))
   {
-    throw InvalidFormatException("Day must be between 1 and {}",
-                                 __get_day_in_month(m_month, m_year));
+    throw InvalidFormatException("Day must be between 1 and {}", {__get_day_in_month(m_month, m_year)});
   }
 
   if (m_hour == -max_int)
@@ -696,24 +695,22 @@ Date::fix_parsed_values(ParserContext& ctx)
 
   if (m_tzoffset < -720 || m_tzoffset > 720)
   {
-    throw InvalidFormatException(
-        "Timezone offset must be between -13:00 and +13:00");
+    throw InvalidFormatException("Timezone offset must be between -13:00 and +13:00");
   }
 
   if (m_tzoffset % 15 != 0)
   {
-    throw InvalidFormatException(
-        "Timezone offset must be in 15-minute increments");
+    throw InvalidFormatException("Timezone offset must be in 15-minute increments");
   }
 
-  int day_in_year = 0;
-  for (int i = 1; i < m_month; i++)
+  Int32 day_in_year = 0;
+  for (Int32 i = 1; i < m_month; i++)
   {
     day_in_year += __get_day_in_month(i, m_year);
   }
 
-  int day_since_epoch = 0;
-  for (int i = 1970; i < m_year; i++)
+  Int32 day_since_epoch = 0;
+  for (Int32 i = 1970; i < m_year; i++)
   {
     day_since_epoch += 365;
     if (i % 4 == 0)
@@ -733,7 +730,7 @@ Date::fix_parsed_values(ParserContext& ctx)
   }
 
   day_since_epoch += day_in_year + m_day - 1;
-  int weekday = (day_since_epoch + 4) % 7;
+  Int32 weekday = (day_since_epoch + 4) % 7;
 
   if (m_weekday == -max_int)
   {
@@ -746,11 +743,11 @@ Date::fix_parsed_values(ParserContext& ctx)
 }
 
 Date
-Date::from_string(const std::string& str, const std::string& format)
+Date::from_string(const String& str, const String& format)
 {
   auto date = Date::new_dangling_date();
-  auto ss   = std::stringstream{str};
-  auto fms  = std::stringstream{format};
+  auto ss   = StringStream{str};
+  auto fms  = StringStream{format};
   auto ctx  = ParserContext{ss, fms, 0};
 
   while (!ss.eof())
@@ -775,16 +772,15 @@ Date::from_string(const std::string& str, const std::string& format)
 Date
 Date::new_dangling_date()
 {
-  int max_int = std::numeric_limits<int>::max();
-  return {-max_int, -max_int, -max_int, -max_int, -max_int,
-          -max_int, -max_int, -max_int, -max_int, -max_int};
+  Int32 max_int = NumericLimits<Int32>::min();
+  return {-max_int, -max_int, -max_int, -max_int, -max_int, -max_int, -max_int, -max_int, -max_int, -max_int};
 }
 
 
-void
+Void
 Stringify<Date>::stringify(const FormatContext& context, const Date& value)
 {
-  std::string_view fmt;
+  StringView fmt;
   if (context.placeholder.specs.find('f') != context.placeholder.specs.end())
   {
     fmt = context.placeholder.specs.at('f');
@@ -794,7 +790,7 @@ Stringify<Date>::stringify(const FormatContext& context, const Date& value)
     fmt = Date::ISO_8601_FORMAT;
   }
 
-  auto fms = std::stringstream{};
+  auto fms = StringStream{};
   fms << fmt;
 
   fms.seekg(0);
@@ -813,9 +809,8 @@ Stringify<Date>::stringify(const FormatContext& context, const Date& value)
   }
 }
 
-void
-Stringify<Date>::stringify_year(std::ostream& output, std::istream fms,
-                                const Date& value)
+Void
+Stringify<Date>::stringify_year(OutputStream& output, InputStream& fms, const Date& value)
 {
   if (fms.peek() == 'Y')
   {
@@ -832,9 +827,8 @@ Stringify<Date>::stringify_year(std::ostream& output, std::istream fms,
   }
 }
 
-void
-Stringify<Date>::stringify_month(std::ostream& output, std::istream fms,
-                                 const Date& value)
+Void
+Stringify<Date>::stringify_month(OutputStream& output, InputStream& fms, const Date& value)
 {
   char c = fms.get();
   switch (c)

@@ -12,23 +12,23 @@ public:
   {
     struct
     {
-      bool pretty_print = false;
-      int  indent       = 1;
+      Bool pretty_print = false;
+      Int32  indent       = 1;
       char indent_char  = ' ';
     } serializer_config;
 
     struct
     {
-      bool allow_c_comments    = false;
-      bool allow_yaml_comments = false;
+      Bool allow_c_comments    = false;
+      Bool allow_yaml_comments = false;
     } deserializer_config;
   };
 
   Json() noexcept;
   Json(const Configurations& config) noexcept;
 
-  void serialize(std::ostream& stream, const SerializedData& data) const;
-  void deserialize(std::istream& stream, SerializedData& data) const;
+  Void serialize(OutputStream& stream, const SerializedData& data) const;
+  Void deserialize(InputStream& stream, SerializedData& data) const;
 
 private:
   Configurations m_config;

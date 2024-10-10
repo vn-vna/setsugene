@@ -10,7 +10,7 @@ SingleThreadExecutor::SingleThreadExecutor() : m_stopped(true)
 
 SingleThreadExecutor::~SingleThreadExecutor() = default;
 
-void
+Void
 SingleThreadExecutor::start()
 {
   if (!m_stopped)
@@ -45,7 +45,7 @@ SingleThreadExecutor::start()
       });
 }
 
-void
+Void
 SingleThreadExecutor::stop()
 {
   if (m_stopped)
@@ -56,7 +56,7 @@ SingleThreadExecutor::stop()
   m_stopped = true;
 }
 
-void
+Void
 SingleThreadExecutor::force_stop()
 {
   if (m_stopped)
@@ -68,7 +68,7 @@ SingleThreadExecutor::force_stop()
   terminate_thread(*m_thread);
 }
 
-void
+Void
 SingleThreadExecutor::join()
 {
   if (m_thread && m_thread->joinable())
@@ -77,19 +77,19 @@ SingleThreadExecutor::join()
   }
 }
 
-bool
+Bool
 SingleThreadExecutor::is_stopped() const
 {
   return m_stopped;
 }
 
-bool
+Bool
 SingleThreadExecutor::is_queue_empty() const
 {
   return m_tasks.empty();
 }
 
-void
+Void
 SingleThreadExecutor::enqueue(ExecutorTask&& task)
 {
   m_tasks.push(task);

@@ -34,7 +34,7 @@ SerializedData::operator[](T&& key)
   }
   else
   {
-    throw NotImplementedException("SerializedData::operator[] for type {}", typeid(T).name());
+    throw NotImplementedException("SerializedData::operator[] for type {}", {typeid(T).name()});
   }
 }
 
@@ -68,7 +68,7 @@ setsugen::SerializedData::operator[](T&& key) const
   }
   else
   {
-    throw NotImplementedException("SerializedData::operator[] for type {}", typeid(DecayedType).name());
+    throw NotImplementedException("SerializedData::operator[] for type {}", {typeid(DecayedType).name()});
   }
 }
 
@@ -96,7 +96,7 @@ SerializedData::SerializedData(T value, SerializedType type)
       }
       else
       {
-        throw InvalidArgumentException("Cannot construct an Boolean SerializedData from a non-bool value");
+        throw InvalidArgumentException("Cannot construct an Boolean SerializedData from a non-Bool value");
       }
       break;
     }
@@ -120,7 +120,7 @@ SerializedData::SerializedData(T value, SerializedType type)
       }
       else
       {
-        throw InvalidArgumentException("Cannot construct a Float SerializedData from a non-float value");
+        throw InvalidArgumentException("Cannot construct a Float SerializedData from a non-Float32 value");
       }
       break;
     }
@@ -154,7 +154,7 @@ SerializedData::SerializedData(DataStorage<Type>&& data) noexcept
 }
 
 template<typename T>
-bool
+Bool
 SerializedData::operator==(T&& other) const
 {
   using DecayedType = std::decay<T>;
@@ -176,7 +176,7 @@ SerializedData::operator==(T&& other) const
 }
 
 template<typename T>
-bool
+Bool
 SerializedData::operator!=(T&& other) const
 {
   return !(*this == other);
@@ -208,21 +208,21 @@ SerializedData::operator T() const
 }
 
 template<SerializerFormat T>
-void
-SerializedData::dumps(std::ostream& stream, const T& serializer) const
+Void
+SerializedData::dumps(OutputStream& stream, const T& serializer) const
 {
   serializer.serialize(stream, *this);
 }
 
 template<DeserializerFormat T>
-void
-SerializedData::parse(std::istream& stream, const T& deserializer)
+Void
+SerializedData::parse(InputStream& stream, const T& deserializer)
 {
   deserializer.deserialize(stream, *this);
 }
 
 template<Serializable T>
-void
+Void
 SerializedData::serialize(T& value)
 {
   *this = object({});
@@ -236,7 +236,7 @@ SerializedData::serialize(T& value)
 }
 
 template<Serializable T>
-void
+Void
 SerializedData::deserialize(T& value)
 {
   if (this->get_type() != SerializedType::Object)
@@ -253,7 +253,7 @@ SerializedData::deserialize(T& value)
     }
     catch (const std::exception& e)
     {
-      throw InvalidOperationException("Error deserializing field {}: {}", field.get_name(), e.what());
+      throw InvalidOperationException("Error deserializing field {}: {}", {field.get_name(), e.what()});
     }
   }
 }

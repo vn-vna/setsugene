@@ -25,7 +25,7 @@ FixedThreadPoolExecutor::~FixedThreadPoolExecutor()
   m_threads.clear();
 }
 
-void
+Void
 FixedThreadPoolExecutor::enqueue(ExecutorTask&& task)
 {
   std::unique_lock<std::mutex> lock(m_queue_mutex);
@@ -47,7 +47,7 @@ FixedThreadPoolExecutor::dequeue()
 }
 
 
-void
+Void
 FixedThreadPoolExecutor::start()
 {
   if (!m_stopped)
@@ -89,7 +89,7 @@ FixedThreadPoolExecutor::start()
   }
 }
 
-void
+Void
 FixedThreadPoolExecutor::stop()
 {
   m_stopped = true;
@@ -103,7 +103,7 @@ FixedThreadPoolExecutor::stop()
   }
 }
 
-void
+Void
 FixedThreadPoolExecutor::force_stop()
 {
   m_stopped = true;
@@ -123,7 +123,7 @@ FixedThreadPoolExecutor::force_stop()
   }
 }
 
-void
+Void
 FixedThreadPoolExecutor::join()
 {
   for (auto& thread: m_threads)
@@ -132,13 +132,13 @@ FixedThreadPoolExecutor::join()
   }
 }
 
-bool
+Bool
 FixedThreadPoolExecutor::is_stopped() const
 {
   return m_stopped;
 }
 
-bool
+Bool
 FixedThreadPoolExecutor::is_queue_empty() const
 {
   std::lock_guard<std::mutex> lock(m_queue_mutex);

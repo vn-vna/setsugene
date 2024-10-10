@@ -6,8 +6,8 @@ namespace setsugen
 LogAppenderMapping::LogAppenderMapping()  = default;
 LogAppenderMapping::~LogAppenderMapping() = default;
 
-void
-LogAppenderMapping::add_appender(const std::shared_ptr<LogAppender>& appender)
+Void
+LogAppenderMapping::add_appender(const Shared<LogAppender>& appender)
 {
   const auto& name = appender->get_settings().name;
   this->remove_appender(name);
@@ -15,8 +15,8 @@ LogAppenderMapping::add_appender(const std::shared_ptr<LogAppender>& appender)
   m_lookup_table[name] = std::next(m_appender_order.end(), -1);
 }
 
-void
-LogAppenderMapping::remove_appender(const std::string& name)
+Void
+LogAppenderMapping::remove_appender(const String& name)
 {
   if (m_lookup_table.find(name) != m_lookup_table.end())
   {
@@ -26,13 +26,13 @@ LogAppenderMapping::remove_appender(const std::string& name)
 }
 
 LogAppenderMapping::AppenderListIter
-LogAppenderMapping::begin()
+LogAppenderMapping::begin() const
 {
   return this->m_appender_order.begin();
 }
 
 LogAppenderMapping::AppenderListIter
-LogAppenderMapping::end()
+LogAppenderMapping::end() const
 {
   return this->m_appender_order.end();
 }

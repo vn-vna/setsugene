@@ -27,9 +27,9 @@ enum class PluginType : uint64_t
 
 struct PluginConfiguration
 {
-  std::string name;
-  std::string identity;
-  std::string entry_point;
+  String name;
+  String identity;
+  String entry_point;
 };
 
 

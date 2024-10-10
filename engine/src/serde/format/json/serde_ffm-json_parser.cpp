@@ -6,12 +6,12 @@
 
 namespace setsugen::parser
 {
-JsonParser::JsonParser(std::istream& stream, SerializedData& data)
+JsonParser::JsonParser(InputStream& stream, SerializedData& data)
   : m_stream(stream),
     m_data(data)
 {
   std::memset(&m_parser, 0, sizeof(m_parser));
-  json_parser_init(&m_parser, nullptr, JsonParser::json_event_callback, static_cast<void*>(this));
+  json_parser_init(&m_parser, nullptr, JsonParser::json_event_callback, static_cast<Void*>(this));
 }
 
 JsonParser::~JsonParser()
@@ -19,7 +19,7 @@ JsonParser::~JsonParser()
   json_parser_free(&m_parser);
 }
 
-void
+Void
 JsonParser::parse()
 {
   constexpr const std::size_t buffer_size = 1024;
@@ -36,7 +36,7 @@ JsonParser::parse()
       break;
     }
 
-    int ret = json_parser_string(&m_parser, buffer, m_stream.gcount(), nullptr);
+    Int32 ret = json_parser_string(&m_parser, buffer, m_stream.gcount(), nullptr);
     if (!ret)
     {
       continue;
@@ -59,8 +59,8 @@ JsonParser::parse()
   }
 }
 
-int
-JsonParser::json_event_callback(void* userdata, int type, const char* data, uint32_t len)
+Int32
+JsonParser::json_event_callback(Void* userdata, Int32 type, const char* data, uint32_t len)
 {
   auto parser = static_cast<JsonParser*>(userdata);
 
@@ -131,7 +131,7 @@ JsonParser::json_event_callback(void* userdata, int type, const char* data, uint
   return 0;
 }
 
-void
+Void
 JsonParser::handle_new_object()
 {
   // If current node is the root (no parent)
@@ -176,13 +176,13 @@ JsonParser::handle_new_object()
   throw InvalidSyntaxException("Unexpected object begin in JSON stream");
 }
 
-void
+Void
 JsonParser::handle_end_object()
 {
   m_current = m_current->parent;
 }
 
-void
+Void
 JsonParser::handle_new_array()
 {
   // If current node is the root (no parent)
@@ -227,19 +227,19 @@ JsonParser::handle_new_array()
   throw InvalidSyntaxException("Unexpected array begin in JSON stream");
 }
 
-void
+Void
 JsonParser::handle_end_array()
 {
   m_current = m_current->parent;
 }
 
-void
+Void
 JsonParser::handle_key(const char* data, uint32_t len)
 {
-  m_key = std::string(data, len);
+  m_key = String(data, len);
 }
 
-void
+Void
 JsonParser::handle_new_string(const char* data, uint32_t len)
 {
   if (m_current == nullptr)
@@ -253,21 +253,21 @@ JsonParser::handle_new_string(const char* data, uint32_t len)
     m_key    = std::nullopt;
 
     auto& obj = m_current->value->get_object();
-    obj[key]  = SerializedData::string(std::string(data, len));
+    obj[key]  = SerializedData::string(String(data, len));
     return;
   }
 
   if (m_current->value->get_type() == SerializedType::Array)
   {
     auto& arr = m_current->value->get_array();
-    arr.push_back(SerializedData::string(std::string(data, len)));
+    arr.push_back(SerializedData::string(String(data, len)));
     return;
   }
 
   throw InvalidSyntaxException("Unexpected string in JSON stream");
 }
 
-void
+Void
 JsonParser::handle_new_int(const char* data, uint32_t len)
 {
   if (m_current == nullptr)
@@ -281,26 +281,26 @@ JsonParser::handle_new_int(const char* data, uint32_t len)
     m_key    = std::nullopt;
 
     auto& obj = m_current->value->get_object();
-    obj[key]  = SerializedData::integer(std::stoi(std::string(data, len)));
+    obj[key]  = SerializedData::integer(std::stoi(String(data, len)));
     return;
   }
 
   if (m_current->value->get_type() == SerializedType::Array)
   {
     auto& arr = m_current->parent->value->get_array();
-    arr.push_back(SerializedData::integer(std::stoi(std::string(data, len))));
+    arr.push_back(SerializedData::integer(std::stoi(String(data, len))));
     return;
   }
 
   throw InvalidSyntaxException("Unexpected integer in JSON stream");
 }
 
-void
+Void
 JsonParser::handle_new_float(const char* data, uint32_t len)
 {
   if (m_current == nullptr)
   {
-    throw InvalidSyntaxException("Unexpected float in JSON stream");
+    throw InvalidSyntaxException("Unexpected Float32 in JSON stream");
   }
 
   if (m_current->value->get_type() == SerializedType::Object)
@@ -309,22 +309,22 @@ JsonParser::handle_new_float(const char* data, uint32_t len)
     m_key    = std::nullopt;
 
     auto& obj = m_current->value->get_object();
-    obj[key]  = SerializedData::floating(std::stof(std::string(data, len)));
+    obj[key]  = SerializedData::floating(std::stof(String(data, len)));
     return;
   }
 
   if (m_current->value->get_type() == SerializedType::Array)
   {
     auto& arr = m_current->value->get_array();
-    arr.push_back(SerializedData::floating(std::stof(std::string(data, len))));
+    arr.push_back(SerializedData::floating(std::stof(String(data, len))));
     return;
   }
 
-  throw InvalidSyntaxException("Unexpected float in JSON stream");
+  throw InvalidSyntaxException("Unexpected Float32 in JSON stream");
 }
 
-void
-JsonParser::handle_new_bool(bool b)
+Void
+JsonParser::handle_new_bool(Bool b)
 {
   if (m_current == nullptr)
   {
@@ -351,7 +351,7 @@ JsonParser::handle_new_bool(bool b)
   throw InvalidSyntaxException("Unexpected boolean in JSON stream");
 }
 
-void
+Void
 JsonParser::handle_new_null()
 {
   if (m_current == nullptr)

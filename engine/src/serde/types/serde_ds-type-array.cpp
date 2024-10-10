@@ -15,7 +15,7 @@ ArrayStorage::DataStorage(DataStorage &&other) noexcept : m_arrays(std::move(oth
 {}
 
 
-ArrayStorage::DataStorage(std::initializer_list<SerializedData> list) : m_arrays(list)
+ArrayStorage::DataStorage(Initializer<SerializedData> list) : m_arrays(list)
 {}
 
 
@@ -113,14 +113,14 @@ ArrayStorage::shrink_to_fit()
 
 
 ArrayStorage &
-ArrayStorage::sort(std::function<int(const SerializedData &, const SerializedData &)> pred)
+ArrayStorage::sort(std::function<Int32(const SerializedData &, const SerializedData &)> pred)
 {
   std::sort(m_arrays.begin(), m_arrays.end(), pred);
   return *this;
 }
 
 
-bool
+Bool
 ArrayStorage::empty() const
 {
   return m_arrays.empty();
@@ -134,7 +134,7 @@ ArrayStorage::size() const
 }
 
 
-ArrayStorage::operator bool() const noexcept
+ArrayStorage::operator Bool() const noexcept
 {
   return !m_arrays.empty();
 }

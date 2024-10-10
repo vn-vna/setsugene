@@ -9,21 +9,21 @@ template<>
 class DataStorage<SerializedType::Object>
 {
 public:
-  using Iter  = std::unordered_map<std::string, SerializedData>::iterator;
-  using CIter = std::unordered_map<std::string, SerializedData>::const_iterator;
+  using Iter  = UnorderedMap<String, SerializedData>::iterator;
+  using CIter = UnorderedMap<String, SerializedData>::const_iterator;
 
   DataStorage();
   DataStorage(const DataStorage& other);
   DataStorage(DataStorage&& other) noexcept;
-  DataStorage(std::initializer_list<SerializedData> list);
+  DataStorage(Initializer<SerializedData> list);
 
   DataStorage& operator=(const DataStorage& other);
   DataStorage& operator=(DataStorage&& other) noexcept;
 
-  SerializedData&       operator[](const std::string& key);
-  const SerializedData& operator[](const std::string& key) const;
+  SerializedData&       operator[](const String& key);
+  const SerializedData& operator[](const String& key) const;
 
-  bool has_key(const std::string& key) const;
+  Bool has_key(const String& key) const;
 
   size_t size() const;
   Iter   begin();
@@ -32,7 +32,7 @@ public:
   CIter  end() const;
 
 private:
-  std::unordered_map<std::string, SerializedData> m_map;
+  UnorderedMap<String, SerializedData> m_map;
 };
 
 } // namespace setsugen

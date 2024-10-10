@@ -10,8 +10,8 @@
 
 namespace setsugen::emitter
 {
-inline void
-json_print_element(json_printer* p, int el, const char* data, std::size_t len, bool pretty)
+inline Void
+json_print_element(json_printer* p, Int32 el, const char* data, std::size_t len, Bool pretty)
 {
   if (pretty)
   {
@@ -23,13 +23,13 @@ json_print_element(json_printer* p, int el, const char* data, std::size_t len, b
   }
 }
 
-JsonEmitter::JsonEmitter(std::ostream& stream, const SerializedData& data, const Json::Configurations& conf) noexcept
+JsonEmitter::JsonEmitter(OutputStream& stream, const SerializedData& data, const Json::Configurations& conf) noexcept
   : m_stream(stream),
     m_data(data),
     m_config(conf)
 {
-  std::stringstream ss;
-  for (int i = 0; i < conf.serializer_config.indent; ++i)
+  StringStream ss;
+  for (Int32 i = 0; i < conf.serializer_config.indent; ++i)
   {
     ss << conf.serializer_config.indent_char;
   }
@@ -45,13 +45,13 @@ JsonEmitter::~JsonEmitter() noexcept
   json_print_free(&m_printer);
 }
 
-void
+Void
 JsonEmitter::emit()
 {
   this->emit(m_data);
 }
 
-void
+Void
 JsonEmitter::emit(const SerializedData& data)
 {
   switch (data.get_type())
@@ -128,8 +128,8 @@ JsonEmitter::emit(const SerializedData& data)
   }
 }
 
-int
-JsonEmitter::json_event_callback(void* userdata, const char* s, uint32_t length)
+Int32
+JsonEmitter::json_event_callback(Void* userdata, const char* s, uint32_t length)
 {
   auto* emitter = static_cast<JsonEmitter*>(userdata);
   emitter->m_stream.write(s, length);

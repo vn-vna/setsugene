@@ -2,7 +2,7 @@
 
 #include "../test.hpp"
 
-std::string sample_json = R"(
+String sample_json = R"(
 
 {
   "firstName": "John",
@@ -34,7 +34,7 @@ std::string sample_json = R"(
 TEST(JsonSerde, Deserializer)
 {
   SerializedData data;
-  std::stringstream ss{sample_json};
+  StringStream ss{sample_json};
   data.parse<Json>(ss);
 
   EXPECT_EQ(1, 1);

@@ -17,9 +17,10 @@ enum class LogLevel
 
 struct LogData
 {
-  LogLevel    level;
-  std::string message;
-  std::string tag;
+  LogLevel       level;
+  String         message;
+  String         tag;
+  SourceLocation sloc;
 };
 
 class LogAppender
@@ -27,28 +28,27 @@ class LogAppender
 public:
   struct AppenderSettings
   {
-    bool        enabled;
-    std::string name;
-    Formatter   formatter;
-    LogLevel    min_level;
+    Bool      enabled;
+    String    name;
+    Formatter formatter;
+    LogLevel  min_level;
   };
 
-  LogAppender(const std::string& name, const std::string& format = DEFAULT_FORMAT);
+  LogAppender(const String& name, const String& format = DEFAULT_FORMAT);
   virtual ~LogAppender() = default;
 
   const AppenderSettings& get_settings() const;
 
-  void set_level(LogLevel level);
-  void set_format(const std::string& format);
-  void set_enabled(bool enabled);
+  Void set_level(LogLevel level);
+  Void set_format(const String& format);
+  Void set_enabled(Bool enabled);
 
-  virtual void append(const LogData& log_data) = 0;
-  virtual void flush()                         = 0;
+  virtual Void append(const LogData& log_data) = 0;
+  virtual Void flush()                         = 0;
 
-  static std::shared_ptr<LogAppender> create_console_appender(const std::string& name,
-                                                              const std::string& format = DEFAULT_FORMAT);
+  static Shared<LogAppender> create_console_appender(const String& name, const String& format = DEFAULT_FORMAT);
 
-  static constexpr const char* DEFAULT_FORMAT = "[{level:w=6}] {tag:w=40} ->> {message}";
+  static constexpr const char* DEFAULT_FORMAT = "[{level:w=6}] [Thread: {thread.id}] {tag:w=40} ->> {message}";
 
 protected:
   AppenderSettings m_settings;
@@ -57,9 +57,9 @@ protected:
 class LogAppenderMapping
 {
 public:
-  using AppenderList        = std::list<std::shared_ptr<LogAppender>>;
-  using AppenderLookupTable = std::unordered_map<std::string, AppenderList::iterator>;
-  using AppenderListIter    = AppenderList::iterator;
+  using AppenderList        = List<Shared<LogAppender>>;
+  using AppenderLookupTable = UnorderedMap<String, AppenderList::iterator>;
+  using AppenderListIter    = AppenderList::const_iterator;
   friend class Logger;
   friend class LoggerFactory;
 
@@ -69,11 +69,11 @@ private:
 public:
   ~LogAppenderMapping();
 
-  void add_appender(const std::shared_ptr<LogAppender>& appender);
-  void remove_appender(const std::string& name);
+  Void add_appender(const Shared<LogAppender>& appender);
+  Void remove_appender(const String& name);
 
-  AppenderListIter begin();
-  AppenderListIter end();
+  AppenderListIter begin() const;
+  AppenderListIter end() const;
 
 private:
   AppenderList        m_appender_order;
@@ -88,66 +88,64 @@ public:
     LogAppenderMapping appender_mapping;
   };
 
-  void stringify(const FormatContext& context) const;
+  Void stringify(const FormatContext& context) const;
 
   friend class LoggerFactory;
 
 private:
-  Logger(LoggerSettings& settings);
-  Logger(LoggerSettings& settings, const std::string& tag);
+  Logger(const LoggerSettings& settings);
+  Logger(const LoggerSettings& settings, const String& tag);
 
 public:
-  template<typename... Args>
-  inline void log(LogLevel level, const std::string& message, Args... args)
+  inline Void log(LogLevel level, const String& message, Initializer<ArgDescription> args = {},
+                  SourceLocation sloc = SourceLocation::current())
   {
-    FormatArgsStore args_store;
-    size_t          index = 0;
-    (args_store.set(index++, std::forward<Args>(args)), ...);
-    push_log(level, message, args_store);
+    FormatArgsStore args_store(args);
+    push_log(level, message, args_store, sloc);
   }
 
-  template<typename... Args>
-  inline void trace(const std::string& message, Args&&... args)
+  inline Void trace(const String& message, Initializer<ArgDescription> args = {},
+                    SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Trace, message, std::forward<Args>(args)...);
+    log(LogLevel::Trace, message, args, sloc);
   }
 
-  template<typename... Args>
-  inline void debug(const std::string& message, Args&&... args)
+  inline Void debug(const String& message, Initializer<ArgDescription> args = {},
+                    SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Debug, message, std::forward<Args>(args)...);
+    log(LogLevel::Debug, message, args, sloc);
   }
 
-  template<typename... Args>
-  inline void info(const std::string& message, Args&&... args)
+  inline Void info(const String& message, Initializer<ArgDescription> args = {},
+                   SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Info, message, std::forward<Args>(args)...);
+    log(LogLevel::Info, message, args, sloc);
   }
 
-  template<typename... Args>
-  inline void warn(const std::string& message, Args&&... args)
+  inline Void warn(const String& message, Initializer<ArgDescription> args = {},
+                   SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Warn, message, std::forward<Args>(args)...);
+    log(LogLevel::Warn, message, args, sloc);
   }
 
-  template<typename... Args>
-  inline void error(const std::string& message, Args&&... args)
+  inline Void error(const String& message, Initializer<ArgDescription> args = {},
+                    SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Error, message, std::forward<Args>(args)...);
+    log(LogLevel::Error, message, args, sloc);
   }
 
-  template<typename... Args>
-  inline void fatal(const std::string& message, Args&&... args)
+  inline Void fatal(const String& message, Initializer<ArgDescription> args = {},
+                    SourceLocation sloc = SourceLocation::current())
   {
-    log(LogLevel::Fatal, message, std::forward<Args>(args)...);
+    log(LogLevel::Fatal, message, args, sloc);
   }
 
 private:
-  void push_log(LogLevel level, const std::string& message, const FormatArgsStore& args);
+  Void push_log(LogLevel level, const String& message, const FormatArgsStore& args, SourceLocation sloc);
 
 private:
-  std::string     m_tag;
-  LoggerSettings& m_settings;
+  String                m_tag;
+  const LoggerSettings& m_settings;
 };
 
 class LoggerFactory
@@ -156,11 +154,12 @@ public:
   LoggerFactory();
   ~LoggerFactory();
 
-public:
-  std::shared_ptr<Logger> get(const std::string& tag);
+  Owner<Logger> get(const String& tag) const;
 
-  void add_appender(const std::shared_ptr<LogAppender>& appender);
-  void remove_appender(const std::string& name);
+  Void add_appender(const Shared<LogAppender>& appender);
+  Void remove_appender(const String& name);
+
+  static LoggerFactory& default_factory();
 
 private:
   Logger::LoggerSettings m_settings;
@@ -169,12 +168,12 @@ private:
 class ConsoleLogAppender : virtual public LogAppender
 {
 public:
-  ConsoleLogAppender(const std::string& name, const std::string& format = LogAppender::DEFAULT_FORMAT);
+  ConsoleLogAppender(const String& name, const String& format = LogAppender::DEFAULT_FORMAT);
   ~ConsoleLogAppender() override;
 
 public:
-  void append(const LogData& log_data) override;
-  void flush() override;
+  Void append(const LogData& log_data) override;
+  Void flush() override;
 };
 
 template<>
@@ -183,7 +182,7 @@ class Stringify<LogLevel>
 public:
   using ValueType = LogLevel;
 
-  static void stringify(const FormatContext& context, const ValueType& value)
+  static Void stringify(const FormatContext& context, const ValueType& value)
   {
     switch (value)
     {

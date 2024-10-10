@@ -4,31 +4,59 @@
 
 namespace setsugen
 {
-#define DECLARE_VECTORTYPE_ALIAS(prefix, usage, typesym, type, dimsize) \
-  using prefix##dimsize##typesym = Vec<type, dimsize, VectorUsage::usage>; \
-  extern template class Vec<type, dimsize, VectorUsage::usage>;
 
-#define DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, typesym, type) \
-  DECLARE_VECTORTYPE_ALIAS(prefix, usage, typesym, type, 2)      \
-  DECLARE_VECTORTYPE_ALIAS(prefix, usage, typesym, type, 3)      \
-  DECLARE_VECTORTYPE_ALIAS(prefix, usage, typesym, type, 4)
+using Vec2B  = Vec<Bool, 2>;
+using Vec3B  = Vec<Bool, 3>;
+using Vec4B  = Vec<Bool, 4>;
+using Vec2C  = Vec<Int8, 2>;
+using Vec3C  = Vec<Int8, 3>;
+using Vec4C  = Vec<Int8, 4>;
+using Vec2S  = Vec<Int16, 2>;
+using Vec3S  = Vec<Int16, 3>;
+using Vec4S  = Vec<Int16, 4>;
+using Vec2I  = Vec<Int32, 2>;
+using Vec3I  = Vec<Int32, 3>;
+using Vec4I  = Vec<Int32, 4>;
+using Vec2U  = Vec<UInt32, 2>;
+using Vec3U  = Vec<UInt32, 3>;
+using Vec4U  = Vec<UInt32, 4>;
+using Vec2L  = Vec<Int64, 2>;
+using Vec3L  = Vec<Int64, 3>;
+using Vec4L  = Vec<Int64, 4>;
+using Vec2UL = Vec<UInt64, 2>;
+using Vec3UL = Vec<UInt64, 3>;
+using Vec4UL = Vec<UInt64, 4>;
+using Vec2F  = Vec<Float32, 2>;
+using Vec3F  = Vec<Float32, 3>;
+using Vec4F  = Vec<Float32, 4>;
+using Vec2D  = Vec<Float64, 2>;
+using Vec3D  = Vec<Float64, 3>;
+using Vec4D  = Vec<Float64, 4>;
 
-#define DECLARE_VECTORTYPE_OF_USAGE(prefix, usage) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, F, float) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, LF, double) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, I, int) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, U, unsigned int) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, L, long long) \
-  DECLARE_VECTORTYPE_OF_TYPE(prefix, usage, UL, unsigned long long)
+using Dim2I  = Vec<Int32, 2, VectorUsage::Size>;
+using Dim3I  = Vec<Int32, 3, VectorUsage::Size>;
+using Dim4I  = Vec<Int32, 4, VectorUsage::Size>;
+using Dim2U  = Vec<UInt32, 2, VectorUsage::Size>;
+using Dim3U  = Vec<UInt32, 3, VectorUsage::Size>;
+using Dim4U  = Vec<UInt32, 4, VectorUsage::Size>;
+using Dim2L  = Vec<Int64, 2, VectorUsage::Size>;
+using Dim3L  = Vec<Int64, 3, VectorUsage::Size>;
+using Dim4L  = Vec<Int64, 4, VectorUsage::Size>;
+using Dim2UL = Vec<UInt64, 2, VectorUsage::Size>;
+using Dim3UL = Vec<UInt64, 3, VectorUsage::Size>;
+using Dim4UL = Vec<UInt64, 4, VectorUsage::Size>;
+using Dim2F  = Vec<Float32, 2, VectorUsage::Size>;
+using Dim3F  = Vec<Float32, 3, VectorUsage::Size>;
+using Dim4F  = Vec<Float32, 4, VectorUsage::Size>;
+using Dim2D  = Vec<Float64, 2, VectorUsage::Size>;
+using Dim3D  = Vec<Float64, 3, VectorUsage::Size>;
+using Dim4D  = Vec<Float64, 4, VectorUsage::Size>;
 
-DECLARE_VECTORTYPE_OF_USAGE(Vec, Math)
-DECLARE_VECTORTYPE_OF_USAGE(Color, Color)
-DECLARE_VECTORTYPE_OF_USAGE(Dim, Size)
-DECLARE_VECTORTYPE_OF_USAGE(Size, Size)
+using Color3F = Vec<Float32, 3, VectorUsage::Color>;
+using Color3D = Vec<Float64, 3, VectorUsage::Color>;
+using Color4F = Vec<Float32, 4, VectorUsage::Color>;
+using Color4D = Vec<Float64, 4, VectorUsage::Color>;
 
-#undef DECLARE_VECTORTYPE_OF_USAGE
-#undef DECLARE_VECTORTYPE_OF_TYPE
-#undef DECLARE_VECTORTYPE_ALIAS
-
-using Color = Color4F;
-}
+using Color     = Color4F;
+using ColorFlag = Vec<Bool, 4, VectorUsage::Color>;
+} // namespace setsugen

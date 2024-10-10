@@ -31,48 +31,48 @@ DataStorage<SerializedType::Integer> &
 DataStorage<SerializedType::Integer>::operator=(DataStorage &&other) noexcept = default;
 
 
-DataStorage<SerializedType::Integer>::operator bool() const noexcept
+DataStorage<SerializedType::Integer>::operator Bool() const noexcept
 {
   return m_value != 0;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator==(const DataStorage &other) const
 {
   return m_value == other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator!=(const DataStorage &other) const
 {
   return m_value != other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator<(const DataStorage &other) const
 {
   return m_value < other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator>(const DataStorage &other) const
 {
   return m_value > other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator<=(const DataStorage &other) const
 {
   return m_value <= other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::Integer>::operator>=(const DataStorage &other) const
 {
   return m_value >= other.m_value;

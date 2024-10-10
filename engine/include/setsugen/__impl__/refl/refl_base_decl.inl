@@ -9,7 +9,7 @@ template<typename R>
 class ReflectionBase
 {
 public:
-  std::vector<ReflectionField>& get_fields() const;
+  DArray<ReflectionField>& get_fields() const;
 };
 
 template<typename T>

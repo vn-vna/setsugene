@@ -15,8 +15,8 @@ public:
   Vec3F get_position() const;
   Vec3F get_direction() const;
 
-  void set_position(const Vec3F& position);
-  void set_center(const Vec3F& center);
+  Void set_position(const Vec3F& position);
+  Void set_center(const Vec3F& center);
 
   Mat4x4F         get_view_matrix() const;
   virtual Mat4x4F get_projection_matrix() const = 0;
@@ -34,25 +34,25 @@ class PerspectiveCamera : public Camera
 {
 public:
    PerspectiveCamera(Entity* entity, const Vec3F& position = Vec3F{}, const Vec3F& direction = Vec3F{0.0f, 1.0f, 0.0f},
-                     const Vec3F& up = Vec3F{0.0f, 1.0f, 0.0f}, float near_plane = 0.5f, float far_plane = 1000.0f,
-                     float fov = 75.0f, float aspect = 16.0f / 9.0f);
+                     const Vec3F& up = Vec3F{0.0f, 1.0f, 0.0f}, Float32 near_plane = 0.5f, Float32 far_plane = 1000.0f,
+                     Float32 fov = 75.0f, Float32 aspect = 16.0f / 9.0f);
   ~PerspectiveCamera() override = default;
 
-  float   get_near_plane() const;
-  float   get_far_plane() const;
-  float   get_fov() const;
+  Float32   get_near_plane() const;
+  Float32   get_far_plane() const;
+  Float32   get_fov() const;
   Mat4x4F get_projection_matrix() const override;
 
-  void set_near_plane(float near_plane);
-  void set_far_plane(float far_plane);
-  void set_fov(float fov);
-  void set_aspect_ratio(float aspect);
+  Void set_near_plane(Float32 near_plane);
+  Void set_far_plane(Float32 far_plane);
+  Void set_fov(Float32 fov);
+  Void set_aspect_ratio(Float32 aspect);
 
 private:
-  float m_near;
-  float m_far;
-  float m_fov;
-  float m_aspect;
+  Float32 m_near;
+  Float32 m_far;
+  Float32 m_fov;
+  Float32 m_aspect;
 };
 
 

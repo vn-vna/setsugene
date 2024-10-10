@@ -7,12 +7,12 @@ DataStorage<SerializedType::String>::DataStorage(const char *value)
 {}
 
 
-DataStorage<SerializedType::String>::DataStorage(const std::string &value)
+DataStorage<SerializedType::String>::DataStorage(const String &value)
     : m_value{value}
 {}
 
 
-DataStorage<SerializedType::String>::DataStorage(std::string &&value)
+DataStorage<SerializedType::String>::DataStorage(String &&value)
     : m_value{value}
 {}
 
@@ -48,21 +48,21 @@ DataStorage<SerializedType::String>::operator=(DataStorage &&other) noexcept
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::String>::operator==(const DataStorage &other) const
 {
     return m_value == other.m_value;
 }
 
 
-bool
+Bool
 DataStorage<SerializedType::String>::operator!=(const DataStorage &other) const
 {
     return m_value != other.m_value;
 }
 
 
-std::string
+String
 DataStorage<SerializedType::String>::value() const noexcept
 {
     return m_value;

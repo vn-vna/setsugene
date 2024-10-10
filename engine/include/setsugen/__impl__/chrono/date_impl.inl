@@ -7,19 +7,19 @@
 namespace setsugen
 {
 
-int
+Int32
 Date::year() const
 {
   return m_year;
 }
 
-int
+Int32
 Date::month() const
 {
   return m_month;
 }
 
-int
+Int32
 Date::day() const
 {
   auto daymin = m_hour * 60 + m_minute + m_tzoffset;
@@ -34,13 +34,13 @@ Date::day() const
   return m_day;
 }
 
-int
+Int32
 Date::weekday() const
 {
   return m_weekday;
 }
 
-int
+Int32
 Date::hour() const
 {
   auto daymin = m_hour * 60 + m_minute + m_tzoffset;
@@ -55,7 +55,7 @@ Date::hour() const
   return daymin / 60;
 }
 
-int
+Int32
 Date::minute() const
 {
   auto daymin = m_hour * 60 + m_minute + m_tzoffset;
@@ -71,104 +71,104 @@ Date::minute() const
   return daymin % 60;
 }
 
-int
+Int32
 Date::second() const
 {
   return m_second;
 }
 
-int
+Int32
 Date::millisecond() const
 {
   return m_millisecond;
 }
 
-int
+Int32
 Date::microsecond() const
 {
   return m_microsecond;
 }
 
-int
+Int32
 Date::tzh() const
 {
   return m_tzoffset / 60;
 }
 
-int
+Int32
 Date::tzm() const
 {
   return m_tzoffset % 60;
 }
 
-void
-Date::set_year(int year)
+Void
+Date::set_year(Int32 year)
 {
   m_year = year;
 }
 
-void
-Date::set_month(int month)
+Void
+Date::set_month(Int32 month)
 {
   m_month = month;
 }
 
-void
-Date::set_day(int day)
+Void
+Date::set_day(Int32 day)
 {
   m_day = day;
 }
 
-void
-Date::set_hour(int hour)
+Void
+Date::set_hour(Int32 hour)
 {
   m_hour = hour;
 }
 
-void
-Date::set_minute(int minute)
+Void
+Date::set_minute(Int32 minute)
 {
   m_minute = minute;
 }
 
-void
-Date::set_second(int second)
+Void
+Date::set_second(Int32 second)
 {
   m_second = second;
 }
 
-void
-Date::set_millisecond(int millisecond)
+Void
+Date::set_millisecond(Int32 millisecond)
 {
   m_millisecond = millisecond;
 }
 
-void
-Date::set_microsecond(int microsecond)
+Void
+Date::set_microsecond(Int32 microsecond)
 {
   m_microsecond = microsecond;
 }
 
-void
-Date::set_tzoffset(int tzoffset)
+Void
+Date::set_tzoffset(Int32 tzoffset)
 {
   m_tzoffset = tzoffset;
 }
 
-void
-Date::set_tzh(int tzh)
+Void
+Date::set_tzh(Int32 tzh)
 {
   m_tzoffset = tzh * 60 + tzm();
 }
 
-void
-Date::set_tzm(int tzm)
+Void
+Date::set_tzm(Int32 tzm)
 {
   m_tzoffset = tzh() * 60 + tzm;
 }
 
 Date
-Date::use_tzoffset(int tzoffset) const
+Date::use_tzoffset(Int32 tzoffset) const
 {
   return Date{m_year, m_month, m_day, m_hour, m_minute, m_second, m_millisecond, m_microsecond, tzoffset};
 }

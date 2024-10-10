@@ -7,7 +7,7 @@
 namespace setsugen
 {
 
-enum class TimeZoneOffset : int
+enum class TimeZoneOffset : Int32
 {
   UTC_PLUS_13  = 780,
   UTC_PLUS_12  = 720,
@@ -76,32 +76,32 @@ enum class TimeZoneOffset : int
 class Date
 {
 public:
-  Date(int year = 1970, int month = 1, int day = 1, int weekday = 0, int hour = 0, int minute = 0, int second = 0,
-       int millisecond = 0, int microsecond = 0, int tzoffset = 0);
+  Date(Int32 year = 1970, Int32 month = 1, Int32 day = 1, Int32 weekday = 0, Int32 hour = 0, Int32 minute = 0,
+       Int32 second = 0, Int32 millisecond = 0, Int32 microsecond = 0, Int32 tzoffset = 0);
 
-  inline int year() const;
-  inline int month() const;
-  inline int day() const;
-  inline int weekday() const;
-  inline int hour() const;
-  inline int minute() const;
-  inline int second() const;
-  inline int millisecond() const;
-  inline int microsecond() const;
-  inline int tzh() const;
-  inline int tzm() const;
+  inline Int32 year() const;
+  inline Int32 month() const;
+  inline Int32 day() const;
+  inline Int32 weekday() const;
+  inline Int32 hour() const;
+  inline Int32 minute() const;
+  inline Int32 second() const;
+  inline Int32 millisecond() const;
+  inline Int32 microsecond() const;
+  inline Int32 tzh() const;
+  inline Int32 tzm() const;
 
-  inline void set_year(int year);
-  inline void set_month(int month);
-  inline void set_day(int day);
-  inline void set_hour(int hour);
-  inline void set_minute(int minute);
-  inline void set_second(int second);
-  inline void set_millisecond(int millisecond);
-  inline void set_microsecond(int microsecond);
-  inline void set_tzoffset(int tzoffset);
-  inline void set_tzh(int tzh);
-  inline void set_tzm(int tzm);
+  inline Void set_year(Int32 year);
+  inline Void set_month(Int32 month);
+  inline Void set_day(Int32 day);
+  inline Void set_hour(Int32 hour);
+  inline Void set_minute(Int32 minute);
+  inline Void set_second(Int32 second);
+  inline Void set_millisecond(Int32 millisecond);
+  inline Void set_microsecond(Int32 microsecond);
+  inline Void set_tzoffset(Int32 tzoffset);
+  inline Void set_tzh(Int32 tzh);
+  inline Void set_tzm(Int32 tzm);
 
   /**
    * @brief Create a new date object with the current date and time in another
@@ -110,7 +110,7 @@ public:
    * @param tzoffset
    * @return Date
    */
-  inline Date use_tzoffset(int tzoffset) const;
+  inline Date use_tzoffset(Int32 tzoffset) const;
 
   /**
    * @brief Get the current date and time.
@@ -125,65 +125,65 @@ public:
    * @param format
    * @return Date
    */
-  static Date from_string(const std::string& str, const std::string& format);
+  static Date from_string(const String& str, const String& format);
 
   inline static constexpr const char* ISO_8601_FORMAT = "&YY-&mm-&ddT&HH:&ii:&ss.&ff&ZZ";
 
 private:
   struct ParserContext
   {
-    std::istream& stream;
-    std::istream& fms;
-    int           ampm;
+    InputStream& stream;
+    InputStream& fms;
+    Int32         ampm;
   };
 
-  void parse_next_token(ParserContext& ctx);
-  void parse_year(ParserContext& ctx);
-  void parse_month(ParserContext& ctx);
-  void parse_day(ParserContext& ctx);
-  void parse_weekday(ParserContext& ctx);
-  void parse_hour(ParserContext& ctx);
-  void parse_minute(ParserContext& ctx);
-  void parse_second(ParserContext& ctx);
-  void parse_millisecond(ParserContext& ctx);
-  void parse_microsecond(ParserContext& ctx);
-  void parse_tzoffset(ParserContext& ctx);
-  void check_nontoken(ParserContext& ctx);
-  void fix_parsed_values(ParserContext& ctx);
+  Void parse_next_token(ParserContext& ctx);
+  Void parse_year(ParserContext& ctx);
+  Void parse_month(ParserContext& ctx);
+  Void parse_day(ParserContext& ctx);
+  Void parse_weekday(ParserContext& ctx);
+  Void parse_hour(ParserContext& ctx);
+  Void parse_minute(ParserContext& ctx);
+  Void parse_second(ParserContext& ctx);
+  Void parse_millisecond(ParserContext& ctx);
+  Void parse_microsecond(ParserContext& ctx);
+  Void parse_tzoffset(ParserContext& ctx);
+  Void check_nontoken(ParserContext& ctx);
+  Void fix_parsed_values(ParserContext& ctx);
 
-  std::string print(const std::string& format) const;
+  String print(const String& format) const;
 
   static Date new_dangling_date();
 
-  int m_year;
-  int m_month;
-  int m_day;
-  int m_weekday;
-  int m_hour;
-  int m_minute;
-  int m_second;
-  int m_millisecond;
-  int m_microsecond;
-  int m_tzoffset;
+  Int32 m_year;
+  Int32 m_month;
+  Int32 m_day;
+  Int32 m_weekday;
+  Int32 m_hour;
+  Int32 m_minute;
+  Int32 m_second;
+  Int32 m_millisecond;
+  Int32 m_microsecond;
+  Int32 m_tzoffset;
 };
 
 template<>
 class Stringify<Date>
 {
 public:
-  static void stringify(const FormatContext& context, const Date& value);
+  static Void stringify(const FormatContext& context, const Date& value);
 
 private:
-  static void stringify_year(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_month(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_day(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_weekday(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_hour(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_minute(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_second(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_millisecond(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_microsecond(std::ostream& output, std::istream fms, const Date& value);
-  static void stringify_tzoffset(std::ostream& output, std::istream fms, const Date& value);
+  static Void stringify_year(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_month(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_day(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_weekday(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_hour(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_minute(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_second(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_millisecond(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_microsecond(OutputStream& output, InputStream& fms, const Date& value);
+  static Void stringify_tzoffset(OutputStream& output, InputStream& fms, const Date& value);
 };
 
 } // namespace setsugen

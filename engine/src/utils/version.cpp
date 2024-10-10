@@ -9,12 +9,13 @@
 
 namespace setsugen
 {
-Version::Version()
-  : Version(1, 0, 0)
+Version::Version() : Version(1, 0, 0)
 {}
 
-Version::Version(unsigned int major, unsigned int minor, unsigned int patch)
-  : m_version((major << 22U) | (minor << 12U) | patch)
+Version::Version(UInt32 version) : m_version(version)
+{}
+
+Version::Version(UInt32 major, UInt32 minor, UInt32 patch) : m_version((major << 22U) | (minor << 12U) | patch)
 {}
 
 Version::~Version() = default;
@@ -25,22 +26,28 @@ Version::create_version(unsigned major, unsigned minor, unsigned patch)
   return {major, minor, patch};
 }
 
-unsigned int
+UInt32
 Version::get_major() const
 {
   return (m_version & VERSION_MAJOR_MASK) >> 22U;
 }
 
-unsigned int
+UInt32
 Version::get_minor() const
 {
   return (m_version & VERSION_MINOR_MASK) >> 12U;
 }
 
-unsigned int
+UInt32
 Version::get_patch() const
 {
   return (m_version & VERSION_PATCH_MASK);
+}
+
+UInt32
+Version::data() const
+{
+  return m_version;
 }
 
 template<>

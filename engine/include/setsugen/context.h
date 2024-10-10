@@ -1,16 +1,11 @@
 #pragma once
 
-#include <setsugen/pch.h>
+// IWYU pragma: begin_exports
 
-namespace setsugen
-{
+#include "./__impl__/context/context_fwd.inl"
 
-class ApplicationContext
-{
-public:
-  ApplicationContext();
+#include "./__impl__/context/app_context.inl"
+#include "./__impl__/context/ecs_context.inl"
+#include "./__impl__/context/render_context.inl"
 
-private:
-};
-
-} // namespace setsugen
+// IWYU pragma: end_exports

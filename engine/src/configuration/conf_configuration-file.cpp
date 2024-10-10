@@ -3,7 +3,7 @@
 namespace setsugen
 {
 
-FileConfigurationSource::FileConfigurationSource(const std::string& path, Format format, bool required)
+FileConfigurationSource::FileConfigurationSource(const String& path, Format format, Bool required)
     : ConfigurationSource(required), m_path(path), m_format(format)
 {
   if (m_format == Format::Auto)
@@ -23,7 +23,7 @@ FileConfigurationSource::FileConfigurationSource(const std::string& path, Format
     }
     else
     {
-      throw InvalidFormatException("Cannot determine format of file '{}'", m_path);
+      throw InvalidFormatException("Cannot determine format of file '{}'", {m_path});
     }
   }
 }
@@ -31,12 +31,12 @@ FileConfigurationSource::FileConfigurationSource(const std::string& path, Format
 SerializedData
 FileConfigurationSource::load()
 {
-  SerializedData data;
-  std::ifstream  file(m_path);
+  SerializedData  data;
+  FileInputStream file(m_path);
 
   if (!file.good())
   {
-    throw FileNotFoundException("Cannot open configuration file {}", m_path);
+    throw FileNotFoundException("Cannot open configuration file {}", {m_path});
   }
 
   switch (m_format)

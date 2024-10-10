@@ -13,13 +13,13 @@ class Scene;
 class Entity
 {
 public:
-  using ComponentManager = std::unordered_map<size_t, std::unique_ptr<Component>>;
-  using ChildrenMap      = std::unordered_map<size_t, Entity*>;
+  using ComponentManager = UnorderedMap<size_t, Owner<Component>>;
+  using ChildrenMap      = UnorderedMap<size_t, Entity*>;
 
-           Entity(const std::string& name, Scene* scene = nullptr);
+           Entity(const String& name, Scene* scene = nullptr);
   virtual ~Entity();
 
-  const std::string& get_name() const;
+  const String& get_name() const;
   Scene*             get_scene() const;
 
   template<ComponentType T, typename... Args>
@@ -34,7 +34,7 @@ public:
 
     auto tcomp       = new T(this, std::forward<Args>(args)...);
     auto component   = dynamic_cast<Component*>(tcomp);
-    m_components[id] = std::unique_ptr<Component>(component);
+    m_components[id] = Owner<Component>(component);
     return tcomp;
   }
 
@@ -52,7 +52,7 @@ public:
   }
 
   template<ComponentType T>
-  void remove_component()
+  Void remove_component()
   {
     const auto id   = typeid(T).hash_code();
     const auto iter = m_components.find(id);
@@ -65,21 +65,21 @@ public:
   }
 
   ComponentManager*    get_components();
-  void                 add_child(Entity* entity);
-  std::vector<Entity*> find_children(const std::string& name);
-  void                 remove_child(Entity* entity);
+  Void                 add_child(Entity* entity);
+  DArray<Entity*> find_children(const String& name);
+  Void                 remove_child(Entity* entity);
 
   static size_t id_of(Entity* entity);
 
 protected:
-  std::string      m_name;
+  String      m_name;
   Scene*           m_scene;
   Entity*          m_parent;
   ChildrenMap      m_children;
   ComponentManager m_components;
 
   friend class Scene;
-  void update();
+  Void update();
 };
 
 template<>
@@ -88,7 +88,7 @@ class Stringify<Entity>
 public:
   using ValueType = Entity;
 
-  static void stringify(const FormatContext& context, const ValueType& value)
+  static Void stringify(const FormatContext& context, const ValueType& value)
   {
     context.result << "[[Entity: name = " << value.get_name()
                    << "] owned by [Scene: name = " << value.get_scene()->get_name() << "]]";

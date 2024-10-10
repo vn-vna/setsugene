@@ -3,7 +3,7 @@
 namespace setsugen
 {
 
-DataStorage<SerializedType::Float>::DataStorage(double value)
+DataStorage<SerializedType::Float>::DataStorage(Float64 value)
 {
   m_value = value;
 }
@@ -20,7 +20,7 @@ DataStorage<SerializedType::Float>::DataStorage(DataStorage&& other) noexcept
 }
 
 DataStorage<SerializedType::Float>&
-DataStorage<SerializedType::Float>::operator=(double value)
+DataStorage<SerializedType::Float>::operator=(Float64 value)
 {
   m_value = value;
   return *this;
@@ -41,50 +41,50 @@ DataStorage<SerializedType::Float>::operator=(DataStorage&& other) -> DataStorag
   return *this;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator==(const DataStorage& other) const
 {
   return m_value == other.m_value;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator!=(const DataStorage& other) const
 {
   return m_value != other.m_value;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator<(const DataStorage& other) const
 {
   return m_value < other.m_value;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator>(const DataStorage& other) const
 {
   return m_value > other.m_value;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator<=(const DataStorage& other) const
 {
   return m_value <= other.m_value;
 }
 
-bool
+Bool
 DataStorage<SerializedType::Float>::operator>=(const DataStorage& other) const
 {
   return m_value >= other.m_value;
 }
 
 
-double DataStorage<SerializedType::Float>::value() const noexcept
+Float64 DataStorage<SerializedType::Float>::value() const noexcept
 {
   return m_value;
 }
 
 
-DataStorage<SerializedType::Float>::operator bool() const noexcept
+DataStorage<SerializedType::Float>::operator Bool() const noexcept
 {
   return m_value != 0.0;
 }

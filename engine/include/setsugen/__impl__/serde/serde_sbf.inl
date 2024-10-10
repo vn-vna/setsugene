@@ -8,8 +8,8 @@ namespace setsugen
 class Sbf
 {
 public:
-  void serialize(std::ostream& stream, const SerializedData& data);
-  void deserialize(std::istream& stream, SerializedData& data);
+  Void serialize(OutputStream& stream, const SerializedData& data);
+  Void deserialize(InputStream& stream, SerializedData& data);
 };
 
 } // namespace setsugen
